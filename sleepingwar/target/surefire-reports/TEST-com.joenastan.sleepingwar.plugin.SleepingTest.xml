@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.joenastan.sleepingwar.plugin.SleepingTest" time="0.058" tests="1" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="14"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1252"/>
+    <property name="java.class.path" value="d:\GitHub\SleepingCroniWars\sleepingwar\target\test-classes;d:\GitHub\SleepingCroniWars\sleepingwar\target\classes;C:\Users\tanjo\.m2\repository\junit\junit\4.11\junit-4.11.jar;C:\Users\tanjo\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\tanjo\.m2\repository\com\destroystokyo\paper\paper-api\1.16.3-R0.1-SNAPSHOT\paper-api-1.16.3-R0.1-SNAPSHOT.jar;C:\Users\tanjo\.m2\repository\commons-lang\commons-lang\2.6\commons-lang-2.6.jar;C:\Users\tanjo\.m2\repository\com\google\code\findbugs\jsr305\1.3.9\jsr305-1.3.9.jar;C:\Users\tanjo\.m2\repository\com\googlecode\json-simple\json-simple\1.1.1\json-simple-1.1.1.jar;C:\Users\tanjo\.m2\repository\com\google\guava\guava\21.0\guava-21.0.jar;C:\Users\tanjo\.m2\repository\com\google\code\gson\gson\2.8.0\gson-2.8.0.jar;C:\Users\tanjo\.m2\repository\net\md-5\bungeecord-chat\1.16-R0.3\bungeecord-chat-1.16-R0.3.jar;C:\Users\tanjo\.m2\repository\org\slf4j\slf4j-api\1.7.25\slf4j-api-1.7.25.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm\8.0.1\asm-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm-commons\8.0.1\asm-commons-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm-tree\8.0.1\asm-tree-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm-analysis\8.0.1\asm-analysis-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\yaml\snakeyaml\1.27\snakeyaml-1.27.jar;C:\Users\tanjo\.m2\repository\org\spigotmc\spigot-api\1.16.3-R0.1-SNAPSHOT\spigot-api-1.16.3-R0.1-SNAPSHOT.jar;"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Asia/Jakarta"/>
+    <property name="os.name" value="Windows 10"/>
+    <property name="java.vm.specification.version" value="14"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-14.0.1\bin"/>
+    <property name="sun.java.command" value="C:\windows\TEMP\surefire17014739100301857370\surefirebooter3652728641065430454.jar C:\Windows\Temp\surefire17014739100301857370 2020-11-10T12-01-21_436-jvmRun1 surefire9084617329145825912tmp surefire_06335264351684766297tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="d:\GitHub\SleepingCroniWars\sleepingwar\target\test-classes;d:\GitHub\SleepingCroniWars\sleepingwar\target\classes;C:\Users\tanjo\.m2\repository\junit\junit\4.11\junit-4.11.jar;C:\Users\tanjo\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\tanjo\.m2\repository\com\destroystokyo\paper\paper-api\1.16.3-R0.1-SNAPSHOT\paper-api-1.16.3-R0.1-SNAPSHOT.jar;C:\Users\tanjo\.m2\repository\commons-lang\commons-lang\2.6\commons-lang-2.6.jar;C:\Users\tanjo\.m2\repository\com\google\code\findbugs\jsr305\1.3.9\jsr305-1.3.9.jar;C:\Users\tanjo\.m2\repository\com\googlecode\json-simple\json-simple\1.1.1\json-simple-1.1.1.jar;C:\Users\tanjo\.m2\repository\com\google\guava\guava\21.0\guava-21.0.jar;C:\Users\tanjo\.m2\repository\com\google\code\gson\gson\2.8.0\gson-2.8.0.jar;C:\Users\tanjo\.m2\repository\net\md-5\bungeecord-chat\1.16-R0.3\bungeecord-chat-1.16-R0.3.jar;C:\Users\tanjo\.m2\repository\org\slf4j\slf4j-api\1.7.25\slf4j-api-1.7.25.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm\8.0.1\asm-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm-commons\8.0.1\asm-commons-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm-tree\8.0.1\asm-tree-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm-analysis\8.0.1\asm-analysis-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\yaml\snakeyaml\1.27\snakeyaml-1.27.jar;C:\Users\tanjo\.m2\repository\org\spigotmc\spigot-api\1.16.3-R0.1-SNAPSHOT\spigot-api-1.16.3-R0.1-SNAPSHOT.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\tanjo"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2020-04-14"/>
+    <property name="java.home" value="C:\Program Files\Java\jdk-14.0.1"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="d:\GitHub\SleepingCroniWars\sleepingwar"/>
+    <property name="java.vm.compressedOopsMode" value="32-bit"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\windows\TEMP\surefire17014739100301857370\surefirebooter3652728641065430454.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="14.0.1+7"/>
+    <property name="user.name" value="tanjo"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="Cp1252"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="localRepository" value="C:\Users\tanjo\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="C:\windows\TEMP\"/>
+    <property name="java.version" value="14.0.1"/>
+    <property name="user.dir" value="d:\GitHub\SleepingCroniWars\sleepingwar"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="java.library.path" value="C:\Program Files\Java\jdk-14.0.1\bin;C:\windows\Sun\Java\bin;C:\windows\system32;C:\windows;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\dotnet\;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\Git LFS;C:\Users\tanjo\AppData\Local\Programs\Python\Python38-32\Scripts\;C:\Users\tanjo\AppData\Local\Programs\Python\Python38-32\;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Program Files (x86)\mingw-w64\i686-8.1.0-posix-dwarf-rt_v6-rev0\mingw32\bin;C:\Users\tanjo\AppData\Roaming\npm;C:\Users\tanjo\.dotnet\tools;C:\Users\tanjo\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\heroku\bin;C:\Users\tanjo\AppData\Local\GitHubDesktop\bin;D:\Downloads\Compressed\PHP 7.4.4;%IntelliJ IDEA%;C:\Users\tanjo\AppData\Local\mongodb-win32-x86_64-2012plus-4.2.6\bin;C:\xampp\php;C:\Users\tanjo\.dotnet\tools;D:\Application\apache-maven-3.6.3\bin;;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="14.0.1+7"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="58.0"/>
+  </properties>
+  <testcase name="shouldAnswerWithTrue" classname="com.joenastan.sleepingwar.plugin.SleepingTest" time="0.003"/>
+</testsuite>
