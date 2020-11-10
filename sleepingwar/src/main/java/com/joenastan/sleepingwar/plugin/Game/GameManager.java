@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGamePlayerJoin;
@@ -29,6 +30,7 @@ public class GameManager {
     private static Map<String, SleepingRoom> rooms = new HashMap<String, SleepingRoom>();
     private static Map<Player, String> playerList = new HashMap<Player, String>();
 
+    // Player create a room
     public static void hostingBedwars(Player player, World useMap) {
         if (!checkAlreadyHosted(player)) {
             String createdID = bedwarsWorldID();
@@ -44,8 +46,7 @@ public class GameManager {
             rooms.put(createdID, newRoom);
             joinBedwars(player, createdID);
             playerList.put(player, createdID);
-            player.sendMessage(ChatColor.GOLD + "Room Created, Password to enter the game: " + ChatColor.GREEN + createdID);
-
+            
             BedwarsGamePlayerJoin event = new BedwarsGamePlayerJoin(player, newRoom);
             Bukkit.getServer().getPluginManager().callEvent(event);
         } else {
@@ -53,6 +54,7 @@ public class GameManager {
         }
     }
 
+    // Player join the room
     public static void joinBedwars(Player player, String password) {
         if (rooms.containsKey(password)) {
             player.sendMessage(ChatColor.GREEN + "Joining...");
@@ -67,27 +69,17 @@ public class GameManager {
         }
     }
 
-    public static void leaveRoom(Player player) {
+    // Player leave the room
+    public static void leaveBedwars(Player player) {
         if (playerList.containsKey(player)) {
             String worldKey = playerList.get(player);
             // Check world
             if (rooms.containsKey(worldKey)) {
                 SleepingRoom room = rooms.get(worldKey);
-                // Check host
-                if (room.getHost().equals(player)) {
-                    // Kick all players that involved
-                    for(Player p : room.getAllPlayer()) {
-                        if (playerList.containsKey(p))
-                            playerList.remove(p);
-                    }
-                    // Proceed Destroy Room
-                    room.destroyRoom();
-                    rooms.remove(worldKey);
-                } else {
-                    // Leave Room
-                    room.playerLeave(player);
-                    playerList.remove(player);
-                }
+
+                // Leave Room
+                room.playerLeave(player);
+                playerList.remove(player);
 
                 BedwarsGamePlayerLeave event = new BedwarsGamePlayerLeave(player, room);
                 Bukkit.getServer().getPluginManager().callEvent(event);
@@ -96,6 +88,15 @@ public class GameManager {
             playerList.remove(player);
         } 
         player.sendMessage(ChatColor.YELLOW + "You are not in game.");
+    }
+
+    // This function only for when the room will be destroy
+    public static void allLeave(Set<Player> ppl) {
+        for (Player p : ppl) {
+            if (playerList.containsKey(p)) {
+                playerList.remove(p);
+            }
+        }
     }
 
     public static SleepingRoom getRoomByPlayer(Player player) {

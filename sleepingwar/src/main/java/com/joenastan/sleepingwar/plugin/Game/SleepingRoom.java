@@ -44,6 +44,7 @@ public class SleepingRoom {
         this.worldOriginalName = worldOriginalName;
         teamSpawnerList = systemConfig.getTeamSpawner(worldOriginalName);
         publicResourceSpawners.addAll(systemConfig.getResourceSpawnersPack(worldOriginalName, "PUBLIC").values());
+        host.sendMessage(ChatColor.GOLD + "Room Created, World name to enter the game: " + ChatColor.GREEN + bedwarsWorld.getName());
 
         timer = new StopwatchTimer(maxGameDuration);
     }
@@ -51,6 +52,9 @@ public class SleepingRoom {
     public void playerEnter(Player player) {
         tpFrom.put(player, player.getLocation());
         player.teleport(queueSpawn);
+        for (Player pplInRoom : tpFrom.keySet()) {
+            pplInRoom.sendMessage(ChatColor.GOLD + player.getName() + " joined the party, there are " + tpFrom.size() + " in room.");
+        }
     }
 
     public void playerLeave(Player player) {
@@ -58,6 +62,26 @@ public class SleepingRoom {
             if (tf.getKey().equals(player)) {
                 player.teleport(tpFrom.remove(tf.getKey()));
                 break;
+            }
+        }
+
+        // If nobody inside the room then destroy it
+        if (tpFrom.size() == 0) {
+            destroyRoom();
+        } else {
+            // Announcement
+            for (Player p : tpFrom.keySet()) {
+                p.sendMessage(ChatColor.YELLOW + player.getName() + " left the party, there are " + tpFrom.size() + " in room.");
+            }
+
+            if (player.equals(hostedBy)) {
+                List<Player> plys = new ArrayList<Player>();
+                plys.addAll(tpFrom.keySet());
+                hostedBy = plys.get(0);
+
+                for (Player p : tpFrom.keySet()) {
+                    p.sendMessage(ChatColor.YELLOW + hostedBy.getName() + " is now the host.");
+                }
             }
         }
     }
@@ -94,6 +118,7 @@ public class SleepingRoom {
         }
 
         File worldDir = gameWorld.getWorldFolder();
+        GameManager.allLeave(tpFrom.keySet());
         Bukkit.unloadWorld(gameWorld, false);
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(), 
             new DeleteWorldDelayed(worldDir), 60L);

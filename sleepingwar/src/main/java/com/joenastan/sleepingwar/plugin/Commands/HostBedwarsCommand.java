@@ -63,7 +63,7 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
                 }
                 // Exit Command
                 else if (subCommand.equalsIgnoreCase(exitCMD)) {
-                    GameManager.leaveRoom(player);
+                    GameManager.leaveBedwars(player);
                 }
             } else {
                 bedwarsHelpMessage(sender);

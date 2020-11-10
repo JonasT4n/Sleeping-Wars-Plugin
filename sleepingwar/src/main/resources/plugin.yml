@@ -27,6 +27,9 @@ permissions:
     sleepywar.builder:
         description: can build while in world building.
         default: op
+    sleepywar.default:
+        description: anyone has this permissions to use the commands
+        default: true
     sleepywar.admin:
         description: the Game Maker, a special permission.
         default: op
@@ -34,11 +37,11 @@ permissions:
 commands:
     sworld:
         usage: Invalid usage, please checkout in /help SleepingWars
-        permission: sleepywar.admin
+        permission: sleepywar.default
         description: World maker for Bedwars utility
     bedwars:
         usage: Invalid usage, please checkout in /help SleepingWars
-        permission: sleepywar.sleeper
+        permission: sleepywar.default
         description: Play Bedwars (Only can be hosted by admin)
     swperm:
         usage: Invalid usage, please checkout in /help SleepingWars

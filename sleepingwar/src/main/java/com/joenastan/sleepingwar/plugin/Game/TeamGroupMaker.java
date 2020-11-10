@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
 
-import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.Utility.PlayerReviveTimer;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 

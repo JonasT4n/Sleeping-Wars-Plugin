@@ -58,7 +58,13 @@ public class OnGameEvent implements Listener {
                         player.openInventory(openInv);
                     }
                 } else if (BedwarsMenus.isUpgradeMenu(event.getView())) {
-
+                    ItemStack clickedItem = onInv.getItem(slot);
+                    if (clickedItem != null) {
+                        ItemMeta clickedItemMeta = clickedItem.getItemMeta();
+                        Inventory openInv = BedwarsMenus.getOpenShopMenu(ChatColor.stripColor(clickedItemMeta.getDisplayName()));
+                        event.setCancelled(true);
+                        player.openInventory(openInv);
+                    }
                 }
             }
         }
@@ -143,19 +149,23 @@ public class OnGameEvent implements Listener {
         // Custom Villager Egg Spawn
         EntityType entType = event.getRightClicked().getType();
         Player player = event.getPlayer();
-        //System.out.println("[DEBUG] " + entType.name());
+        System.out.println("[DEBUG] " + entType.name());
         if (entType == EntityType.VILLAGER && player.hasPermission("sleepyway.sleeper")) {
             String customName = event.getRightClicked().getCustomName();
             // Upgrade Villager
             if (customName.equalsIgnoreCase("Upgrade Villager")) {
                 SleepingRoom room = GameManager.getRoomByPlayer(player);
+                System.out.println("[DEBUG] " + room);
                 if (room != null) {
                     TeamGroupMaker team = room.getTeam(player);
+                    System.out.println("[DEBUG] " + team);
                     if (team != null) {
                         player.openInventory(BedwarsMenus.UpgradeMenu(team));
+                        System.out.println("[DEBUG] Opened Menu");
                         return;
                     }
                 }
+                System.out.println("[DEBUG] Opened Default Menu");
                 player.openInventory(BedwarsMenus.UpgradeMenu());
             } 
             // Shop Villager

@@ -1,6 +1,7 @@
 package com.joenastan.sleepingwar.plugin.Game;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class PricetagsItems {
 
@@ -25,40 +28,6 @@ public class PricetagsItems {
         this.currency = currency;
         this.price = price;
         defaultPrice = price;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public int getPrice(int price) {
-        this.price = price;
-        return price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
-
-    public int getDefaultPrice() {
-        return defaultPrice;
-    }
-
-    public Material getCurrency() {
-        return currency;
-    }
-
-    public Material getCurrency(Material currency) {
-        this.currency = currency;
-        return currency;
-    }
-
-    public void setCurrency(Material currency) {
-        this.currency = currency;
-    }
-
-    public Material getItem() {
-        return item;
     }
 
     public PricetagsItems addEnchancement(Enchantment enc, int lvl) {
@@ -105,6 +74,7 @@ public class PricetagsItems {
             thisItemMeta.addEnchant(enc, enchanceLevel.get(enc), true);
         }
         
+        thisItemMeta.setLore(Arrays.asList("", getPriceTag()));
         thisItem.setItemMeta(thisItemMeta);
         return thisItem;
     }
@@ -119,6 +89,7 @@ public class PricetagsItems {
             thisItemMeta.addEnchant(enc, enchanceLevel.get(enc), true);
         }
 
+        thisItemMeta.setLore(Arrays.asList("", getPriceTag()));
         thisItem.setItemMeta(thisItemMeta);
         return thisItem;
     }
@@ -134,6 +105,7 @@ public class PricetagsItems {
         }
 
         thisItemMeta.addItemFlags(flag);
+        thisItemMeta.setLore(Arrays.asList("", getPriceTag()));
         thisItem.setItemMeta(thisItemMeta);
         return thisItem;
     }
@@ -148,7 +120,11 @@ public class PricetagsItems {
             thisItemMeta.addEnchant(enc, enchanceLevel.get(enc), true);
         }
 
-        thisItemMeta.setLore(lore);
+        List<String> copiedLore = new ArrayList<>();
+        copiedLore.addAll(lore);
+        copiedLore.add("");
+        copiedLore.add(getPriceTag());
+        thisItemMeta.setLore(copiedLore);
         thisItem.setItemMeta(thisItemMeta);
         return thisItem;
     }
@@ -163,10 +139,67 @@ public class PricetagsItems {
             thisItemMeta.addEnchant(enc, enchanceLevel.get(enc), true);
         }
 
-        thisItemMeta.setLore(lore);
+        List<String> copiedLore = new ArrayList<>();
+        copiedLore.addAll(lore);
+        copiedLore.add("");
+        copiedLore.add(getPriceTag());
+        thisItemMeta.setLore(copiedLore);
         thisItemMeta.addItemFlags(flag);
         thisItem.setItemMeta(thisItemMeta);
         return thisItem;
+    }
+
+    protected String getPriceTag() {
+        switch (currency) {
+            case IRON_INGOT:
+                return String.format("%s %d %s", ChatColor.GRAY + "", price, "Iron(s)");
+
+            case GOLD_INGOT:
+                return String.format("%s %d %s", ChatColor.YELLOW + "", price, "Gold(s)");
+
+            case DIAMOND:
+                return String.format("%s %d %s", ChatColor.AQUA + "", price, "Diamond(s)");
+
+            case EMERALD:
+                return String.format("%s %d %s", ChatColor.GREEN + "", price, "Emerald(s)");
+
+            default:
+                return String.format("%s %d %s", ChatColor.WHITE + "", price, currency.getKey().getNamespace());
+        }
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public int getPrice(int price) {
+        this.price = price;
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public int getDefaultPrice() {
+        return defaultPrice;
+    }
+
+    public Material getCurrency() {
+        return currency;
+    }
+
+    public Material getCurrency(Material currency) {
+        this.currency = currency;
+        return currency;
+    }
+
+    public void setCurrency(Material currency) {
+        this.currency = currency;
+    }
+
+    public Material getItem() {
+        return item;
     }
 
 }

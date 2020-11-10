@@ -74,10 +74,10 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             else if (sender instanceof Player) {
                 Player player = ((Player)sender);
                 // Set World Spawn
-                if (initialSubCommand.equalsIgnoreCase(setSpawnCMD)) {
+                if (initialSubCommand.equalsIgnoreCase(setSpawnCMD) && player.hasPermission("sleepywar.builder")) {
                     setSpawn(player, player.getWorld());
                 } 
-                // Teleport to bedwars world
+                // Teleport and Edit to bedwars world
                 else if (initialSubCommand.equalsIgnoreCase(editWorldCMD)) {
                     if (args.length < 2)
                         sender.sendMessage(ChatColor.GREEN + "You need to insert a world name. " + 
@@ -93,7 +93,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                     }
                 } 
                 // Set Queue Spawn
-                else if (initialSubCommand.equalsIgnoreCase(queueSpawnCMD)) {
+                else if (initialSubCommand.equalsIgnoreCase(queueSpawnCMD) && player.hasPermission("sleepywar.builder")) {
                     String worldName = player.getWorld().getName();
                     if (systemConfig.getAllWorldName().contains(worldName)) {
                         Location settledSpawn = systemConfig.getQueueLocations(worldName, player.getLocation());
@@ -104,7 +104,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                     }
                 }
                 // Set Resource Spawner
-                else if (initialSubCommand.equalsIgnoreCase(setResourceSpawnerCMD)) {
+                else if (initialSubCommand.equalsIgnoreCase(setResourceSpawnerCMD) && player.hasPermission("sleepywar.builder")) {
                     if (args.length < 4) {
                         player.sendMessage(ChatColor.DARK_PURPLE + "Invalid Input.");
                     } else {
@@ -117,7 +117,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                     }
                 }
                 // Set Block anywhere
-                else if (initialSubCommand.equalsIgnoreCase(setBlockCMD)) {
+                else if (initialSubCommand.equalsIgnoreCase(setBlockCMD) && player.hasPermission("sleepywar.builder")) {
                     String worldName = player.getWorld().getName();
                     if (args.length < 4) {
                         sender.sendMessage(ChatColor.RED + "Invalid Argument, must include X, Y, and Z.");
@@ -134,11 +134,11 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                     }
                 }
                 // Open Builder GUI
-                else if (initialSubCommand.equalsIgnoreCase(openBuilderCMD)) {
+                else if (initialSubCommand.equalsIgnoreCase(openBuilderCMD) && player.hasPermission("sleepywar.builder")) {
                     openBuilderGUI(player);
                 }
                 // Set Team Spawner
-                else if (initialSubCommand.equalsIgnoreCase(setTeamSpawnCMD)) {
+                else if (initialSubCommand.equalsIgnoreCase(setTeamSpawnCMD) && player.hasPermission("sleepywar.builder")) {
                     if (args.length < 2)
                         sender.sendMessage(ChatColor.GREEN + "You need to insert team name. " + 
                             ChatColor.YELLOW + "/sworld teamspawn <teamname>");
@@ -147,7 +147,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                     }
                 }
                 // Leave World
-                else if (initialSubCommand.equalsIgnoreCase(leaveWorldCMD)) {
+                else if (initialSubCommand.equalsIgnoreCase(leaveWorldCMD) && player.hasPermission("sleepywar.builder")) {
                     if (previousLocation.containsKey(player))
                         player.teleport(previousLocation.remove(player));
                     else
