@@ -1,13 +1,13 @@
 package com.joenastan.sleepingwar.plugin;
 
-import com.joenastan.sleepingwar.plugin.Commands.HostBedwarsCommand;
-import com.joenastan.sleepingwar.plugin.Commands.SleepingWarsPermissionsCommand;
-import com.joenastan.sleepingwar.plugin.Commands.TabCompletor.HostingCommands;
-import com.joenastan.sleepingwar.plugin.Commands.TabCompletor.SworldCommands;
-import com.joenastan.sleepingwar.plugin.Commands.WorldMakerCommand;
-import com.joenastan.sleepingwar.plugin.Events.OnGameEvent;
-import com.joenastan.sleepingwar.plugin.Game.GameManager;
-import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
+import com.joenastan.sleepingwar.plugin.commands.HostBedwarsCommand;
+import com.joenastan.sleepingwar.plugin.commands.SleepingWarsPermissionsCommand;
+import com.joenastan.sleepingwar.plugin.commands.TabCompletor.HostingCommands;
+import com.joenastan.sleepingwar.plugin.commands.TabCompletor.SworldCommands;
+import com.joenastan.sleepingwar.plugin.commands.WorldMakerCommand;
+import com.joenastan.sleepingwar.plugin.events.OnGameEvent;
+import com.joenastan.sleepingwar.plugin.game.GameManager;
+import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
