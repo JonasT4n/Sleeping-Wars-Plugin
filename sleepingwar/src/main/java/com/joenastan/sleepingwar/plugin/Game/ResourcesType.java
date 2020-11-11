@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum ResourcesType {
-    IRON, 
-    GOLD, 
-    DIAMOND, 
+    IRON,
+    GOLD,
+    DIAMOND,
     EMERALD;
 
     public static ResourcesType getType(String name) {
-        if (name.equalsIgnoreCase("iron")) 
+        if (name.equalsIgnoreCase("iron"))
             return IRON;
         else if (name.equalsIgnoreCase("gold"))
             return GOLD;
@@ -18,7 +18,7 @@ public enum ResourcesType {
             return DIAMOND;
         else if (name.equalsIgnoreCase("emerald"))
             return EMERALD;
-        else 
+        else
             return null;
     }
 

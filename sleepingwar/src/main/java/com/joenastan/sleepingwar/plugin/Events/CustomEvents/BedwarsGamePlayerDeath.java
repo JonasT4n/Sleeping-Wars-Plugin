@@ -2,7 +2,6 @@ package com.joenastan.sleepingwar.plugin.Events.CustomEvents;
 
 import com.joenastan.sleepingwar.plugin.Game.SleepingRoom;
 import com.joenastan.sleepingwar.plugin.Game.TeamGroupMaker;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -21,12 +20,12 @@ public class BedwarsGamePlayerDeath extends Event {
         this.team = team;
     }
 
-    @Override
-    public HandlerList getHandlers() {
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 
-    public static HandlerList getHandlerList() {
+    @Override
+    public HandlerList getHandlers() {
         return handlers;
     }
 
@@ -41,5 +40,5 @@ public class BedwarsGamePlayerDeath extends Event {
     public TeamGroupMaker getTeam() {
         return team;
     }
-    
+
 }

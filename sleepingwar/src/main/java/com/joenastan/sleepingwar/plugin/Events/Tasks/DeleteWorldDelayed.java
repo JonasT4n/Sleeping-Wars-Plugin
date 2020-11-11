@@ -3,7 +3,7 @@ package com.joenastan.sleepingwar.plugin.Events.Tasks;
 import java.io.File;
 
 public class DeleteWorldDelayed implements Runnable {
-    
+
     private File worldFolder;
 
     public DeleteWorldDelayed(File worldFolder) {

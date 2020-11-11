@@ -1,40 +1,29 @@
 package com.joenastan.sleepingwar.plugin.Commands;
 
+import com.joenastan.sleepingwar.plugin.Game.GameManager;
+import com.joenastan.sleepingwar.plugin.Game.ResourceSpawner;
+import com.joenastan.sleepingwar.plugin.Game.ResourcesType;
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
+import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
+import com.joenastan.sleepingwar.plugin.Utility.VoidGenerator;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.*;
+import org.bukkit.World.Environment;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import net.md_5.bungee.api.ChatColor;
-
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
-import org.bukkit.World.Environment;
-import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
-import org.bukkit.GameMode;
-import org.bukkit.GameRule;
-import org.bukkit.Location;
-import org.bukkit.Material;
-
 import java.util.Arrays;
 import java.util.Map;
 
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.Game.GameManager;
-import com.joenastan.sleepingwar.plugin.Game.ResourceSpawner;
-import com.joenastan.sleepingwar.plugin.Game.ResourcesType;
-import com.joenastan.sleepingwar.plugin.Game.SleepingRoom;
-import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
-import com.joenastan.sleepingwar.plugin.Utility.VoidGenerator;
-
 public class WorldMakerCommand implements Listener, CommandExecutor {
 
+    private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
     private String createCMD = "create"; // command to create the world
     private String editWorldCMD = "edit"; // command to go teleport into bedwars and set to builder mode
     private String systemCMD = "system"; // check and edit game system, or you can edit in yml file in plugin folder
@@ -47,7 +36,6 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
     private String setResourceSpawnerCMD = "setrspawn"; // Set Resource Spawner with it's type
     private String testResourceSpawnCMD = "testres"; // Test respawning resource spawner
     private String deleteResourceSpawnCMD = "delrspawn"; // delete resource spawner by name
-    private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -56,21 +44,23 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             String initialSubCommand = args[0];
             // Only player in server can use this command
             if (sender instanceof Player) {
-                Player player = ((Player)sender);
+                Player player = ((Player) sender);
                 // Set World Spawn
                 if (initialSubCommand.equalsIgnoreCase(setSpawnCMD) && player.hasPermission("sleepywar.builder")) {
                     setSpawn(player, player.getWorld());
-                } 
+                }
                 // Teleport and Edit to bedwars world
                 else if (initialSubCommand.equalsIgnoreCase(editWorldCMD)) {
                     if (args.length < 2)
-                        sender.sendMessage(ChatColor.GREEN + "You need to insert a world name. " + 
-                            ChatColor.YELLOW + "/sworld edit <worldname>");
+                        sender.sendMessage(ChatColor.GREEN + "You need to insert a world name. " +
+                                ChatColor.YELLOW + "/sworld edit <worldname>");
                     else {
                         String worldName = "";
                         for (int i = 1; i < args.length; i++) {
                             worldName += args[i];
-                            if (i == args.length - 1) { break; }
+                            if (i == args.length - 1) {
+                                break;
+                            }
                             worldName += " ";
                         }
                         editWorld(player, worldName);
@@ -79,13 +69,15 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 // Create World
                 else if (initialSubCommand.equalsIgnoreCase(createCMD) && player.hasPermission("sleepywar.builder")) {
                     if (args.length < 2)
-                        sender.sendMessage(ChatColor.GREEN + "You need to insert a world name. " + 
-                            ChatColor.YELLOW + "/sworld create <worldname>");
+                        sender.sendMessage(ChatColor.GREEN + "You need to insert a world name. " +
+                                ChatColor.YELLOW + "/sworld create <worldname>");
                     else {
                         String worldName = "";
                         for (int i = 1; i < args.length; i++) {
                             worldName += args[i];
-                            if (i == args.length - 1) { break; }
+                            if (i == args.length - 1) {
+                                break;
+                            }
                             worldName += " ";
                         }
                         createWorld(sender, worldName);
@@ -100,8 +92,8 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                     String worldName = player.getWorld().getName();
                     if (systemConfig.getAllWorldName().contains(worldName)) {
                         Location settledSpawn = systemConfig.getQueueLocations(worldName, player.getLocation());
-                        sender.sendMessage(ChatColor.LIGHT_PURPLE + "Queue spawn settled on " + ChatColor.AQUA + 
-                            String.format("(X/Y/Z): %d/%d/%d", (int)settledSpawn.getX(), (int)settledSpawn.getY(), (int)settledSpawn.getZ()));
+                        sender.sendMessage(ChatColor.LIGHT_PURPLE + "Queue spawn settled on " + ChatColor.AQUA +
+                                String.format("(X/Y/Z): %d/%d/%d", (int) settledSpawn.getX(), (int) settledSpawn.getY(), (int) settledSpawn.getZ()));
                     } else {
                         sender.sendMessage(ChatColor.RED + "You are not in Bedwars world building.");
                     }
@@ -147,8 +139,8 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 // Delete resource spawn
                 else if (initialSubCommand.equalsIgnoreCase(deleteResourceSpawnCMD) && player.hasPermission("sleepywar.builder")) {
                     if (args.length < 2)
-                        sender.sendMessage(ChatColor.GREEN + "You need to insert an existing spawner name. " + 
-                            ChatColor.YELLOW + "/sworld delrspawn <codename>");
+                        sender.sendMessage(ChatColor.GREEN + "You need to insert an existing spawner name. " +
+                                ChatColor.YELLOW + "/sworld delrspawn <codename>");
                     else {
                         deleteResourceSpawner(player, args[1]);
                     }
@@ -156,8 +148,8 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 // Set Team Spawner
                 else if (initialSubCommand.equalsIgnoreCase(setTeamSpawnCMD) && player.hasPermission("sleepywar.builder")) {
                     if (args.length < 2)
-                        sender.sendMessage(ChatColor.GREEN + "You need to insert team name. " + 
-                            ChatColor.YELLOW + "/sworld teamspawn <teamname>");
+                        sender.sendMessage(ChatColor.GREEN + "You need to insert team name. " +
+                                ChatColor.YELLOW + "/sworld teamspawn <teamname>");
                     else {
                         setTeamSpawn(player, args[1]);
                     }
@@ -182,10 +174,10 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
     }
 
     private void helpMessage(CommandSender sender) {
-        sender.sendMessage(ChatColor.GOLD + "Sleeping World Maker Commands for World Building. " + ChatColor.AQUA + "List of sub-commands:\n" + 
-            ChatColor.GREEN + "tp => Teleport to Bedwars World\nsave => Save the world into backup\ncreate => Create Bedwars World\n" +
-            "system => Check and Edit Game System in Bedwars world\nsetqspawn => Set Queue spawn on your current position\n" + 
-            "setspawn => Set World default spawn on your position, builder mode only\nopenb => Open extra kit for Bedwars");
+        sender.sendMessage(ChatColor.GOLD + "Sleeping World Maker Commands for World Building. " + ChatColor.AQUA + "List of sub-commands:\n" +
+                ChatColor.GREEN + "tp => Teleport to Bedwars World\nsave => Save the world into backup\ncreate => Create Bedwars World\n" +
+                "system => Check and Edit Game System in Bedwars world\nsetqspawn => Set Queue spawn on your current position\n" +
+                "setspawn => Set World default spawn on your position, builder mode only\nopenb => Open extra kit for Bedwars");
     }
 
     private void editWorld(Player player, String worldName) {
@@ -212,7 +204,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
         upgradeEggMeta.setDisplayName("Bedwars Upgrade Villager");
         upgradeEggMeta.setLore(Arrays.asList("A Perma Upgrade Shop"));
         upgradeMobEgg.setItemMeta(upgradeEggMeta);
-        
+
         ItemStack shopMobEgg = new ItemStack(Material.VILLAGER_SPAWN_EGG);
         ItemMeta shopEggMeta = shopMobEgg.getItemMeta();
         shopEggMeta.setDisplayName("Bedwars Shop Villager");
@@ -246,8 +238,8 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
         if (innerCommand.length > 0) {
             // TODO: Inner Command Use
         } else {
-            sender.sendMessage(ChatColor.AQUA + "Inner Command of" + ChatColor.GREEN + "/sworld system: \n" + ChatColor.GOLD + 
-                "show => Show Current World Game System\n");
+            sender.sendMessage(ChatColor.AQUA + "Inner Command of" + ChatColor.GREEN + "/sworld system: \n" + ChatColor.GOLD +
+                    "show => Show Current World Game System\n");
         }
     }
 
@@ -303,7 +295,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 ResourceSpawner newRSpawener = new ResourceSpawner(rsname, loc, rcst);
                 systemConfig.getResourceSpawnersPack(wname, teamName).put(rsname, newRSpawener);
                 player.sendMessage(ChatColor.GREEN + "Added " + type + " spawner with name \"" + rsname + "\" on team " + teamName);
-            } else if (teamName.equalsIgnoreCase("public")){
+            } else if (teamName.equalsIgnoreCase("public")) {
                 ResourceSpawner newRSpawener = new ResourceSpawner(rsname, loc, rcst);
                 systemConfig.getResourceSpawnersPack(wname, "PUBLIC").put(rsname, newRSpawener);
                 player.sendMessage(ChatColor.GREEN + "Added public " + type + " spawner with name \"" + rsname);
@@ -318,10 +310,10 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
         if (SleepingWarsPlugin.getPlugin().getServer().getWorld(worldName) == null) {
             sender.sendMessage(ChatColor.BLUE + "Creating World...");
             WorldCreator creator = new WorldCreator(worldName)
-                .environment(Environment.NORMAL)
-                .type(WorldType.FLAT)
-                .hardcore(false)
-                .generateStructures(false);
+                    .environment(Environment.NORMAL)
+                    .type(WorldType.FLAT)
+                    .hardcore(false)
+                    .generateStructures(false);
             creator.generator(new VoidGenerator());
             World world = Bukkit.createWorld(creator);
 

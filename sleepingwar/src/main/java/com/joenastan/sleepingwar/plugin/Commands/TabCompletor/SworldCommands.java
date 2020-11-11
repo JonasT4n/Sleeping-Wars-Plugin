@@ -1,16 +1,15 @@
 package com.joenastan.sleepingwar.plugin.Commands.TabCompletor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Game.ResourcesType;
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SworldCommands implements TabCompleter {
 
@@ -27,11 +26,11 @@ public class SworldCommands implements TabCompleter {
     private String systemCMD = "system"; // check and edit game system, or you can edit in yml file in plugin folder
     private String setTeamSpawnCMD = "teamspawn"; // Set Team Spawn by name on that location
     private String testResourceSpawnCMD = "testres"; // Test respawning resource spawner
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (sender instanceof Player) {
-            Player player = ((Player)sender);
+            Player player = ((Player) sender);
             if (args.length == 1) {
                 List<String> sworldSubs = new ArrayList<String>();
                 sworldSubs.add(createCMD);
@@ -52,13 +51,13 @@ public class SworldCommands implements TabCompleter {
                 // Gives world name hint
                 if (args[0].equalsIgnoreCase("edit")) {
                     return systemConf.getAllWorldName();
-                } 
+                }
                 // Gives coordinate X hint
                 else if (args[0].equalsIgnoreCase(setBlockCMD)) {
                     List<String> setBlockHint = new ArrayList<String>();
                     setBlockHint.add("X");
                     return setBlockHint;
-                } 
+                }
                 // Gives team names hint
                 else if (args[0].equalsIgnoreCase(setTeamSpawnCMD)) {
                     String worldName = player.getWorld().getName();

@@ -1,15 +1,14 @@
 package com.joenastan.sleepingwar.plugin.Utility.Timer;
 
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class StopwatchTimer {
 
     private final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
-    private float duration;
     protected float counter;
+    private float duration;
     private int taskID = -1;
 
     public StopwatchTimer(float duration) {
@@ -18,7 +17,7 @@ public class StopwatchTimer {
     }
 
     public void start() {
-        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable(){
+        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
             @Override
             public void run() {
                 if (counter <= 0f) {
@@ -47,7 +46,7 @@ public class StopwatchTimer {
     public void setDuration(float duration) {
         this.duration = duration;
     }
-    
+
     protected void setTaskID(int taskID) {
         this.taskID = taskID;
     }

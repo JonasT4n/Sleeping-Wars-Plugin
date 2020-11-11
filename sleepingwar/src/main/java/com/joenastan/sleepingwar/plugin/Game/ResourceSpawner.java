@@ -1,7 +1,6 @@
 package com.joenastan.sleepingwar.plugin.Game;
 
 import com.joenastan.sleepingwar.plugin.Utility.Timer.ResourceSpawnTimer;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -17,7 +16,7 @@ public class ResourceSpawner {
     private ResourceSpawnTimer looper;
     private Material mat;
     private boolean isActive;
-    
+
     public ResourceSpawner(String codename, Location spawnLoc, ResourcesType typeSpawnResource) {
         this.spawnLoc = spawnLoc;
         this.typeSpawnResource = typeSpawnResource;
@@ -53,20 +52,20 @@ public class ResourceSpawner {
         w.dropItemNaturally(spawnLoc, res);
     }
 
-    public void setOwner(String ownerTeam) {
-        this.ownedTeam = ownerTeam;
-    }
-
     public String getOwner() {
         return ownedTeam;
     }
 
-    public void setMaterialSpawn(Material mat) {
-        this.mat = mat;
+    public void setOwner(String ownerTeam) {
+        this.ownedTeam = ownerTeam;
     }
-    
+
     public Material getMaterialSpawn() {
         return mat;
+    }
+
+    public void setMaterialSpawn(Material mat) {
+        this.mat = mat;
     }
 
     public void setSpawnInterval(float seconds) {
@@ -93,15 +92,6 @@ public class ResourceSpawner {
         return isActive;
     }
 
-    public boolean isRunning(boolean active) {
-        if (isActive == active)
-            return isActive;
-
-        isActive = active;
-        setRunning(isActive);
-        return isActive;
-    }
-
     private void setRunning(boolean run) {
         if (run == true) {
             System.out.println("[DEBUG] Resource Spawner " + codename + " is now running");
@@ -110,5 +100,14 @@ public class ResourceSpawner {
             System.out.println("[DEBUG] Resource Spawner " + codename + " is now stopped");
             looper.stop();
         }
+    }
+
+    public boolean isRunning(boolean active) {
+        if (isActive == active)
+            return isActive;
+
+        isActive = active;
+        setRunning(isActive);
+        return isActive;
     }
 }

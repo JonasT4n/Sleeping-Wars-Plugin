@@ -1,20 +1,18 @@
 package com.joenastan.sleepingwar.plugin;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for simple App.
  */
-public class SleepingTest 
-{
+public class SleepingTest {
     /**
      * Rigorous Test :-)
      */
     @Test
-    public void shouldAnswerWithTrue()
-    {
-        assertTrue( true );
+    public void shouldAnswerWithTrue() {
+        assertTrue(true);
     }
 }

@@ -1,17 +1,10 @@
 package com.joenastan.sleepingwar.plugin.Game;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Events.Tasks.DeleteWorldDelayed;
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.Utility.Timer.StopwatchTimer;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -19,10 +12,11 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.md_5.bungee.api.ChatColor;
+import java.io.File;
+import java.util.*;
 
 public class SleepingRoom {
-    
+
     private final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
     private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
     private Player hostedBy;
@@ -54,7 +48,7 @@ public class SleepingRoom {
 
         timer = new StopwatchTimer(maxGameDuration);
     }
-    
+
     public void playerEnter(Player player) {
         tpFrom.put(player, player.getLocation());
         player.teleport(queueSpawn);
@@ -129,8 +123,8 @@ public class SleepingRoom {
         GameManager.allLeave(tpFrom.keySet());
         GameManager.getAllRoom().remove(gameWorld.getName());
         Bukkit.unloadWorld(gameWorld, false);
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(), 
-            new DeleteWorldDelayed(worldDir), 60L);
+        plugin.getServer().getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(),
+                new DeleteWorldDelayed(worldDir), 60L);
     }
 
     public void roomBroadcast(String message) {
@@ -174,12 +168,12 @@ public class SleepingRoom {
         }
 
         for (Map.Entry<String, String> tm : teamPrefix.entrySet()) {
-            if (teamUp.size() < 1) 
+            if (teamUp.size() < 1)
                 break;
 
             String teamName = tm.getKey();
-            TeamGroupMaker team = new TeamGroupMaker(this, teamName, worldOriginalName, teamUp.remove(0), 
-                teamSpawnerList.get(teamName), tm.getValue());
+            TeamGroupMaker team = new TeamGroupMaker(this, teamName, worldOriginalName, teamUp.remove(0),
+                    teamSpawnerList.get(teamName), tm.getValue());
             teams.put(team.getName(), team);
         }
     }
@@ -219,7 +213,7 @@ public class SleepingRoom {
             putedBlock.remove(block);
             return true;
         }
-            
+
         return false;
     }
 
@@ -261,12 +255,12 @@ public class SleepingRoom {
         return isResSpawn;
     }
 
-    public void setGameDuration(int dur) {
-        maxGameDuration = dur;
-    }
-
     public float getGameDuration() {
         return maxGameDuration;
+    }
+
+    public void setGameDuration(int dur) {
+        maxGameDuration = dur;
     }
 
     public Location getQueueSpawn() {

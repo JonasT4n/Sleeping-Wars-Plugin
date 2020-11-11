@@ -1,19 +1,18 @@
 package com.joenastan.sleepingwar.plugin.Utility;
 
+import com.joenastan.sleepingwar.plugin.Game.ResourceSpawner;
+import com.joenastan.sleepingwar.plugin.Game.ResourcesType;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.World.Environment;
+import org.bukkit.WorldCreator;
+import org.bukkit.plugin.Plugin;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.joenastan.sleepingwar.plugin.Game.ResourceSpawner;
-import com.joenastan.sleepingwar.plugin.Game.ResourcesType;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.World.Environment;
-import org.bukkit.plugin.Plugin;
 
 public class GameSystemConfig extends AbstractFile {
 
@@ -49,7 +48,7 @@ public class GameSystemConfig extends AbstractFile {
         if (teamPrefix.containsKey(worldName)) {
             List<String> tNames = new ArrayList<String>();
             tNames.addAll(teamPrefix.get(worldName).keySet());
-            return tNames; 
+            return tNames;
         }
         return null;
     }
@@ -117,16 +116,16 @@ public class GameSystemConfig extends AbstractFile {
             // Loop by World Name
             for (String key : filecon.getConfigurationSection("worlds").getKeys(false)) {
                 WorldCreator creator = new WorldCreator(key).environment(Environment.values()[filecon.getInt("worlds." + key + ".env")])
-                    .hardcore(filecon.getBoolean("worlds." + key + ".hardcore"))
-                    .generateStructures(filecon.getBoolean("worlds." + key + ".structure"));
+                        .hardcore(filecon.getBoolean("worlds." + key + ".hardcore"))
+                        .generateStructures(filecon.getBoolean("worlds." + key + ".structure"));
                 World w = Bukkit.createWorld(creator);
                 worlds.put(key, creator);
 
-                Location thisWorldQueueLoc = new Location( w, 
-                    filecon.getInt("worlds." + key + ".queueloc.x"), 
-                    filecon.getInt("worlds." + key + ".queueloc.y"),
-                    filecon.getInt("worlds." + key + ".queueloc.z")
-                    );
+                Location thisWorldQueueLoc = new Location(w,
+                        filecon.getInt("worlds." + key + ".queueloc.x"),
+                        filecon.getInt("worlds." + key + ".queueloc.y"),
+                        filecon.getInt("worlds." + key + ".queueloc.z")
+                );
                 queueLocations.put(key, thisWorldQueueLoc);
 
                 // Loop by Team Name
@@ -135,19 +134,19 @@ public class GameSystemConfig extends AbstractFile {
                 Map<String, Map<String, ResourceSpawner>> teamResourceSpawnersLocal = new HashMap<String, Map<String, ResourceSpawner>>();
                 for (String tString : filecon.getConfigurationSection("worlds." + key + ".teams").getKeys(false)) {
                     teamPrefix.get(key).put(tString, filecon.getString("worlds." + key + ".teams." + tString + ".color"));
-                    Location thisTeamSpawn = new Location(w, filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.x"), 
-                        filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.y"), 
-                        filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.z"));
+                    Location thisTeamSpawn = new Location(w, filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.x"),
+                            filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.y"),
+                            filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.z"));
                     inTeamGameSpawners.get(key).put(tString, thisTeamSpawn);
 
                     // Get all resource spawners from team
                     Map<String, ResourceSpawner> resourceSpawnersLocal = new HashMap<String, ResourceSpawner>();
                     for (String rsName : filecon.getConfigurationSection("worlds." + key + ".teams." + tString + ".resources").getKeys(false)) {
-                        Location rspawnerLoc = new Location(w, filecon.getInt("worlds." + key + ".teams." + tString + ".resources.spawnloc.x"), 
-                            filecon.getInt("worlds." + key + ".teams." + tString + ".resources.spawnloc.y"), 
-                            filecon.getInt("worlds." + key + ".teams." + tString + ".resources.spawnloc.z"));
-                        ResourceSpawner rspawner = new ResourceSpawner(rsName, rspawnerLoc, 
-                            ResourcesType.values()[filecon.getInt("worlds." + key + ".teams." + tString + ".resources.type")]);
+                        Location rspawnerLoc = new Location(w, filecon.getInt("worlds." + key + ".teams." + tString + ".resources.spawnloc.x"),
+                                filecon.getInt("worlds." + key + ".teams." + tString + ".resources.spawnloc.y"),
+                                filecon.getInt("worlds." + key + ".teams." + tString + ".resources.spawnloc.z"));
+                        ResourceSpawner rspawner = new ResourceSpawner(rsName, rspawnerLoc,
+                                ResourcesType.values()[filecon.getInt("worlds." + key + ".teams." + tString + ".resources.type")]);
                         resourceSpawnersLocal.put(rsName, rspawner);
                     }
                     teamResourceSpawnersLocal.put(tString, resourceSpawnersLocal);
@@ -157,16 +156,16 @@ public class GameSystemConfig extends AbstractFile {
                 // Get all resource spawners from team
                 Map<String, ResourceSpawner> publicResourceSpawnersLocal = new HashMap<String, ResourceSpawner>();
                 for (String rsName : filecon.getConfigurationSection("worlds." + key + ".public-resources-spawner").getKeys(false)) {
-                    Location rspawnerLoc = new Location(w, filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.x"), 
-                        filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.y"), 
-                        filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.z"));
-                    ResourceSpawner rspawner = new ResourceSpawner(rsName, rspawnerLoc, 
-                        ResourcesType.values()[filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".type")]);
+                    Location rspawnerLoc = new Location(w, filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.x"),
+                            filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.y"),
+                            filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.z"));
+                    ResourceSpawner rspawner = new ResourceSpawner(rsName, rspawnerLoc,
+                            ResourcesType.values()[filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".type")]);
                     publicResourceSpawnersLocal.put(rsName, rspawner);
                 }
                 teamResourceSpawnersLocal.put("PUBLIC", publicResourceSpawnersLocal);
                 resourceSpawners.put(key, teamResourceSpawnersLocal);
-            }  
+            }
         }
     }
 
@@ -222,12 +221,12 @@ public class GameSystemConfig extends AbstractFile {
             // Player prefix
             for (Map.Entry<String, String> prefix : teamPrefix.get(wname).entrySet()) {
                 filecon.set("worlds." + wname + ".teams." + prefix.getKey() + ".color", prefix.getValue());
-                filecon.set("worlds." + wname + ".teams." + prefix.getKey() + ".spawner.x", 
-                    inTeamGameSpawners.get(wname).get(prefix.getKey()).getBlockX());
-                filecon.set("worlds." + wname + ".teams." + prefix.getKey() + ".spawner.y", 
-                    inTeamGameSpawners.get(wname).get(prefix.getKey()).getBlockY());
-                filecon.set("worlds." + wname + ".teams." + prefix.getKey() + ".spawner.z", 
-                    inTeamGameSpawners.get(wname).get(prefix.getKey()).getBlockZ());
+                filecon.set("worlds." + wname + ".teams." + prefix.getKey() + ".spawner.x",
+                        inTeamGameSpawners.get(wname).get(prefix.getKey()).getBlockX());
+                filecon.set("worlds." + wname + ".teams." + prefix.getKey() + ".spawner.y",
+                        inTeamGameSpawners.get(wname).get(prefix.getKey()).getBlockY());
+                filecon.set("worlds." + wname + ".teams." + prefix.getKey() + ".spawner.z",
+                        inTeamGameSpawners.get(wname).get(prefix.getKey()).getBlockZ());
             }
 
             // Resource Spawners
@@ -236,29 +235,28 @@ public class GameSystemConfig extends AbstractFile {
                 if (resSp.getKey().equals("PUBLIC")) {
                     for (Map.Entry<String, ResourceSpawner> publicSpawner : resSp.getValue().entrySet()) {
                         Location spawnLoc = publicSpawner.getValue().getSpawnLocation();
-                        filecon.set("worlds." + wname + ".public-resources-spawner." + publicSpawner.getKey() + ".type", 
-                            publicSpawner.getValue().getTypeResourceSpawner().ordinal());
-                        filecon.set("worlds." + wname + ".public-resources-spawner." + publicSpawner.getKey() + ".spawnloc.x", 
-                            spawnLoc.getBlockX());
-                        filecon.set("worlds." + wname + ".public-resources-spawner." + publicSpawner.getKey() + ".spawnloc.y", 
-                            spawnLoc.getBlockY());
-                        filecon.set("worlds." + wname + ".public-resources-spawner." + publicSpawner.getKey() + ".spawnloc.z", 
-                            spawnLoc.getBlockZ());
+                        filecon.set("worlds." + wname + ".public-resources-spawner." + publicSpawner.getKey() + ".type",
+                                publicSpawner.getValue().getTypeResourceSpawner().ordinal());
+                        filecon.set("worlds." + wname + ".public-resources-spawner." + publicSpawner.getKey() + ".spawnloc.x",
+                                spawnLoc.getBlockX());
+                        filecon.set("worlds." + wname + ".public-resources-spawner." + publicSpawner.getKey() + ".spawnloc.y",
+                                spawnLoc.getBlockY());
+                        filecon.set("worlds." + wname + ".public-resources-spawner." + publicSpawner.getKey() + ".spawnloc.z",
+                                spawnLoc.getBlockZ());
                     }
                 }
                 // Team owned resources spawner
-                else 
-                {
+                else {
                     for (Map.Entry<String, ResourceSpawner> publicSpawner : resSp.getValue().entrySet()) {
                         Location spawnLoc = publicSpawner.getValue().getSpawnLocation();
-                        filecon.set("worlds." + wname + ".teams." + resSp.getKey() + ".resources." + publicSpawner.getKey() + ".type", 
-                            publicSpawner.getValue().getTypeResourceSpawner().ordinal());
-                        filecon.set("worlds." + wname + ".teams." + resSp.getKey() + ".resources." + publicSpawner.getKey() + ".spawnloc.x", 
-                            spawnLoc.getBlockX());
-                        filecon.set("worlds." + wname + ".teams." + resSp.getKey() + ".resources." + publicSpawner.getKey() + ".spawnloc.y", 
-                            spawnLoc.getBlockY());
-                        filecon.set("worlds." + wname + ".teams." + resSp.getKey() + ".resources." + publicSpawner.getKey() + ".spawnloc.z", 
-                            spawnLoc.getBlockZ());
+                        filecon.set("worlds." + wname + ".teams." + resSp.getKey() + ".resources." + publicSpawner.getKey() + ".type",
+                                publicSpawner.getValue().getTypeResourceSpawner().ordinal());
+                        filecon.set("worlds." + wname + ".teams." + resSp.getKey() + ".resources." + publicSpawner.getKey() + ".spawnloc.x",
+                                spawnLoc.getBlockX());
+                        filecon.set("worlds." + wname + ".teams." + resSp.getKey() + ".resources." + publicSpawner.getKey() + ".spawnloc.y",
+                                spawnLoc.getBlockY());
+                        filecon.set("worlds." + wname + ".teams." + resSp.getKey() + ".resources." + publicSpawner.getKey() + ".spawnloc.z",
+                                spawnLoc.getBlockZ());
                     }
                 }
             }

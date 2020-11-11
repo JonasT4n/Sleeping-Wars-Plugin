@@ -1,7 +1,6 @@
 package com.joenastan.sleepingwar.plugin.Game;
 
-import java.util.Arrays;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -15,7 +14,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.Arrays;
 
 public class BedwarsMenus {
 
@@ -25,40 +24,40 @@ public class BedwarsMenus {
         // Sharper Blade Entity
         PricetagsItems sharperBladeMaker = new PricetagsItems(Material.DIAMOND_SWORD, Material.DIAMOND, 4);
         ItemStack sharperBlade = sharperBladeMaker.createItemStack(1, ChatColor.AQUA + "Sharper Blade",
-            Arrays.asList("Permanently upgrade weapon", "Sharpness by 1 for team."),
-            ItemFlag.HIDE_ATTRIBUTES);
+                Arrays.asList("Permanently upgrade weapon", "Sharpness by 1 for team."),
+                ItemFlag.HIDE_ATTRIBUTES);
 
         // Mine-A-Holic Entity
         PricetagsItems mineAHolicMaker = new PricetagsItems(Material.GOLDEN_PICKAXE, Material.DIAMOND, 4);
         ItemStack mineAHolic = mineAHolicMaker.createItemStack(1, ChatColor.AQUA + "Mine-A-Holic",
-            Arrays.asList("Permanently upgrade weapon", "Efficiency by 1 for team."),
-            ItemFlag.HIDE_ATTRIBUTES);
+                Arrays.asList("Permanently upgrade weapon", "Efficiency by 1 for team."),
+                ItemFlag.HIDE_ATTRIBUTES);
 
         // Make It Rain! Entity
         PricetagsItems makeItRainMaker = new PricetagsItems(Material.GHAST_TEAR, Material.DIAMOND, 6);
         ItemStack makeItRain = makeItRainMaker.createItemStack(1,
-            ChatColor.AQUA + "Make it Rain!",
-            Arrays.asList("Permanently upgrade resource", "spawning faster."));
+                ChatColor.AQUA + "Make it Rain!",
+                Arrays.asList("Permanently upgrade resource", "spawning faster."));
 
         // Holy Light
         PricetagsItems holyLightMaker = new PricetagsItems(Material.EXPERIENCE_BOTTLE, Material.DIAMOND, 6);
-        ItemStack holyLight = holyLightMaker.createItemStack(1,ChatColor.AQUA + "Holy Light",
-            Arrays.asList("Permanent health regeneration", "at your team base."));
+        ItemStack holyLight = holyLightMaker.createItemStack(1, ChatColor.AQUA + "Holy Light",
+                Arrays.asList("Permanent health regeneration", "at your team base."));
 
         // Tough Skin
         PricetagsItems toughSkinMaker = new PricetagsItems(Material.LEATHER, Material.DIAMOND, 4);
         ItemStack toughSkin = toughSkinMaker.createItemStack(1, ChatColor.AQUA + "Tough Skin",
-            Arrays.asList("Permanent upgrade armor", "Protection by 1 for team."));
+                Arrays.asList("Permanent upgrade armor", "Protection by 1 for team."));
 
         // Eye for an eye
         PricetagsItems eyeForEyeMaker = new PricetagsItems(Material.ENDER_EYE, Material.DIAMOND, 6);
         ItemStack eyeForEye = eyeForEyeMaker.createItemStack(1, ChatColor.AQUA + "Eye for an Eye",
-            Arrays.asList("Permanent upgrade armor", "Thorns by 1 for team."));
+                Arrays.asList("Permanent upgrade armor", "Thorns by 1 for team."));
 
         // Gift for the Poor
         PricetagsItems giftPoorMaker = new PricetagsItems(Material.DEAD_BUSH, Material.DIAMOND, 6);
-        ItemStack giftPoor = giftPoorMaker.createItemStack(1,  ChatColor.AQUA + "Gift for the Poor", 
-            Arrays.asList("Something special is coming."));
+        ItemStack giftPoor = giftPoorMaker.createItemStack(1, ChatColor.AQUA + "Gift for the Poor",
+                Arrays.asList("Something special is coming."));
 
         upgradeMenuTemplate.setItem(10, sharperBlade);
         upgradeMenuTemplate.setItem(11, mineAHolic);
@@ -77,48 +76,48 @@ public class BedwarsMenus {
         // Sharper Blade Entity
         PricetagsItems sharperBladeMaker = new PricetagsItems(Material.DIAMOND_SWORD, Material.DIAMOND, 4);
         ItemStack sharperBlade = sharperBladeMaker.createItemStack(1, ChatColor.AQUA + "Sharper Blade",
-            Arrays.asList("Permanently upgrade weapon", "Sharpness by 1 for team."),
-            ItemFlag.HIDE_ATTRIBUTES);
+                Arrays.asList("Permanently upgrade weapon", "Sharpness by 1 for team."),
+                ItemFlag.HIDE_ATTRIBUTES);
 
         System.out.println("[DEBUG] Running 1");
 
         // Mine-A-Holic Entity
         PricetagsItems mineAHolicMaker = new PricetagsItems(Material.GOLDEN_PICKAXE, Material.DIAMOND, 4);
         ItemStack mineAHolic = mineAHolicMaker.createItemStack(1, ChatColor.AQUA + "Mine-A-Holic",
-            Arrays.asList("Permanently upgrade weapon", "Efficiency by 1 for team."),
-            ItemFlag.HIDE_ATTRIBUTES);
+                Arrays.asList("Permanently upgrade weapon", "Efficiency by 1 for team."),
+                ItemFlag.HIDE_ATTRIBUTES);
 
         System.out.println("[DEBUG] Running 1");
 
         // Make It Rain! Entity
         PricetagsItems makeItRainMaker = new PricetagsItems(Material.GHAST_TEAR, Material.DIAMOND, 6);
         ItemStack makeItRain = makeItRainMaker.createItemStack(1,
-            ChatColor.AQUA + "Make it Rain!",
-            Arrays.asList("Permanently upgrade resource", "spawning faster."));
+                ChatColor.AQUA + "Make it Rain!",
+                Arrays.asList("Permanently upgrade resource", "spawning faster."));
 
         System.out.println("[DEBUG] Running 1");
 
         // Holy Light
         PricetagsItems holyLightMaker = new PricetagsItems(Material.EXPERIENCE_BOTTLE, Material.DIAMOND, 6);
         ItemStack holyLight = holyLightMaker.createItemStack(1, ChatColor.AQUA + "Holy Light",
-            Arrays.asList("Permanent health regeneration", "at your team base."));
+                Arrays.asList("Permanent health regeneration", "at your team base."));
 
         // Tough Skin
         PricetagsItems toughSkinMaker = new PricetagsItems(Material.LEATHER, Material.DIAMOND, 4);
         ItemStack toughSkin = toughSkinMaker.createItemStack(1, ChatColor.AQUA + "Tough Skin",
-            Arrays.asList("Permanent upgrade armor", "Protection by 1 for team."));
+                Arrays.asList("Permanent upgrade armor", "Protection by 1 for team."));
 
         // Eye for an eye
         PricetagsItems eyeForEyeMaker = new PricetagsItems(Material.ENDER_EYE, Material.DIAMOND, 6);
         ItemStack eyeForEye = eyeForEyeMaker.createItemStack(1, ChatColor.AQUA + "Eye for an Eye",
-            Arrays.asList("Permanent upgrade armor", "Thorns by 1 for team."));
+                Arrays.asList("Permanent upgrade armor", "Thorns by 1 for team."));
 
         System.out.println("[DEBUG] Running 4");
 
         // Gift for the Poor
         PricetagsItems giftPoorMaker = new PricetagsItems(Material.DEAD_BUSH, Material.DIAMOND, 6);
-        ItemStack giftPoor = giftPoorMaker.createItemStack(1,  ChatColor.AQUA + "Gift for the Poor", 
-            Arrays.asList("Something special is coming."));
+        ItemStack giftPoor = giftPoorMaker.createItemStack(1, ChatColor.AQUA + "Gift for the Poor",
+                Arrays.asList("Something special is coming."));
 
         upgradeMenuTemplate.setItem(10, sharperBlade);
         upgradeMenuTemplate.setItem(11, mineAHolic);
@@ -167,9 +166,9 @@ public class BedwarsMenus {
         ItemStack punchBow1 = level1BowMaker.createItemStack(1, "Bow Level 1");
 
         PricetagsItems level2BowMaker = new PricetagsItems(Material.BOW, Material.GOLD_INGOT, 32)
-            .addEnchancement(Enchantment.ARROW_DAMAGE, 2).addEnchancement(Enchantment.ARROW_KNOCKBACK, 2);
+                .addEnchancement(Enchantment.ARROW_DAMAGE, 2).addEnchancement(Enchantment.ARROW_KNOCKBACK, 2);
         ItemStack punchBow2 = level2BowMaker.createItemStack(1, "Bow Level 2");
-        
+
         PricetagsItems arrowMaker = new PricetagsItems(Material.ARROW, Material.GOLD_INGOT, 2);
         ItemStack arrow = arrowMaker.createItemStack(1);
 
@@ -286,7 +285,7 @@ public class BedwarsMenus {
         ItemStack potionShopItem = new ItemStack(Material.POTION);
         ItemMeta potionShopMeta = potionShopItem.getItemMeta();
         potionShopMeta.setDisplayName(ChatColor.AQUA + "Potions Menu");
-        PotionMeta realPotionMeta = (PotionMeta)potionShopMeta;
+        PotionMeta realPotionMeta = (PotionMeta) potionShopMeta;
         realPotionMeta.setBasePotionData(new PotionData(PotionType.WATER));
         potionShopItem.setItemMeta(potionShopMeta);
 
@@ -342,7 +341,7 @@ public class BedwarsMenus {
 
             case "Items Menu":
                 return ItemsShopMenu();
-        
+
             default:
                 return null;
         }
@@ -371,7 +370,7 @@ public class BedwarsMenus {
 
             case "Items Shop":
                 return true;
-        
+
             default:
                 return false;
         }

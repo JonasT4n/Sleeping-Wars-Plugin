@@ -1,20 +1,30 @@
 package com.joenastan.sleepingwar.plugin;
 
-import java.io.File;
-
+import com.joenastan.sleepingwar.plugin.Commands.HostBedwarsCommand;
+import com.joenastan.sleepingwar.plugin.Commands.SleepingWarsPermissionsCommand;
+import com.joenastan.sleepingwar.plugin.Commands.TabCompletor.HostingCommands;
+import com.joenastan.sleepingwar.plugin.Commands.TabCompletor.SworldCommands;
+import com.joenastan.sleepingwar.plugin.Commands.WorldMakerCommand;
+import com.joenastan.sleepingwar.plugin.Events.OnGameEvent;
+import com.joenastan.sleepingwar.plugin.Game.GameManager;
+import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 
-// Include All Local Packages
-import com.joenastan.sleepingwar.plugin.Commands.*;
-import com.joenastan.sleepingwar.plugin.Commands.TabCompletor.*;
-import com.joenastan.sleepingwar.plugin.Events.*;
-import com.joenastan.sleepingwar.plugin.Game.GameManager;
-import com.joenastan.sleepingwar.plugin.Utility.*;
+import java.io.File;
 
 public class SleepingWarsPlugin extends JavaPlugin {
 
     private static JavaPlugin plugin;
     private static GameSystemConfig systemConfig;
+
+    // Private Variable Getter
+    public static JavaPlugin getPlugin() {
+        return plugin;
+    }
+
+    public static GameSystemConfig getGameSystemConfig() {
+        return systemConfig;
+    }
 
     @Override
     public void onEnable() {
@@ -50,17 +60,17 @@ public class SleepingWarsPlugin extends JavaPlugin {
     // Initialize plugin before activation
     private void initSW() {
         // Create Directory if not exists
-        if (!(getDataFolder().exists())) { getDataFolder().mkdir(); }
+        if (!(getDataFolder().exists())) {
+            getDataFolder().mkdir();
+        }
 
         // Create inner directories inside Data Folder if not exists
         File folderPath = new File(getDataFolder().toPath().toAbsolutePath().toString() + "\\WorldList");
-        if (!(folderPath.exists())) { folderPath.mkdir(); }
+        if (!(folderPath.exists())) {
+            folderPath.mkdir();
+        }
 
         // Create Configuration Files
         systemConfig = new GameSystemConfig(plugin, "worlds.yml");
     }
-
-    // Private Variable Getter
-    public static JavaPlugin getPlugin() { return plugin; }
-    public static GameSystemConfig getGameSystemConfig() { return systemConfig; }
 }

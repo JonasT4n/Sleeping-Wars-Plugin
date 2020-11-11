@@ -1,13 +1,12 @@
 package com.joenastan.sleepingwar.plugin.Events.CustomEvents;
 
 import com.joenastan.sleepingwar.plugin.Game.SleepingRoom;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 public class BedwarsGamePlayerJoin extends Event {
-    
+
     private static final HandlerList handlers = new HandlerList();
 
     private Player player;
@@ -18,12 +17,12 @@ public class BedwarsGamePlayerJoin extends Event {
         this.room = room;
     }
 
-    @Override
-    public HandlerList getHandlers() {
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 
-    public static HandlerList getHandlerList() {
+    @Override
+    public HandlerList getHandlers() {
         return handlers;
     }
 

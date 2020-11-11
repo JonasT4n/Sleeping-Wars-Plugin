@@ -1,16 +1,16 @@
 package com.joenastan.sleepingwar.plugin.Utility;
 
-import java.io.File;
-
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
+import java.io.File;
+
 public class AbstractFile {
 
     protected Plugin main;
-    private File file;
     protected FileConfiguration filecon;
+    private File file;
 
     public AbstractFile(Plugin main, String filename) {
         this.main = main;

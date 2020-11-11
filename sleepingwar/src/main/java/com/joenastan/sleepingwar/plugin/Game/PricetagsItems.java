@@ -1,18 +1,13 @@
 package com.joenastan.sleepingwar.plugin.Game;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.*;
 
 public class PricetagsItems {
 
@@ -41,7 +36,7 @@ public class PricetagsItems {
             if (enchanceListLevel.containsKey(enc.getKey()))
                 enchanceListLevel.put(enc.getKey(), enc.getValue());
         }
-    
+
         return this;
     }
 
@@ -58,7 +53,7 @@ public class PricetagsItems {
         for (Map.Entry<Enchantment, Integer> enchance : enchanceListLevel.entrySet()) {
             thisItemMeta.addEnchant(enchance.getKey(), enchance.getValue(), true);
         }
-        
+
         thisItemMeta.setLore(Arrays.asList("", getPriceTag()));
         thisItem.setItemMeta(thisItemMeta);
         return thisItem;
@@ -153,13 +148,13 @@ public class PricetagsItems {
         return price;
     }
 
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
     public int getPrice(int price) {
         this.price = price;
         return price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
     }
 
     public int getDefaultPrice() {
@@ -170,13 +165,13 @@ public class PricetagsItems {
         return currency;
     }
 
+    public void setCurrency(Material currency) {
+        this.currency = currency;
+    }
+
     public Material getCurrency(Material currency) {
         this.currency = currency;
         return currency;
-    }
-
-    public void setCurrency(Material currency) {
-        this.currency = currency;
     }
 
     public Material getItem() {

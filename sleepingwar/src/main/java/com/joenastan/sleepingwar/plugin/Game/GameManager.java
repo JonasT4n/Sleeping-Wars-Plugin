@@ -1,25 +1,17 @@
 package com.joenastan.sleepingwar.plugin.Game;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGamePlayerJoin;
 import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGamePlayerLeave;
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.*;
 
 public class GameManager {
 
@@ -41,13 +33,13 @@ public class GameManager {
 
             // Get Configuration
             Location queueSpawn = gameConfig.getQueueLocations(useMap.getName());
-            
+
             // Create Room
             SleepingRoom newRoom = new SleepingRoom(useMap.getName(), player, copied, queueSpawn, 3600L);
             rooms.put(createdID, newRoom);
             joinBedwars(player, createdID);
             playerList.put(player, createdID);
-            
+
             BedwarsGamePlayerJoin event = new BedwarsGamePlayerJoin(player, newRoom);
             Bukkit.getServer().getPluginManager().callEvent(event);
         } else {
@@ -88,7 +80,7 @@ public class GameManager {
                 return;
             }
             playerList.remove(player);
-        } 
+        }
         player.sendMessage(ChatColor.YELLOW + "You are not in game.");
     }
 
@@ -156,7 +148,7 @@ public class GameManager {
     private static boolean checkAlreadyHosted(Player player) {
         Collection<SleepingRoom> allRooms = rooms.values();
         for (SleepingRoom s : allRooms) {
-            if (s.getHost().equals(player)) 
+            if (s.getHost().equals(player))
                 return true;
         }
         return false;

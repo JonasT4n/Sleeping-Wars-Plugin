@@ -9,7 +9,7 @@ public class PostEndedGame implements Runnable {
     public PostEndedGame(SleepingRoom room) {
         this.room = room;
     }
-    
+
     @Override
     public void run() {
         room.destroyRoom();

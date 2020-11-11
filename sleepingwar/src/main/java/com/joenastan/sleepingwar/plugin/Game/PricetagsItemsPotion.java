@@ -1,12 +1,12 @@
 package com.joenastan.sleepingwar.plugin.Game;
 
-import java.util.Arrays;
-
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
+
+import java.util.Arrays;
 
 public class PricetagsItemsPotion extends PricetagsItems {
 
@@ -29,7 +29,7 @@ public class PricetagsItemsPotion extends PricetagsItems {
     public ItemStack createItemStack(int amount) {
         ItemStack thisItem = new ItemStack(getItem(), amount);
         ItemMeta thisItemMeta = thisItem.getItemMeta();
-        PotionMeta potionMeta = (PotionMeta)thisItemMeta;
+        PotionMeta potionMeta = (PotionMeta) thisItemMeta;
         potionMeta.setBasePotionData(potionData);
         thisItemMeta.setLore(Arrays.asList("", getPriceTag()));
         thisItem.setItemMeta(thisItemMeta);

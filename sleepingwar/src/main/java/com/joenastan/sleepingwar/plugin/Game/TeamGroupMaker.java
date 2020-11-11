@@ -1,19 +1,17 @@
 package com.joenastan.sleepingwar.plugin.Game;
 
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
+import com.joenastan.sleepingwar.plugin.Utility.Timer.PlayerReviveTimer;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-
-import net.md_5.bungee.api.ChatColor;
-
-import com.joenastan.sleepingwar.plugin.Utility.Timer.PlayerReviveTimer;
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-
-enum ColorTeam { RED, BLUE, YELLOW, GREEN, ORANGE, PURPLE, CYAN, LIME }
+enum ColorTeam {RED, BLUE, YELLOW, GREEN, ORANGE, PURPLE, CYAN, LIME}
 
 public class TeamGroupMaker {
 
@@ -35,7 +33,7 @@ public class TeamGroupMaker {
         this.spawnPoint = spawnPoint;
         this.teamPrefix = teamPrefix;
         this.worldOriginalName = worldOriginalName;
-        
+
         respawnTime = 5f;
         for (Player p : players) {
             p.sendMessage(getColor(teamPrefix) + "You are in team [" + teamName + "]");
@@ -89,7 +87,7 @@ public class TeamGroupMaker {
     }
 
     public int getTeamLevel(String upgradeName) {
-        if (permanentLevels.containsKey(upgradeName)) 
+        if (permanentLevels.containsKey(upgradeName))
             return permanentLevels.get(upgradeName);
         return -1;
     }

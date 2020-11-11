@@ -1,31 +1,18 @@
 package com.joenastan.sleepingwar.plugin.Events;
 
-import java.util.List;
-
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGameEnded;
-import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGamePlayerDeath;
-import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGamePlayerJoin;
-import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGamePlayerLeave;
-import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGamePlayerRevive;
-import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGameSpawnerUp;
-import com.joenastan.sleepingwar.plugin.Events.CustomEvents.BedwarsGameStart;
+import com.joenastan.sleepingwar.plugin.Events.CustomEvents.*;
 import com.joenastan.sleepingwar.plugin.Events.Tasks.PostEndedGame;
 import com.joenastan.sleepingwar.plugin.Game.BedwarsMenus;
 import com.joenastan.sleepingwar.plugin.Game.GameManager;
 import com.joenastan.sleepingwar.plugin.Game.SleepingRoom;
 import com.joenastan.sleepingwar.plugin.Game.TeamGroupMaker;
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -45,7 +32,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.List;
 
 public class OnGameEvent implements Listener {
 
@@ -90,8 +77,8 @@ public class OnGameEvent implements Listener {
             if (!player.hasPermission("sleepywar.builder")) {
                 event.setCancelled(true);
             }
-        } 
-        
+        }
+
         // Check if player in world gameplay
         if (!GameManager.getAllPlayerInGame().isEmpty()) {
             if (GameManager.getAllPlayerInGame().contains(player)) {
@@ -184,9 +171,9 @@ public class OnGameEvent implements Listener {
         String inWorldName = event.getLocation().getWorld().getName();
 
         // Check if player put TNT explosion in game world or builder world
-        if (systemConfig.getAllWorldName().contains(inWorldName) ) {
+        if (systemConfig.getAllWorldName().contains(inWorldName)) {
             blockList.clear();
-        } 
+        }
 
         if (GameManager.getAllRoom() != null) {
             if (GameManager.getAllRoom().keySet().contains(inWorldName)) {
@@ -239,7 +226,7 @@ public class OnGameEvent implements Listener {
                 }
                 //System.out.println("[DEBUG] Opened Default Menu");
                 player.openInventory(BedwarsMenus.UpgradeMenu());
-            } 
+            }
             // Shop Villager
             else if (customName.equalsIgnoreCase("Bedwars Shop Villager")) {
                 player.openInventory(BedwarsMenus.getOpenShopMenu("Main Menu"));
@@ -252,7 +239,7 @@ public class OnGameEvent implements Listener {
         Entity ent = event.getEntity();
         EntityType entType = event.getEntityType();
         if (ent instanceof LivingEntity) {
-            LivingEntity liveEnt = ((LivingEntity)ent);
+            LivingEntity liveEnt = ((LivingEntity) ent);
             if (entType == EntityType.VILLAGER) {
                 String customName = event.getEntity().getCustomName();
                 if (customName != null) {
@@ -260,7 +247,7 @@ public class OnGameEvent implements Listener {
                     // Upgrade Villager
                     if (customName.equalsIgnoreCase("Upgrade Villager")) {
                         liveEnt.addPotionEffect(slowEffect);
-                    } 
+                    }
                     // Shop Villager
                     else if (customName.equalsIgnoreCase("Shop Villager")) {
                         liveEnt.addPotionEffect(slowEffect);
@@ -284,7 +271,7 @@ public class OnGameEvent implements Listener {
         if (!team.isBedBroken()) {
             player.sendMessage(ChatColor.YELLOW + "You have been killed, reviving in 5 seconds...");
             team.revive(player);
-        } 
+        }
         // else then check player and team is still alive, and check remaining and last team
         else {
             player.sendMessage(ChatColor.RED + "You have been elimineted.");

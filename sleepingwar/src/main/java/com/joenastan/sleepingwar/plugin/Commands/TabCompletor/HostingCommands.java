@@ -1,15 +1,14 @@
 package com.joenastan.sleepingwar.plugin.Commands.TabCompletor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Game.GameManager;
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HostingCommands implements TabCompleter {
 
@@ -35,5 +34,5 @@ public class HostingCommands implements TabCompleter {
         }
         return null;
     }
-    
+
 }
