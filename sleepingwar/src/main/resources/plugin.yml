@@ -6,32 +6,32 @@ main: com.joenastan.sleepingwar.plugin.SleepingWarsPlugin
 author: Joenastan
 
 permissions:
-    sleepywar.*:
-        description: Sleepywars permission, every single permissions
-        children:
-            sleepywar.admin: true
-            sleepywar.builder: true
-            sleepywar.default: true
-    sleepywar.builder:
-        description: can build while in world building.
-        default: op
-    sleepywar.default:
-        description: anyone has this permissions to use the commands
-        default: true
-    sleepywar.admin:
-        description: the Game Maker, a special permission.
-        default: op
+  sleepywar.*:
+    description: Sleepywars global permission, every single permission
+    children:
+      sleepywar.admin: true
+      sleepywar.builder: true
+      sleepywar.default: true
+  sleepywar.builder:
+    description: can build while in world building.
+    default: op
+  sleepywar.default:
+    description: anyone has this permissions to use the commands
+    default: true
+  sleepywar.admin:
+    description: the Game Maker, a special permission.
+    default: op
 
 commands:
-    sworld:
-        usage: Invalid usage, please checkout in /help SleepingWars
-        permission: sleepywar.default
-        description: World maker for Bedwars utility
-    bedwars:
-        usage: Invalid usage, please checkout in /help SleepingWars
-        permission: sleepywar.default
-        description: Play Bedwars (Only can be hosted by admin)
-    swperm:
-        usage: Invalid usage, please checkout in /help SleepingWars
-        permission: sleepywar.admin
-        description: Additional for manage player permissions
+  sworld:
+    usage: Invalid usage, please checkout in /help SleepingWars
+    permission: sleepywar.default
+    description: World maker for Bedwars utility
+  bedwars:
+    usage: Invalid usage, please checkout in /help SleepingWars
+    permission: sleepywar.default
+    description: Play Bedwars (Only can be hosted by admin)
+  swperm:
+    usage: Invalid usage, please checkout in /help SleepingWars
+    permission: sleepywar.admin
+    description: Additional for manage player permissions
