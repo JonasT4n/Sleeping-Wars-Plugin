@@ -52,6 +52,8 @@ public class OnGameEvent implements Listener {
                         ItemMeta clickedItemMeta = clickedItem.getItemMeta();
                         Inventory openInv = BedwarsMenus.getOpenShopMenu(ChatColor.stripColor(clickedItemMeta.getDisplayName()));
                         event.setCancelled(true);
+
+                        assert openInv != null;
                         player.openInventory(openInv);
                     }
                 } else if (BedwarsMenus.isUpgradeMenu(event.getView())) {
@@ -60,6 +62,8 @@ public class OnGameEvent implements Listener {
                         ItemMeta clickedItemMeta = clickedItem.getItemMeta();
                         Inventory openInv = BedwarsMenus.getOpenShopMenu(ChatColor.stripColor(clickedItemMeta.getDisplayName()));
                         event.setCancelled(true);
+
+                        assert openInv != null;
                         player.openInventory(openInv);
                     }
                 }

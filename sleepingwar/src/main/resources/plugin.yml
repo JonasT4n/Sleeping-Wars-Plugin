@@ -7,7 +7,7 @@ author: Joenastan
 
 permissions:
   sleepywar.*:
-    description: Sleepywars permission, every single permissions
+    description: Sleepywars global permission, every single permission
     children:
       sleepywar.admin: true
       sleepywar.builder: true

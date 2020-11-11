@@ -93,7 +93,7 @@ public class ResourceSpawner {
     }
 
     private void setRunning(boolean run) {
-        if (run == true) {
+        if (run) {
             System.out.println("[DEBUG] Resource Spawner " + codename + " is now running");
             looper.start();
         } else {
