@@ -15,8 +15,6 @@ import org.bukkit.WorldCreator;
 import org.bukkit.World.Environment;
 import org.bukkit.plugin.Plugin;
 
-import net.md_5.bungee.api.ChatColor;
-
 public class GameSystemConfig extends AbstractFile {
 
     private Map<String, Location> queueLocations = new HashMap<String, Location>();
@@ -56,12 +54,46 @@ public class GameSystemConfig extends AbstractFile {
         return null;
     }
 
-    public Map<String, ResourceSpawner> getResourceSpawnersPack(String worldType, String teamName) {
-        if (resourceSpawners.containsKey(worldType))
-            if (resourceSpawners.get(worldType).containsKey(teamName))
-                return resourceSpawners.get(worldType).get(teamName);
+    public boolean deleteResourceSpawner(String world, String codename) {
+        if (resourceSpawners.containsKey(world)) {
+            for (Map.Entry<String, Map<String, ResourceSpawner>> collectionSpawner : resourceSpawners.get(world).entrySet()) {
+                if (resourceSpawners.get(world).get(collectionSpawner.getKey()).containsKey(codename)) {
+                    ResourceSpawner delSpawner = collectionSpawner.getValue().remove(codename);
+                    if (delSpawner.isRunning()) {
+                        delSpawner.isRunning(false);
+                    }
 
-        return null;
+                    if (collectionSpawner.getKey().equals("PUBLIC")) {
+                        filecon.set("worlds." + world + ".public-resources-spawner." + codename, null);
+                    } else {
+                        filecon.set("worlds." + world + ".teams." + collectionSpawner.getKey() + ".resources", null);
+                    }
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public Map<String, ResourceSpawner> getResourceSpawnerPack(String world) {
+        Map<String, ResourceSpawner> packs = new HashMap<String, ResourceSpawner>();
+        if (resourceSpawners.containsKey(world)) {
+            for (Map.Entry<String, Map<String, ResourceSpawner>> pack : resourceSpawners.get(world).entrySet()) {
+                packs.putAll(pack.getValue());
+            }
+        }
+
+        return packs;
+    }
+
+    public Map<String, ResourceSpawner> getResourceSpawnersPack(String world, String teamName) {
+        if (resourceSpawners.containsKey(world))
+            if (resourceSpawners.get(world).containsKey(teamName))
+                return resourceSpawners.get(world).get(teamName);
+
+        return new HashMap<String, ResourceSpawner>();
     }
 
     public Map<String, String> getTeamPrefix(String world) {
@@ -102,7 +134,7 @@ public class GameSystemConfig extends AbstractFile {
                 inTeamGameSpawners.put(key, new HashMap<String, Location>());
                 Map<String, Map<String, ResourceSpawner>> teamResourceSpawnersLocal = new HashMap<String, Map<String, ResourceSpawner>>();
                 for (String tString : filecon.getConfigurationSection("worlds." + key + ".teams").getKeys(false)) {
-                    teamPrefix.get(key).put(tString, filecon.getString("worlds." + key + ".teams." + tString));
+                    teamPrefix.get(key).put(tString, filecon.getString("worlds." + key + ".teams." + tString + ".color"));
                     Location thisTeamSpawn = new Location(w, filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.x"), 
                         filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.y"), 
                         filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.z"));
@@ -130,7 +162,7 @@ public class GameSystemConfig extends AbstractFile {
                         filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.z"));
                     ResourceSpawner rspawner = new ResourceSpawner(rsName, rspawnerLoc, 
                         ResourcesType.values()[filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".type")]);
-                    publicResourceSpawnersLocal.put(key, rspawner);
+                    publicResourceSpawnersLocal.put(rsName, rspawner);
                 }
                 teamResourceSpawnersLocal.put("PUBLIC", publicResourceSpawnersLocal);
                 resourceSpawners.put(key, teamResourceSpawnersLocal);
@@ -147,10 +179,10 @@ public class GameSystemConfig extends AbstractFile {
 
         // Default Color
         teamPrefix.put(worldName, new HashMap<String, String>());
-        teamPrefix.get(worldName).put("Blue", ChatColor.BLUE + "");
-        teamPrefix.get(worldName).put("Yellow", ChatColor.YELLOW + "");
-        teamPrefix.get(worldName).put("Red", ChatColor.RED + "");
-        teamPrefix.get(worldName).put("Green", ChatColor.GREEN + "");
+        teamPrefix.get(worldName).put("Blue", "blue");
+        teamPrefix.get(worldName).put("Yellow", "yellow");
+        teamPrefix.get(worldName).put("Red", "red");
+        teamPrefix.get(worldName).put("Green", "green");
 
         // Create Sections
         filecon.createSection("worlds." + worldName, new HashMap<>());

@@ -27,6 +27,7 @@ public class GameManager {
     private static final String alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
     private static final GameSystemConfig gameConfig = SleepingWarsPlugin.getGameSystemConfig();
+    private static Map<Player, Location> builderPreviousLocation = new HashMap<Player, Location>();
     private static Map<String, SleepingRoom> rooms = new HashMap<String, SleepingRoom>();
     private static Map<Player, String> playerList = new HashMap<Player, String>();
 
@@ -55,12 +56,13 @@ public class GameManager {
     }
 
     // Player join the room
-    public static void joinBedwars(Player player, String password) {
-        if (rooms.containsKey(password)) {
+    public static void joinBedwars(Player player, String worldpw) {
+        if (rooms.containsKey(worldpw)) {
             player.sendMessage(ChatColor.GREEN + "Joining...");
-            SleepingRoom room = rooms.get(password);
+            SleepingRoom room = rooms.get(worldpw);
             room.playerEnter(player);
-            player.sendMessage(ChatColor.AQUA + "This game hosted by" + ChatColor.LIGHT_PURPLE + room.getHost().getName());
+            playerList.put(player, worldpw);
+            player.sendMessage(ChatColor.AQUA + "This game hosted by " + ChatColor.LIGHT_PURPLE + room.getHost().getName());
 
             BedwarsGamePlayerJoin event = new BedwarsGamePlayerJoin(player, room);
             Bukkit.getServer().getPluginManager().callEvent(event);
@@ -108,16 +110,34 @@ public class GameManager {
         return null;
     }
 
-    public static List<String> getAllAvailableRoom() {
-        List<String> roomNames = new ArrayList<String>();
-        roomNames.addAll(rooms.keySet());
-        return roomNames;
+    public static SleepingRoom getRoomByName(String roomName) {
+        for (Map.Entry<String, SleepingRoom> roomEntry : rooms.entrySet()) {
+            if (roomEntry.getKey().equals(roomName))
+                return roomEntry.getValue();
+        }
+
+        return null;
+    }
+
+    public static Map<String, SleepingRoom> getAllRoom() {
+        return rooms;
     }
 
     public static List<Player> getAllPlayerInGame() {
         List<Player> ppl = new ArrayList<Player>();
+        if (playerList.isEmpty())
+            return ppl;
+
         ppl.addAll(playerList.keySet());
         return getAllPlayerInGame();
+    }
+
+    public static Map<Player, String> getPlayerInGameList() {
+        return playerList;
+    }
+
+    public static Map<Player, Location> getBuilders() {
+        return builderPreviousLocation;
     }
 
     private static String bedwarsWorldID() {
@@ -151,6 +171,13 @@ public class GameManager {
 
         playerList.clear();
         playerList = null;
+
+        for (Map.Entry<Player, Location> prevLoc : builderPreviousLocation.entrySet()) {
+            prevLoc.getKey().teleport(prevLoc.getValue());
+        }
+
+        builderPreviousLocation.clear();
+        builderPreviousLocation = null;
     }
 
 }

@@ -1,6 +1,6 @@
 package com.joenastan.sleepingwar.plugin.Game;
 
-import com.joenastan.sleepingwar.plugin.Utility.ResourceSpawnTimer;
+import com.joenastan.sleepingwar.plugin.Utility.Timer.ResourceSpawnTimer;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 public class ResourceSpawner {
 
     private String ownedTeam = "UNKNOWN";
-    private String spawnerName;
+    private String codename;
     private int spawnAmount;
     private Location spawnLoc;
     private ResourcesType typeSpawnResource;
@@ -18,10 +18,10 @@ public class ResourceSpawner {
     private Material mat;
     private boolean isActive;
     
-    public ResourceSpawner(String spawnerName, Location spawnLoc, ResourcesType typeSpawnResource) {
+    public ResourceSpawner(String codename, Location spawnLoc, ResourcesType typeSpawnResource) {
         this.spawnLoc = spawnLoc;
         this.typeSpawnResource = typeSpawnResource;
-        this.spawnerName = spawnerName;
+        this.codename = codename;
         isActive = false;
         spawnAmount = 1;
 
@@ -85,8 +85,8 @@ public class ResourceSpawner {
         return typeSpawnResource;
     }
 
-    public String getName() {
-        return spawnerName;
+    public String getCodename() {
+        return codename;
     }
 
     public boolean isRunning() {
@@ -94,6 +94,9 @@ public class ResourceSpawner {
     }
 
     public boolean isRunning(boolean active) {
+        if (isActive == active)
+            return isActive;
+
         isActive = active;
         setRunning(isActive);
         return isActive;
@@ -101,8 +104,10 @@ public class ResourceSpawner {
 
     private void setRunning(boolean run) {
         if (run == true) {
+            System.out.println("[DEBUG] Resource Spawner " + codename + " is now running");
             looper.start();
         } else {
+            System.out.println("[DEBUG] Resource Spawner " + codename + " is now stopped");
             looper.stop();
         }
     }

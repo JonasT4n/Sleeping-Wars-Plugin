@@ -10,11 +10,12 @@ import java.util.Random;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.Events.Tasks.DeleteWorldDelayed;
 import com.joenastan.sleepingwar.plugin.Utility.GameSystemConfig;
-import com.joenastan.sleepingwar.plugin.Utility.StopwatchTimer;
+import com.joenastan.sleepingwar.plugin.Utility.Timer.StopwatchTimer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -29,16 +30,21 @@ public class SleepingRoom {
     private Map<String, TeamGroupMaker> teams = new HashMap<String, TeamGroupMaker>();
     private Map<String, Location> teamSpawnerList;
     private List<ResourceSpawner> publicResourceSpawners = new ArrayList<ResourceSpawner>();
+    private boolean isResSpawn;
     private float maxGameDuration;
     private World gameWorld;
     private Location queueSpawn;
     private String worldOriginalName;
     private StopwatchTimer timer;
+    private boolean isInGameOn;
+    private List<Block> putedBlock = new ArrayList<Block>();
 
     public SleepingRoom(String worldOriginalName, Player host, World bedwarsWorld, Location queueSpawn, long maxGameDuration) {
         hostedBy = host;
         tpFrom.put(host, host.getLocation());
         gameWorld = bedwarsWorld;
+        isResSpawn = false;
+        isInGameOn = false;
         this.queueSpawn = queueSpawn;
         this.maxGameDuration = maxGameDuration;
         this.worldOriginalName = worldOriginalName;
@@ -58,6 +64,7 @@ public class SleepingRoom {
     }
 
     public void playerLeave(Player player) {
+        // player leave
         for (Map.Entry<Player, Location> tf : tpFrom.entrySet()) {
             if (tf.getKey().equals(player)) {
                 player.teleport(tpFrom.remove(tf.getKey()));
@@ -66,7 +73,7 @@ public class SleepingRoom {
         }
 
         // If nobody inside the room then destroy it
-        if (tpFrom.size() == 0) {
+        if (tpFrom.size() == 0 || gameWorld.getPlayerCount() == 0) {
             destroyRoom();
         } else {
             // Announcement
@@ -98,7 +105,10 @@ public class SleepingRoom {
         for (ResourceSpawner rSpawn : publicResourceSpawners) {
             rSpawn.isRunning(true);
         }
+        System.out.println("[DEBUG] run 4");
         // Scheduling the game ended
+        isResourceSpawning(true);
+        isInGameOn = true;
         timer.start();
     }
 
@@ -113,20 +123,24 @@ public class SleepingRoom {
         }
 
         // Stop all resources spawn schedules
-        for (ResourceSpawner spawnerRes : publicResourceSpawners) {
-            spawnerRes.isRunning(false);
-        }
+        isResourceSpawning(false);
 
         File worldDir = gameWorld.getWorldFolder();
         GameManager.allLeave(tpFrom.keySet());
+        GameManager.getAllRoom().remove(gameWorld.getName());
         Bukkit.unloadWorld(gameWorld, false);
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(), 
             new DeleteWorldDelayed(worldDir), 60L);
     }
 
+    public void roomBroadcast(String message) {
+        for (Map.Entry<Player, Location> ppl : tpFrom.entrySet()) {
+            ppl.getKey().sendMessage(message);
+        }
+    }
+
     private void createTeam() {
-        GameSystemConfig systemConf = SleepingWarsPlugin.getGameSystemConfig();
-        Map<String, String> teamPrefix = systemConf.getTeamPrefix(gameWorld.getName());
+        Map<String, String> teamPrefix = systemConfig.getTeamPrefix(worldOriginalName);
         List<Player> mapSetPlayer = new ArrayList<Player>();
         mapSetPlayer.addAll(tpFrom.keySet());
         List<List<Player>> teamUp = new ArrayList<List<Player>>();
@@ -138,21 +152,33 @@ public class SleepingRoom {
             teamUp.add(new ArrayList<Player>());
         }
 
+        System.out.println("[DEBUG] run 2");
+
         // Randomize player into the empty list
         for (int i = 0; i < sizeMap; i++) {
             for (int j = 0; j < teamPrefix.size(); j++) {
-                if (tpFrom.size() < 1)
+                if (mapSetPlayer.size() < 1)
                     break;
 
-                int indexPicked = rand.ints(0, mapSetPlayer.size()).findFirst().getAsInt();
+                int indexPicked = rand.nextInt(mapSetPlayer.size());
                 Player playerPicked = mapSetPlayer.remove(indexPicked);
                 teamUp.get(j).add(playerPicked);
             }
         }
 
+        System.out.println("[DEBUG] run 3");
+
+        for (int i = teamPrefix.size() - 1; i >= 0; i--) {
+            if (teamUp.get(i).size() < 1)
+                teamUp.remove(i);
+        }
+
         for (Map.Entry<String, String> tm : teamPrefix.entrySet()) {
+            if (teamUp.size() < 1) 
+                break;
+
             String teamName = tm.getKey();
-            TeamGroupMaker team = new TeamGroupMaker(teamName, worldOriginalName, teamUp.remove(0), 
+            TeamGroupMaker team = new TeamGroupMaker(this, teamName, worldOriginalName, teamUp.remove(0), 
                 teamSpawnerList.get(teamName), tm.getValue());
             teams.put(team.getName(), team);
         }
@@ -180,6 +206,23 @@ public class SleepingRoom {
         return false;
     }
 
+    public boolean isGameProcessing() {
+        return isInGameOn;
+    }
+
+    public void putBlock(Block block) {
+        putedBlock.add(block);
+    }
+
+    public boolean destroyBlock(Block block) {
+        if (putedBlock.contains(block)) {
+            putedBlock.remove(block);
+            return true;
+        }
+            
+        return false;
+    }
+
     public List<Player> getAllPlayer() {
         List<Player> ppl = new ArrayList<Player>();
         ppl.addAll(tpFrom.keySet());
@@ -194,6 +237,28 @@ public class SleepingRoom {
 
     public Player getHost() {
         return hostedBy;
+    }
+
+    public boolean isResourceSpawning() {
+        return isResSpawn;
+    }
+
+    public boolean isResourceSpawning(boolean active) {
+        isResSpawn = active;
+
+        // Running public resource spawner
+        for (ResourceSpawner spawner : publicResourceSpawners) {
+            spawner.isRunning(isResSpawn);
+        }
+
+        // Running all team resource spawner
+        for (TeamGroupMaker resSpawner : teams.values()) {
+            for (ResourceSpawner spawner : resSpawner.getAllResourceSpawners()) {
+                spawner.isRunning(isResSpawn);
+            }
+        }
+
+        return isResSpawn;
     }
 
     public void setGameDuration(int dur) {

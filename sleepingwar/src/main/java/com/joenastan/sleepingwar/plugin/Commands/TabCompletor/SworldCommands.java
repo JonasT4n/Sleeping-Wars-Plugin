@@ -17,6 +17,7 @@ public class SworldCommands implements TabCompleter {
     private static final GameSystemConfig systemConf = SleepingWarsPlugin.getGameSystemConfig();
     private String createCMD = "create"; // command to create the world
     private String editWorldCMD = "edit"; // command to go teleport into bedwars and set to builder mode
+    private String deleteResourceSpawnCMD = "delrspawn"; // delete resource spawner by name
     private String leaveWorldCMD = "leave"; // leave world back to where you were
     private String openBuilderCMD = "openb"; // exclusive kit for bedwars
     private String queueSpawnCMD = "setqspawn"; // set queue spawn for hosting a bedwars
@@ -25,6 +26,7 @@ public class SworldCommands implements TabCompleter {
     private String setResourceSpawnerCMD = "setrspawn"; // Set Resource Spawner with it's type
     private String systemCMD = "system"; // check and edit game system, or you can edit in yml file in plugin folder
     private String setTeamSpawnCMD = "teamspawn"; // Set Team Spawn by name on that location
+    private String testResourceSpawnCMD = "testres"; // Test respawning resource spawner
     
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -34,6 +36,7 @@ public class SworldCommands implements TabCompleter {
                 List<String> sworldSubs = new ArrayList<String>();
                 sworldSubs.add(createCMD);
                 sworldSubs.add(editWorldCMD);
+                sworldSubs.add(deleteResourceSpawnCMD);
                 sworldSubs.add(leaveWorldCMD);
                 sworldSubs.add(openBuilderCMD);
                 sworldSubs.add(queueSpawnCMD);
@@ -43,6 +46,7 @@ public class SworldCommands implements TabCompleter {
                 sworldSubs.add(openBuilderCMD);
                 sworldSubs.add(systemCMD);
                 sworldSubs.add(setTeamSpawnCMD);
+                sworldSubs.add(testResourceSpawnCMD);
                 return sworldSubs;
             } else if (args.length == 2) {
                 // Gives world name hint
@@ -63,13 +67,22 @@ public class SworldCommands implements TabCompleter {
                     }
                 }
                 // Gives team names hint and public
-                else if (args[0].equals(setResourceSpawnerCMD)) {
+                else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD)) {
                     String worldName = player.getWorld().getName();
                     if (systemConf.getAllWorldName().contains(worldName)) {
                         List<String> teamNameshint = new ArrayList<String>();
                         teamNameshint.addAll(systemConf.getAllTeamName(worldName));
                         teamNameshint.add("public");
                         return teamNameshint;
+                    }
+                }
+                // Gives hint of resource spawner codename
+                else if (args[0].equalsIgnoreCase(deleteResourceSpawnCMD)) {
+                    String worldName = player.getWorld().getName();
+                    if (systemConf.getAllWorldName().contains(worldName)) {
+                        List<String> names = new ArrayList<String>();
+                        names.addAll(systemConf.getResourceSpawnerPack(worldName).keySet());
+                        return names;
                     }
                 }
             } else if (args.length == 3) {

@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
 
-import com.joenastan.sleepingwar.plugin.Utility.PlayerReviveTimer;
+import com.joenastan.sleepingwar.plugin.Utility.Timer.PlayerReviveTimer;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 
 enum ColorTeam { RED, BLUE, YELLOW, GREEN, ORANGE, PURPLE, CYAN, LIME }
@@ -18,33 +18,31 @@ enum ColorTeam { RED, BLUE, YELLOW, GREEN, ORANGE, PURPLE, CYAN, LIME }
 public class TeamGroupMaker {
 
     private String teamName;
-    private String worldType;
+    private String worldOriginalName;
     private Map<Player, PlayerReviveTimer> playersNTimer = new HashMap<Player, PlayerReviveTimer>();
     private Location spawnPoint;
-    private boolean bedDestroyed;
+    private boolean bedBroken;
     private float respawnTime;
+    private int eliminetedCount = 0;
     private Map<String, ResourceSpawner> resourceSpawners = new HashMap<String, ResourceSpawner>();
     private Location baseLocationMin;
     private Location baseLocationMax;
     private Map<String, Integer> permanentLevels = new HashMap<String, Integer>();
     private String teamPrefix;
 
-    public TeamGroupMaker(String teamName, String worldType, List<Player> players, Location spawnPoint, String teamPrefix) {
+    public TeamGroupMaker(SleepingRoom inRoom, String teamName, String worldOriginalName, List<Player> players, Location spawnPoint, String teamPrefix) {
         this.teamName = teamName;
         this.spawnPoint = spawnPoint;
         this.teamPrefix = teamPrefix;
-        this.worldType = worldType;
+        this.worldOriginalName = worldOriginalName;
         
         respawnTime = 5f;
         for (Player p : players) {
-            p.sendMessage("You are in team [" + teamPrefix + teamName + "]");
+            p.sendMessage(getColor(teamPrefix) + "You are in team [" + teamName + "]");
             playersNTimer.put(p, new PlayerReviveTimer(respawnTime, p, this));
         }
 
-        resourceSpawners = SleepingWarsPlugin.getGameSystemConfig().getResourceSpawnersPack(worldType, teamName);
-        for (ResourceSpawner rs : resourceSpawners.values()) {
-            rs.isRunning(true);
-        }
+        resourceSpawners = SleepingWarsPlugin.getGameSystemConfig().getResourceSpawnersPack(worldOriginalName, teamName);
     }
 
     public boolean checkPlayer(Player player) {
@@ -54,10 +52,16 @@ public class TeamGroupMaker {
     }
 
     public void revive(Player player) {
-        if (!bedDestroyed) {
-            player.teleport(spawnPoint);
-            playersNTimer.get(player).start();
-        }
+        playersNTimer.get(player).start();
+    }
+
+    public boolean isAllMemberElimineted() {
+        eliminetedCount++;
+        return eliminetedCount == playersNTimer.size();
+    }
+
+    public boolean isBedBroken() {
+        return bedBroken;
     }
 
     public void sendMessage(Player p, String msg) {
@@ -88,5 +92,27 @@ public class TeamGroupMaker {
         if (permanentLevels.containsKey(upgradeName)) 
             return permanentLevels.get(upgradeName);
         return -1;
+    }
+
+    private ChatColor getColor(String prefix) {
+        if (prefix.equalsIgnoreCase("blue")) {
+            return ChatColor.BLUE;
+        } else if (prefix.equalsIgnoreCase("green")) {
+            return ChatColor.GREEN;
+        } else if (prefix.equalsIgnoreCase("yellow")) {
+            return ChatColor.YELLOW;
+        } else if (prefix.equalsIgnoreCase("aqua")) {
+            return ChatColor.AQUA;
+        } else if (prefix.equalsIgnoreCase("red")) {
+            return ChatColor.RED;
+        } else if (prefix.equalsIgnoreCase("light-putple")) {
+            return ChatColor.LIGHT_PURPLE;
+        } else if (prefix.equalsIgnoreCase("gold")) {
+            return ChatColor.GOLD;
+        } else if (prefix.equalsIgnoreCase("gray")) {
+            return ChatColor.GRAY;
+        } else {
+            return ChatColor.WHITE;
+        }
     }
 }

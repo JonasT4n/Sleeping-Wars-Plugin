@@ -16,8 +16,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class PricetagsItems {
 
-    private List<Enchantment> enchanceList = new ArrayList<Enchantment>();
-    private Map<Enchantment, Integer> enchanceLevel = new HashMap<Enchantment, Integer>();
+    private Map<Enchantment, Integer> enchanceListLevel = new HashMap<Enchantment, Integer>();
     private Material item;
     private Material currency;
     private int price;
@@ -31,47 +30,33 @@ public class PricetagsItems {
     }
 
     public PricetagsItems addEnchancement(Enchantment enc, int lvl) {
-        if (enchanceList.contains(enc))
-            enchanceList.add(enc);
+        if (enchanceListLevel.containsKey(enc))
+            enchanceListLevel.put(enc, lvl);
 
-        enchanceLevel.put(enc, lvl);
         return this;
     }
 
     public PricetagsItems addEnchancement(Map<Enchantment, Integer> encs) {
         for (Map.Entry<Enchantment, Integer> enc : encs.entrySet()) {
-            if (enchanceList.contains(enc.getKey()))
-                enchanceList.add(enc.getKey());
-
-            enchanceLevel.put(enc.getKey(), enc.getValue());
+            if (enchanceListLevel.containsKey(enc.getKey()))
+                enchanceListLevel.put(enc.getKey(), enc.getValue());
         }
     
         return this;
     }
 
-    public List<String> getEnchancementList() {
-        List<String> listEnc = new ArrayList<String>();
-        for (int i = 0; i < enchanceList.size(); i++) {
-            listEnc.add(enchanceList.get(i).getKey().getNamespace());
-        }
+    public List<Enchantment> getEnchancementList() {
+        List<Enchantment> listEnc = new ArrayList<Enchantment>();
+        listEnc.addAll(enchanceListLevel.keySet());
         return listEnc;
-    }
-
-    public void removeEnchancement(int index) {
-        if (index >= enchanceList.size())
-            return;
-
-        Enchantment enc = enchanceList.remove(index);
-        enchanceLevel.remove(enc);
     }
 
     public ItemStack createItemStack(int amount) {
         ItemStack thisItem = new ItemStack(item, amount);
         ItemMeta thisItemMeta = thisItem.getItemMeta();
 
-        for (int i = 0; i < enchanceList.size(); i++) {
-            Enchantment enc = enchanceList.get(i);
-            thisItemMeta.addEnchant(enc, enchanceLevel.get(enc), true);
+        for (Map.Entry<Enchantment, Integer> enchance : enchanceListLevel.entrySet()) {
+            thisItemMeta.addEnchant(enchance.getKey(), enchance.getValue(), true);
         }
         
         thisItemMeta.setLore(Arrays.asList("", getPriceTag()));
@@ -84,9 +69,8 @@ public class PricetagsItems {
         ItemMeta thisItemMeta = thisItem.getItemMeta();
         thisItemMeta.setDisplayName(display);
 
-        for (int i = 0; i < enchanceList.size(); i++) {
-            Enchantment enc = enchanceList.get(i);
-            thisItemMeta.addEnchant(enc, enchanceLevel.get(enc), true);
+        for (Map.Entry<Enchantment, Integer> enchance : enchanceListLevel.entrySet()) {
+            thisItemMeta.addEnchant(enchance.getKey(), enchance.getValue(), true);
         }
 
         thisItemMeta.setLore(Arrays.asList("", getPriceTag()));
@@ -99,9 +83,8 @@ public class PricetagsItems {
         ItemMeta thisItemMeta = thisItem.getItemMeta();
         thisItemMeta.setDisplayName(display);
 
-        for (int i = 0; i < enchanceList.size(); i++) {
-            Enchantment enc = enchanceList.get(i);
-            thisItemMeta.addEnchant(enc, enchanceLevel.get(enc), true);
+        for (Map.Entry<Enchantment, Integer> enchance : enchanceListLevel.entrySet()) {
+            thisItemMeta.addEnchant(enchance.getKey(), enchance.getValue(), true);
         }
 
         thisItemMeta.addItemFlags(flag);
@@ -115,9 +98,8 @@ public class PricetagsItems {
         ItemMeta thisItemMeta = thisItem.getItemMeta();
         thisItemMeta.setDisplayName(display);
 
-        for (int i = 0; i < enchanceList.size(); i++) {
-            Enchantment enc = enchanceList.get(i);
-            thisItemMeta.addEnchant(enc, enchanceLevel.get(enc), true);
+        for (Map.Entry<Enchantment, Integer> enchance : enchanceListLevel.entrySet()) {
+            thisItemMeta.addEnchant(enchance.getKey(), enchance.getValue(), true);
         }
 
         List<String> copiedLore = new ArrayList<>();
@@ -134,9 +116,8 @@ public class PricetagsItems {
         ItemMeta thisItemMeta = thisItem.getItemMeta();
         thisItemMeta.setDisplayName(display);
 
-        for (int i = 0; i < enchanceList.size(); i++) {
-            Enchantment enc = enchanceList.get(i);
-            thisItemMeta.addEnchant(enc, enchanceLevel.get(enc), true);
+        for (Map.Entry<Enchantment, Integer> enchance : enchanceListLevel.entrySet()) {
+            thisItemMeta.addEnchant(enchance.getKey(), enchance.getValue(), true);
         }
 
         List<String> copiedLore = new ArrayList<>();

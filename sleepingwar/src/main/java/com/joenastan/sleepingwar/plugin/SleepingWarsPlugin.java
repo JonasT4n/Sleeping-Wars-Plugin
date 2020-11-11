@@ -2,14 +2,11 @@ package com.joenastan.sleepingwar.plugin;
 
 import java.io.File;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 // Include All Local Packages
 import com.joenastan.sleepingwar.plugin.Commands.*;
-import com.joenastan.sleepingwar.plugin.Commands.TabCompletor.HostingCommands;
-import com.joenastan.sleepingwar.plugin.Commands.TabCompletor.SworldCommands;
+import com.joenastan.sleepingwar.plugin.Commands.TabCompletor.*;
 import com.joenastan.sleepingwar.plugin.Events.*;
 import com.joenastan.sleepingwar.plugin.Game.GameManager;
 import com.joenastan.sleepingwar.plugin.Utility.*;
@@ -66,18 +63,4 @@ public class SleepingWarsPlugin extends JavaPlugin {
     // Private Variable Getter
     public static JavaPlugin getPlugin() { return plugin; }
     public static GameSystemConfig getGameSystemConfig() { return systemConfig; }
-
-    // Test Functions
-    private void printAllWorld() {
-        String wname = " ";
-        for (int i = 0; i < Bukkit.getWorlds().size(); i++) {
-            wname = wname + Bukkit.getWorlds().get(i).getName() + "; ";
-        }
-
-        System.out.println("[SleepingWars] DEBUG: " + wname);
-    }
-    
-    private void printWorldData(String w) {
-        
-    }
 }

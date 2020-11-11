@@ -9,21 +9,9 @@ permissions:
     sleepywar.*:
         description: Sleepywars permission, every single permissions
         children:
-            sleepywar.sleeper: true
             sleepywar.admin: true
             sleepywar.builder: true
-    sleepywar.sleeper.*:
-        description: default permission only in bedwars game.
-        default: op
-        children:
-            sleepywar.sleeper.host: true
-            sleepywar.sleeper.guest: true
-    sleepywar.sleeper.host:
-        description: when player just create a game then this perm is now taken.
-        default: op
-    sleepywar.sleeper.guest:
-        description: not much power as host, just join or leave the game.
-        default: op
+            sleepywar.default: true
     sleepywar.builder:
         description: can build while in world building.
         default: op

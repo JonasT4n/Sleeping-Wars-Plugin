@@ -33,7 +33,7 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
                 String subCommand = args[0];
                 if (subCommand.equalsIgnoreCase(hostCMD)) {
                     if (args.length < 2) {
-                        sender.sendMessage(ChatColor.GOLD + "Include a world name (/sworld host <worldname>)");
+                        sender.sendMessage(ChatColor.GOLD + "Include a world name (/bedwars host <worldname>), use one of the map that you have made.");
                     } else {
                         if (systemConf.getAllWorldName().contains(args[1])) {
                             World useMap = Bukkit.getWorld(args[1]);
@@ -46,7 +46,7 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
                 // Join Command
                 else if (subCommand.equalsIgnoreCase(joinCMD)) {
                     if (args.length < 2) {
-                        sender.sendMessage(ChatColor.RED + "Insert a room name.");
+                        sender.sendMessage(ChatColor.RED + "Insert a room mate name.");
                     } else {
                         GameManager.joinBedwars(player, args[1]);
                     }

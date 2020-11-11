@@ -1,4 +1,4 @@
-package com.joenastan.sleepingwar.plugin.Utility;
+package com.joenastan.sleepingwar.plugin.Utility.Timer;
 
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 
@@ -9,7 +9,7 @@ public class StopwatchTimer {
 
     private final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
     private float duration;
-    private float counter;
+    protected float counter;
     private int taskID = -1;
 
     public StopwatchTimer(float duration) {
@@ -46,6 +46,10 @@ public class StopwatchTimer {
 
     public void setDuration(float duration) {
         this.duration = duration;
+    }
+    
+    protected void setTaskID(int taskID) {
+        this.taskID = taskID;
     }
 
     protected void runEvent() {
