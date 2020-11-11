@@ -65,7 +65,7 @@ public class SleepingWarsPlugin extends JavaPlugin {
         }
 
         // Create inner directories inside Data Folder if not exists
-        File folderPath = new File(getDataFolder().toPath().toAbsolutePath().toString() + "\\WorldList");
+        File folderPath = new File("plugins/SleepingWars/WorldList");
         if (!(folderPath.exists())) {
             folderPath.mkdir();
         }
