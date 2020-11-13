@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.joenastan.sleepingwar.plugin.SleepingTest" time="0.045" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.joenastan.sleepingwar.plugin.SleepingTest" time="0.05" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="14"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-14.0.1\bin"/>
-    <property name="sun.java.command" value="C:\windows\TEMP\surefire4356288925450042176\surefirebooter10711254495508128635.jar C:\Windows\Temp\surefire4356288925450042176 2020-11-11T21-06-30_309-jvmRun1 surefire1789511670617639907tmp surefire_015260838867103266574tmp"/>
+    <property name="sun.java.command" value="C:\windows\TEMP\surefire11860661205450076655\surefirebooter4113177195939962778.jar C:\Windows\Temp\surefire11860661205450076655 2020-11-13T21-13-21_154-jvmRun1 surefire16060182662782992123tmp surefire_01423144728910201190tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="d:\GitHub\Sleeping-Wars-Plugin\sleepingwar\target\test-classes;d:\GitHub\Sleeping-Wars-Plugin\sleepingwar\target\classes;C:\Users\tanjo\.m2\repository\junit\junit\4.11\junit-4.11.jar;C:\Users\tanjo\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\tanjo\.m2\repository\com\destroystokyo\paper\paper-api\1.16.4-R0.1-SNAPSHOT\paper-api-1.16.4-R0.1-SNAPSHOT.jar;C:\Users\tanjo\.m2\repository\commons-lang\commons-lang\2.6\commons-lang-2.6.jar;C:\Users\tanjo\.m2\repository\com\google\code\findbugs\jsr305\1.3.9\jsr305-1.3.9.jar;C:\Users\tanjo\.m2\repository\com\googlecode\json-simple\json-simple\1.1.1\json-simple-1.1.1.jar;C:\Users\tanjo\.m2\repository\com\google\guava\guava\21.0\guava-21.0.jar;C:\Users\tanjo\.m2\repository\com\google\code\gson\gson\2.8.0\gson-2.8.0.jar;C:\Users\tanjo\.m2\repository\net\md-5\bungeecord-chat\1.16-R0.3\bungeecord-chat-1.16-R0.3.jar;C:\Users\tanjo\.m2\repository\org\yaml\snakeyaml\1.26\snakeyaml-1.26.jar;C:\Users\tanjo\.m2\repository\org\slf4j\slf4j-api\1.7.25\slf4j-api-1.7.25.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm\8.0.1\asm-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm-commons\8.0.1\asm-commons-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm-tree\8.0.1\asm-tree-8.0.1.jar;C:\Users\tanjo\.m2\repository\org\ow2\asm\asm-analysis\8.0.1\asm-analysis-8.0.1.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\windows\TEMP\surefire4356288925450042176\surefirebooter10711254495508128635.jar"/>
+    <property name="surefire.real.class.path" value="C:\windows\TEMP\surefire11860661205450076655\surefirebooter4113177195939962778.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="14.0.1+7"/>

@@ -1,10 +1,11 @@
 package com.joenastan.sleepingwar.plugin.game;
 
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGamePlayerJoin;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGamePlayerLeave;
+import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGamePlayerJoinEvent;
+import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGamePlayerLeaveEvent;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import net.md_5.bungee.api.ChatColor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -13,13 +14,19 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+
 public class GameManager {
 
     private static final int IDRange = 4;
     private static final String alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
     private static final GameSystemConfig gameConfig = SleepingWarsPlugin.getGameSystemConfig();
-    private static Map<Player, Location> builderPreviousLocation = new HashMap<Player, Location>();
     private static Map<String, SleepingRoom> rooms = new HashMap<String, SleepingRoom>();
     private static Map<Player, String> playerList = new HashMap<Player, String>();
 
@@ -28,19 +35,19 @@ public class GameManager {
         if (!checkAlreadyHosted(player)) {
             String createdID = bedwarsWorldID();
             // Copy World
+            File folderLoc = new File(useMap.getWorldFolder().getAbsolutePath());
+            File newCopy = new File(Bukkit.getWorldContainer().getAbsolutePath() + "/" + createdID);
+            copyWorld(folderLoc, newCopy);
             WorldCreator newCreatedWorld = new WorldCreator(createdID);
-            World copied = Bukkit.createWorld(newCreatedWorld.copy(useMap));
-
-            // Get Configuration
-            Location queueSpawn = gameConfig.getQueueLocations(useMap.getName());
+            World copied = Bukkit.createWorld(newCreatedWorld);
 
             // Create Room
-            SleepingRoom newRoom = new SleepingRoom(useMap.getName(), player, copied, queueSpawn, 3600L);
+            Location queueSpawn = gameConfig.getQueueLocations(useMap.getName());
+            SleepingRoom newRoom = new SleepingRoom(useMap.getName(), player, copied, queueSpawn, 720000L);
             rooms.put(createdID, newRoom);
-            joinBedwars(player, createdID);
             playerList.put(player, createdID);
 
-            BedwarsGamePlayerJoin event = new BedwarsGamePlayerJoin(player, newRoom);
+            BedwarsGamePlayerJoinEvent event = new BedwarsGamePlayerJoinEvent(player, newRoom);
             Bukkit.getServer().getPluginManager().callEvent(event);
         } else {
             player.sendMessage(ChatColor.BLUE + "You have already hosted the game.");
@@ -56,7 +63,7 @@ public class GameManager {
             playerList.put(player, worldpw);
             player.sendMessage(ChatColor.AQUA + "This game hosted by " + ChatColor.LIGHT_PURPLE + room.getHost().getName());
 
-            BedwarsGamePlayerJoin event = new BedwarsGamePlayerJoin(player, room);
+            BedwarsGamePlayerJoinEvent event = new BedwarsGamePlayerJoinEvent(player, room);
             Bukkit.getServer().getPluginManager().callEvent(event);
         } else {
             player.sendMessage(ChatColor.RED + "Game not available.");
@@ -75,7 +82,7 @@ public class GameManager {
                 room.playerLeave(player);
                 playerList.remove(player);
 
-                BedwarsGamePlayerLeave event = new BedwarsGamePlayerLeave(player, room);
+                BedwarsGamePlayerLeaveEvent event = new BedwarsGamePlayerLeaveEvent(player, room);
                 Bukkit.getServer().getPluginManager().callEvent(event);
                 return;
             }
@@ -115,21 +122,12 @@ public class GameManager {
         return rooms;
     }
 
-    public static List<Player> getAllPlayerInGame() {
-        List<Player> ppl = new ArrayList<Player>();
-        if (playerList.isEmpty())
-            return ppl;
-
-        ppl.addAll(playerList.keySet());
-        return getAllPlayerInGame();
+    public static Map<Player, String> getAllPlayerInGame() {
+        return playerList;
     }
 
     public static Map<Player, String> getPlayerInGameList() {
         return playerList;
-    }
-
-    public static Map<Player, Location> getBuilders() {
-        return builderPreviousLocation;
     }
 
     private static String bedwarsWorldID() {
@@ -163,13 +161,34 @@ public class GameManager {
 
         playerList.clear();
         playerList = null;
-
-        for (Map.Entry<Player, Location> prevLoc : builderPreviousLocation.entrySet()) {
-            prevLoc.getKey().teleport(prevLoc.getValue());
-        }
-
-        builderPreviousLocation.clear();
-        builderPreviousLocation = null;
     }
 
+    private static void copyWorld(File source, File target){
+        try {
+            ArrayList<String> ignore = new ArrayList<String>(Arrays.asList("uid.dat", "session.dat"));
+            if(!ignore.contains(source.getName())) {
+                if(source.isDirectory()) {
+                    if(!target.exists())
+                    target.mkdirs();
+                    String files[] = source.list();
+                    for (String file : files) {
+                        File srcFile = new File(source, file);
+                        File destFile = new File(target, file);
+                        copyWorld(srcFile, destFile);
+                    }
+                } else {
+                    InputStream in = new FileInputStream(source);
+                    OutputStream out = new FileOutputStream(target);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = in.read(buffer)) > 0)
+                        out.write(buffer, 0, length);
+                    in.close();
+                    out.close();
+                }
+            }
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
 }

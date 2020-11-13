@@ -5,14 +5,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class BedwarsGamePlayerLeave extends Event {
+public class BedwarsGamePlayerJoinEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
     private Player player;
     private SleepingRoom room;
 
-    public BedwarsGamePlayerLeave(Player player, SleepingRoom room) {
+    public BedwarsGamePlayerJoinEvent(Player player, SleepingRoom room) {
         this.player = player;
         this.room = room;
     }

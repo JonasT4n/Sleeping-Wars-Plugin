@@ -79,23 +79,17 @@ public class BedwarsMenus {
                 Arrays.asList("Permanently upgrade weapon", "Sharpness by 1 for team."),
                 ItemFlag.HIDE_ATTRIBUTES);
 
-        System.out.println("[DEBUG] Running 1");
-
         // Mine-A-Holic Entity
         PricetagsItems mineAHolicMaker = new PricetagsItems(Material.GOLDEN_PICKAXE, Material.DIAMOND, 4);
         ItemStack mineAHolic = mineAHolicMaker.createItemStack(1, ChatColor.AQUA + "Mine-A-Holic",
                 Arrays.asList("Permanently upgrade weapon", "Efficiency by 1 for team."),
                 ItemFlag.HIDE_ATTRIBUTES);
 
-        System.out.println("[DEBUG] Running 1");
-
         // Make It Rain! Entity
         PricetagsItems makeItRainMaker = new PricetagsItems(Material.GHAST_TEAR, Material.DIAMOND, 6);
         ItemStack makeItRain = makeItRainMaker.createItemStack(1,
                 ChatColor.AQUA + "Make it Rain!",
                 Arrays.asList("Permanently upgrade resource", "spawning faster."));
-
-        System.out.println("[DEBUG] Running 1");
 
         // Holy Light
         PricetagsItems holyLightMaker = new PricetagsItems(Material.EXPERIENCE_BOTTLE, Material.DIAMOND, 6);
@@ -111,8 +105,6 @@ public class BedwarsMenus {
         PricetagsItems eyeForEyeMaker = new PricetagsItems(Material.ENDER_EYE, Material.DIAMOND, 6);
         ItemStack eyeForEye = eyeForEyeMaker.createItemStack(1, ChatColor.AQUA + "Eye for an Eye",
                 Arrays.asList("Permanent upgrade armor", "Thorns by 1 for team."));
-
-        System.out.println("[DEBUG] Running 4");
 
         // Gift for the Poor
         PricetagsItems giftPoorMaker = new PricetagsItems(Material.DEAD_BUSH, Material.DIAMOND, 6);
@@ -242,6 +234,11 @@ public class BedwarsMenus {
     private static Inventory BlockShopMenu() {
         Inventory shopBlockMenuTemplate = Bukkit.getServer().createInventory(null, 54, "Block Shop");
         shopBlockMenuTemplate = firstRowMenu(shopBlockMenuTemplate);
+
+        PricetagsItems woolMaker = new PricetagsItems(Material.WHITE_WOOL, Material.IRON_INGOT, 4);
+        ItemStack woolio = woolMaker.createItemStack(1);
+
+        shopBlockMenuTemplate.setItem(19, woolio);
 
         return shopBlockMenuTemplate;
     }

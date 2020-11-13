@@ -5,6 +5,7 @@ import com.joenastan.sleepingwar.plugin.commands.SleepingWarsPermissionsCommand;
 import com.joenastan.sleepingwar.plugin.commands.TabCompletor.HostingCommands;
 import com.joenastan.sleepingwar.plugin.commands.TabCompletor.SworldCommands;
 import com.joenastan.sleepingwar.plugin.commands.WorldMakerCommand;
+import com.joenastan.sleepingwar.plugin.events.OnBuilderModeEvents;
 import com.joenastan.sleepingwar.plugin.events.OnGameEvent;
 import com.joenastan.sleepingwar.plugin.game.GameManager;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
@@ -34,6 +35,7 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
         // Load Game Events
         getServer().getPluginManager().registerEvents(new OnGameEvent(), this);
+        getServer().getPluginManager().registerEvents(new OnBuilderModeEvents(), this);
 
         // Load Commands
         getCommand("SWorld").setExecutor(new WorldMakerCommand());
@@ -51,18 +53,18 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
         // Free up memories
         plugin = null;
-        systemConfig.save();
+        systemConfig.Save();
         systemConfig = null;
         GameManager.cleanManager();
+        OnBuilderModeEvents.clearStatic();
     }
 
     // Other Stuff in plugin
     // Initialize plugin before activation
     private void initSW() {
         // Create Directory if not exists
-        if (!(getDataFolder().exists())) {
+        if (!(getDataFolder().exists()))
             getDataFolder().mkdir();
-        }
 
         // Create inner directories inside Data Folder if not exists
         File folderPath = new File("plugins/SleepingWars/WorldList");

@@ -1,6 +1,6 @@
 package com.joenastan.sleepingwar.plugin.commands;
 
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameStart;
+import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameStartEvent;
 import com.joenastan.sleepingwar.plugin.game.GameManager;
 import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
@@ -30,16 +30,7 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
                 // Host Comamnd
                 String subCommand = args[0];
                 if (subCommand.equalsIgnoreCase(hostCMD)) {
-                    if (args.length < 2) {
-                        sender.sendMessage(ChatColor.GOLD + "Include a world name (/bedwars host <worldname>), use one of the map that you have made.");
-                    } else {
-                        if (systemConf.getAllWorldName().contains(args[1])) {
-                            World useMap = Bukkit.getWorld(args[1]);
-                            GameManager.hostingBedwars(player, useMap);
-                        } else {
-                            sender.sendMessage(ChatColor.GOLD + "World not available.");
-                        }
-                    }
+                    hostBedwars(player, args);
                 }
                 // Join Command
                 else if (subCommand.equalsIgnoreCase(joinCMD)) {
@@ -53,7 +44,7 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
                 else if (subCommand.equalsIgnoreCase(startCMD)) {
                     SleepingRoom r = GameManager.getRoomByPlayer(player);
                     if (r.isPlayerHost(player)) {
-                        BedwarsGameStart event = new BedwarsGameStart(r);
+                        BedwarsGameStartEvent event = new BedwarsGameStartEvent(r);
                         Bukkit.getServer().getPluginManager().callEvent(event);
                     } else {
                         player.sendMessage(ChatColor.YELLOW + "You aren't the host. Unable to use this command.");
@@ -76,6 +67,19 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
         sender.sendMessage(ChatColor.GOLD + "Sleeping World Maker Commands for Hosting a Game. " + ChatColor.AQUA + "List of sub-commands:\n" +
                 ChatColor.GREEN + "host => Create room\njoin => join room, must include password\nstart => Start the game, only host able to do it\n" +
                 "leave => Leave room, cannot use while on game");
+    }
+
+    private void hostBedwars(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage(ChatColor.GOLD + "Include a world name (/bedwars host <worldname>), use one of the map that you have made.");
+        } else {
+            if (systemConf.getAllWorldName().contains(args[1])) {
+                World useMap = Bukkit.getWorld(args[1]);
+                GameManager.hostingBedwars(player, useMap);
+            } else {
+                player.sendMessage(ChatColor.GOLD + "World not available.");
+            }
+        }
     }
 
 }

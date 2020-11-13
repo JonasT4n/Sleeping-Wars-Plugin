@@ -1,2 +1,4 @@
-com\joenastan\sleepingwar\plugin\Game\PricetagsItems$1.class
-com\joenastan\sleepingwar\plugin\Game\ResourceSpawner$1.class
+com\joenastan\sleepingwar\plugin\events\OnGameEvent$1.class
+com\joenastan\sleepingwar\plugin\game\TeamGroupMaker$1.class
+com\joenastan\sleepingwar\plugin\game\ResourceSpawner$1.class
+com\joenastan\sleepingwar\plugin\game\PricetagsItems$1.class

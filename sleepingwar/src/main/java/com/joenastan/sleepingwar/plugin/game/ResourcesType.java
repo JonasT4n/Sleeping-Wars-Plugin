@@ -1,15 +1,23 @@
 package com.joenastan.sleepingwar.plugin.game;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public enum ResourcesType {
-    IRON,
-    GOLD,
-    DIAMOND,
-    EMERALD;
+    IRON("iron"),
+    GOLD("gold"),
+    DIAMOND("diamond"),
+    EMERALD("emerald");
 
-    public static ResourcesType getType(String name) {
+    private String resourceName;
+
+    private ResourcesType(String resourceName) {
+        this.resourceName = resourceName;
+    }
+
+    @Override
+    public String toString() {
+        return resourceName;
+    }
+
+    public static ResourcesType fromString(String name) {
         if (name.equalsIgnoreCase("iron"))
             return IRON;
         else if (name.equalsIgnoreCase("gold"))
@@ -20,14 +28,5 @@ public enum ResourcesType {
             return EMERALD;
         else
             return null;
-    }
-
-    public static List<String> getAcceptedStrings() {
-        List<String> names = new ArrayList<String>();
-        names.add("iron");
-        names.add("gold");
-        names.add("diamond");
-        names.add("emerald");
-        return names;
     }
 }

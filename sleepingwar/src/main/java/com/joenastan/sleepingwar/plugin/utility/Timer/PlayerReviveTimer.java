@@ -1,6 +1,6 @@
 package com.joenastan.sleepingwar.plugin.utility.Timer;
 
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGamePlayerRevive;
+import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGamePlayerReviveEvent;
 import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,7 +19,7 @@ public class PlayerReviveTimer extends StopwatchTimer {
     @Override
     protected void runEvent() {
         player.teleport(team.getSpawnLoc());
-        BedwarsGamePlayerRevive event = new BedwarsGamePlayerRevive(player, team);
+        BedwarsGamePlayerReviveEvent event = new BedwarsGamePlayerReviveEvent(player, team);
         Bukkit.getPluginManager().callEvent(event);
     }
 

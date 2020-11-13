@@ -6,10 +6,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class StopwatchTimer {
 
-    private final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
+    protected final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
     protected float counter;
     private float duration;
-    private int taskID = -1;
+    protected int taskID = -1;
 
     public StopwatchTimer(float duration) {
         this.duration = duration;
@@ -26,9 +26,9 @@ public class StopwatchTimer {
                     return;
                 }
 
-                counter -= 0.05f;
+                counter -= 0.5f;
             }
-        }, 0L, 1L);
+        }, 0L, 10L);
     }
 
     public void stop() {
@@ -45,6 +45,10 @@ public class StopwatchTimer {
 
     public void setDuration(float duration) {
         this.duration = duration;
+    }
+
+    public float getDuration() {
+        return duration;
     }
 
     protected void setTaskID(int taskID) {

@@ -16,7 +16,7 @@ public class VoidGenerator extends ChunkGenerator {
 
     @Override
     public Location getFixedSpawnLocation(World world, Random random) {
-        return new Location(world, 0, 10, 0);
+        return new Location(world, 0, 50, 0);
     }
 
 }

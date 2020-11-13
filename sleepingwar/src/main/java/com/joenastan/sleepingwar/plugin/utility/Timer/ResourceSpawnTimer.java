@@ -15,8 +15,7 @@ public class ResourceSpawnTimer extends StopwatchTimer {
 
     @Override
     public void start() {
-        setTaskID(
-                Bukkit.getScheduler().scheduleSyncRepeatingTask(SleepingWarsPlugin.getPlugin(), new Runnable() {
+        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(SleepingWarsPlugin.getPlugin(), new Runnable() {
                     @Override
                     public void run() {
                         if (counter <= 0f) {
@@ -24,15 +23,15 @@ public class ResourceSpawnTimer extends StopwatchTimer {
                             return;
                         }
 
-                        counter -= 0.05f;
+                        counter -= 0.5f;
                     }
-                }, 0L, 1L));
+                }, 0L, 10L);
     }
 
     @Override
     protected void runEvent() {
         spawner.spawn();
-        System.out.println("[DEBUG] Repeating spawn " + spawner.getCodename());
+        //System.out.println("[DEBUG] Repeating spawn " + spawner.getCodename());
         reset();
         start();
     }
