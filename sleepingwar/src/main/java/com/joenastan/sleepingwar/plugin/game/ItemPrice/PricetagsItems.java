@@ -1,6 +1,10 @@
 package com.joenastan.sleepingwar.plugin.game.ItemPrice;
 
 import net.md_5.bungee.api.ChatColor;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -21,6 +25,17 @@ public class PricetagsItems {
         defaultPrice = price;
         this.meta = meta;
         this.defaultAmountGetter = defaultAmountGetter;
+
+        // Add price tag to the lore
+        List<String> lore;
+        if (this.meta.hasLore())
+            lore = this.meta.getLore();
+        else
+            lore = new ArrayList<String>();
+
+        lore.add(" ");
+        lore.add(getPriceTag());
+        this.meta.setLore(lore);
     }
 
     public ItemStack createItem() {
@@ -90,6 +105,10 @@ public class PricetagsItems {
 
     public ItemMeta getMeta() {
         return meta;
+    }
+
+    public int getDefaultAmount() {
+        return defaultAmountGetter;
     }
 
 }

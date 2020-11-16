@@ -28,14 +28,16 @@
 |`/sworld create <worldname>`|Start creating your own bedwars map|
 |`/sworld delevent <display-name>`|Remove an event from timeline|
 |`/sworld delrspawn <codename>`|Delete the resource spawner that has been made before|
+|`/sworld delshop`|Delete the shop spawn location|
 |`/sworld edit <worldname>`|Teleport and edit the world map|
 |`/sworld help <page>`|Help sub-command of `/sworld`|
 |`/sworld leave`|If you are in custom world building, you can go back to where you were|
-|`/sworld openb`|Exclusive item kit for custom bedwars world building|
 |`/sworld setbed <team-name>`|Set team bed location, after use this get yourself a bed and put it somewhere|
 |`/sworld setqspawn`|Set a Queue State spawner, when player join the game then it will teleport exactly to that location|
 |`/sworld setrspawn <resource-type> <team-or-public> <codename>`|Set a natural resource spawner like iron spawner, diamond spawner, etc.|
+|`/sworld setshop`|Set a spawn for shop villager, the safest way to spawn a shop villager|
 |`/sworld setspawn`|Set world default spawn|
+|`/sworld spawnshop`|After you set the location to spawn the shop villager, then you can spawn it as you want|
 |`/sworld teamspawn`|Set an existing team spawn in game|
 |`/sworld testres`|Testing the whole world resource spawners|
 |`/sworld rsinfo`|See world current settled resource spawners|

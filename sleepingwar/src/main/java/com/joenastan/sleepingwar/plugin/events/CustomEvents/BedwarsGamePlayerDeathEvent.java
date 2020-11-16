@@ -13,11 +13,13 @@ public class BedwarsGamePlayerDeathEvent extends Event {
     private Player player;
     private SleepingRoom room;
     private TeamGroupMaker team;
+    private Player killer;
 
-    public BedwarsGamePlayerDeathEvent(Player player, SleepingRoom room, TeamGroupMaker team) {
+    public BedwarsGamePlayerDeathEvent(Player player, SleepingRoom room, TeamGroupMaker team, Player killer) {
         this.player = player;
         this.room = room;
         this.team = team;
+        this.killer = killer;
     }
 
     public static HandlerList getHandlerList() {
@@ -39,6 +41,10 @@ public class BedwarsGamePlayerDeathEvent extends Event {
 
     public TeamGroupMaker getTeam() {
         return team;
+    }
+
+    public Player getKiller() {
+        return killer;
     }
 
 }

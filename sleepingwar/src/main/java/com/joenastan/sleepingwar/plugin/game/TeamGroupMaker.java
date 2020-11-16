@@ -12,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.Material;
 
@@ -52,8 +53,8 @@ public class TeamGroupMaker {
 
         respawnTime = 5f;
         for (Player p : players) {
-            p.sendMessage(getColor(teamPrefix) + "You are in team [" + teamName + "]");
-            playersNTimer.put(p, new PlayerReviveTimer(respawnTime, p, this));
+            p.sendMessage("You are in team [" + getColor() + teamName + ChatColor.WHITE + "]");
+            playersNTimer.put(p, new PlayerReviveTimer(respawnTime, p, this, spawnLoc));
             p.teleport(teamSpawnPoint);
             p.setGameMode(GameMode.SURVIVAL);
             setStarterPack(p);
@@ -76,7 +77,15 @@ public class TeamGroupMaker {
     }
 
     public void reviving(Player player) {
-        playersNTimer.get(player).start();
+        if (!isBedBroken()) {
+            playersNTimer.get(player).start();
+        } else {
+            eliminetedCount++;
+        }
+
+        player.setHealth(20d);
+        player.teleport(inRoom.getWorldQueueSpawn());
+        player.setGameMode(GameMode.SPECTATOR);
     }
 
     public void setStarterPack(Player player) {
@@ -88,14 +97,26 @@ public class TeamGroupMaker {
             new ItemStack(Material.LEATHER_HELMET, 1)
         };
 
-        LeatherArmorMeta bootMeta = (LeatherArmorMeta)leatherArmorPack[0].getItemMeta();
-        bootMeta.setColor(getPureColor(teamPrefix));
-        LeatherArmorMeta pantsMeta = (LeatherArmorMeta)leatherArmorPack[1].getItemMeta();
-        pantsMeta.setColor(getPureColor(teamPrefix));
-        LeatherArmorMeta chestMeta = (LeatherArmorMeta)leatherArmorPack[2].getItemMeta();
-        chestMeta.setColor(getPureColor(teamPrefix));
-        LeatherArmorMeta helmetMeta = (LeatherArmorMeta)leatherArmorPack[3].getItemMeta();
-        helmetMeta.setColor(getPureColor(teamPrefix));
+        // Set Leather Armors Color
+        ItemMeta bootpMeta = leatherArmorPack[0].getItemMeta();
+        LeatherArmorMeta bootMeta = (LeatherArmorMeta)bootpMeta;
+        bootMeta.setColor(getPureColor());
+        leatherArmorPack[0].setItemMeta(bootpMeta);
+
+        ItemMeta pantspMeta = leatherArmorPack[1].getItemMeta();
+        LeatherArmorMeta pantsMeta = (LeatherArmorMeta)pantspMeta;
+        pantsMeta.setColor(getPureColor());
+        leatherArmorPack[1].setItemMeta(pantspMeta);
+
+        ItemMeta chestpMeta = leatherArmorPack[2].getItemMeta();
+        LeatherArmorMeta chestMeta = (LeatherArmorMeta)chestpMeta;
+        chestMeta.setColor(getPureColor());
+        leatherArmorPack[2].setItemMeta(chestpMeta);
+
+        ItemMeta helmetpMeta = leatherArmorPack[3].getItemMeta();
+        LeatherArmorMeta helmetMeta = (LeatherArmorMeta)helmetpMeta;
+        helmetMeta.setColor(getPureColor());
+        leatherArmorPack[3].setItemMeta(helmetpMeta);
 
         // Empty player inventory and set to starter pack
         PlayerInventory playerInv = player.getInventory();
@@ -105,7 +126,7 @@ public class TeamGroupMaker {
     }
 
     public void addElimination() {
-        eliminetedCount++;
+        
     }
 
     public boolean isAllMemberElimineted() {
@@ -118,7 +139,7 @@ public class TeamGroupMaker {
 
     public boolean isBedBroken() {
         Block block = teamBedLocation.getBlock();
-        return isMaterialBed(block.getType());
+        return !isMaterialBed(block.getType());
     }
 
     public void sendTeamMessage(String msg) {
@@ -128,15 +149,11 @@ public class TeamGroupMaker {
     }
 
     public String getName() {
-        return getColor(teamPrefix) + teamName;
+        return getColor() + teamName;
     }
 
     public SleepingRoom getRoom() {
         return inRoom;
-    }
-
-    public Location getSpawnLoc() {
-        return teamSpawnPoint;
     }
 
     public String getMapName() {
@@ -203,44 +220,44 @@ public class TeamGroupMaker {
         return upgradeMenu;
     }
 
-    private String getColor(String prefix) {
-        if (prefix.equalsIgnoreCase("blue")) {
+    public String getColor() {
+        if (teamPrefix.equalsIgnoreCase("blue")) {
             return ChatColor.BLUE + "";
-        } else if (prefix.equalsIgnoreCase("green")) {
+        } else if (teamPrefix.equalsIgnoreCase("green")) {
             return ChatColor.GREEN + "";
-        } else if (prefix.equalsIgnoreCase("yellow")) {
+        } else if (teamPrefix.equalsIgnoreCase("yellow")) {
             return ChatColor.YELLOW + "";
-        } else if (prefix.equalsIgnoreCase("aqua")) {
+        } else if (teamPrefix.equalsIgnoreCase("aqua")) {
             return ChatColor.AQUA + "";
-        } else if (prefix.equalsIgnoreCase("red")) {
+        } else if (teamPrefix.equalsIgnoreCase("red")) {
             return ChatColor.RED + "";
-        } else if (prefix.equalsIgnoreCase("purple")) {
+        } else if (teamPrefix.equalsIgnoreCase("purple")) {
             return ChatColor.LIGHT_PURPLE + "";
-        } else if (prefix.equalsIgnoreCase("gold")) {
+        } else if (teamPrefix.equalsIgnoreCase("gold")) {
             return ChatColor.GOLD + "";
-        } else if (prefix.equalsIgnoreCase("gray")) {
+        } else if (teamPrefix.equalsIgnoreCase("gray")) {
             return ChatColor.GRAY + "";
         } else { // Default is White
             return ChatColor.WHITE + "";
         }
     }
 
-    private Color getPureColor(String prefix) {
-        if (prefix.equalsIgnoreCase("blue")) {
-            return Color.BLUE;
-        } else if (prefix.equalsIgnoreCase("green")) {
-            return Color.GREEN;
-        } else if (prefix.equalsIgnoreCase("yellow")) {
+    private Color getPureColor() {
+        if (teamPrefix.equalsIgnoreCase("blue")) {
+            return Color.fromBGR(255, 0, 0);
+        } else if (teamPrefix.equalsIgnoreCase("green")) {
+            return Color.fromRGB(0, 255, 0);
+        } else if (teamPrefix.equalsIgnoreCase("yellow")) {
             return Color.YELLOW;
-        } else if (prefix.equalsIgnoreCase("aqua")) {
+        } else if (teamPrefix.equalsIgnoreCase("aqua")) {
             return Color.AQUA;
-        } else if (prefix.equalsIgnoreCase("red")) {
-            return Color.RED;
-        } else if (prefix.equalsIgnoreCase("light-purple")) {
+        } else if (teamPrefix.equalsIgnoreCase("red")) {
+            return Color.fromRGB(255, 0, 0);
+        } else if (teamPrefix.equalsIgnoreCase("light-purple")) {
             return Color.PURPLE;
-        } else if (prefix.equalsIgnoreCase("gold")) {
+        } else if (teamPrefix.equalsIgnoreCase("gold")) {
             return Color.fromRGB(255,223,0);
-        } else if (prefix.equalsIgnoreCase("gray")) {
+        } else if (teamPrefix.equalsIgnoreCase("gray")) {
             return Color.GRAY;
         } else { // Default is White
             return Color.WHITE;

@@ -35,8 +35,8 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
 
     private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
     private String addEventCMD = "addevent"; // Add event timeline
-    private String removeEventCMD = "delevent"; // delete event timeline
     private String createCMD = "create"; // command to create the world
+    private String removeEventCMD = "delevent"; // delete event timeline
     private String deleteResSpawnCMD = "delrspawn"; // delete resource spawner by name
     private String deleteShopLocCMD = "delshop"; // delete shop spawner
     private String editWorldCMD = "edit"; // command to go teleport into bedwars and set to builder mode
@@ -255,7 +255,8 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
         if (systemConfig.getAllWorldName().contains(worldName)) {
             if (args.length < 2) {
                 player.sendMessage(ChatColor.GREEN + "You need to insert team name. " + ChatColor.YELLOW + "/sworld setbed <teamname>\n");
-                String description = ChatColor.GREEN + "All beds that has been set:";
+                player.sendMessage(ChatColor.GREEN + "All beds that has been set:");
+                String description = "";
                 for (Map.Entry<String, Location> bedLocEntry : systemConfig.getBedLocationMap(worldName).entrySet()) {
                     Location bedLoc = bedLocEntry.getValue();
                     if (isMaterialBed(bedLoc.getBlock().getType()))

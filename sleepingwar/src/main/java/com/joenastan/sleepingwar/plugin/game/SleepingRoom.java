@@ -1,6 +1,7 @@
 package com.joenastan.sleepingwar.plugin.game;
 
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameEndedEvent;
+import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
 import com.joenastan.sleepingwar.plugin.events.Tasks.DeleteWorldDelayed;
 import com.joenastan.sleepingwar.plugin.game.InventoryMenus.BedwarsShopMenus;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
@@ -80,7 +81,7 @@ public class SleepingRoom {
         bedwarsSpecialEntities.put(host, new PlayerBedwarsEntity(host, host.getLocation(), host.getGameMode()));
         Location locSpawn = new Location(bedwarsWorld, queueSpawn.getX(), queueSpawn.getY(), queueSpawn.getZ());
         host.teleport(locSpawn);
-        host.setGameMode(GameMode.SPECTATOR);
+        host.setGameMode(GameMode.SURVIVAL);
         
         hostedBy = host;
         gameWorld = bedwarsWorld;
@@ -95,13 +96,16 @@ public class SleepingRoom {
         timer = new StopwatchTimer(maxGameDuration);
         updater = new RoomUpdater();
 
-        //System.out.println("[DEBUG] " + systemConfig.getTeamSpawner(worldOriginalName) == null);
         teamSpawnerList.putAll(systemConfig.getTeamSpawner(worldOriginalName));
         for (ResourceSpawner rsp : systemConfig.getResourceSpawnersPack(worldOriginalName, "PUBLIC").values()) {
             Location spawnResLoc = new Location(bedwarsWorld, rsp.getSpawnLocation().getX(), rsp.getSpawnLocation().getY(), rsp.getSpawnLocation().getZ());
             publicResourceSpawners.add(new ResourceSpawner(rsp.getCodename(), spawnResLoc, rsp.getTypeResourceSpawner()));
         }
         hostedBy.sendMessage(ChatColor.GOLD + "Room Created, World name to enter the game: " + ChatColor.GREEN + bedwarsWorld.getName());
+
+        for (BedwarsGameTimelineEvent eventEntry : systemConfig.getTimelineEvents(worldOriginalName)) {
+            inGameEvents.add(new TimelineTimer(eventEntry.getTriggerSeconds(), this, eventEntry));
+        }
     }
 
     public void playerEnter(Player player) {
@@ -110,17 +114,15 @@ public class SleepingRoom {
         for (Player pplInRoom : bedwarsSpecialEntities.keySet()) {
             pplInRoom.sendMessage(ChatColor.GOLD + player.getName() + " joined the party, there are " + bedwarsSpecialEntities.size() + " in room.");
         }
-        player.setGameMode(GameMode.SPECTATOR);
+        player.setGameMode(GameMode.SURVIVAL);
     }
 
     public void playerLeave(Player player) {
         // player leave
-        for (Map.Entry<Player, PlayerBedwarsEntity> tf: bedwarsSpecialEntities.entrySet()) {
-            if (tf.getKey().equals(player)) {
-                bedwarsSpecialEntities.remove(tf.getKey()).returnEntity();
-                player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-                break;
-            }
+        if (bedwarsSpecialEntities.get(player) != null) {
+            bedwarsSpecialEntities.remove(player).returnEntity();
+            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            checkRemainingTeam();
         }
 
         // If nobody inside the room then destroy it
@@ -128,11 +130,8 @@ public class SleepingRoom {
             destroyRoom();
         } else {
             // Announcement
-            for (Player p : bedwarsSpecialEntities.keySet()) {
-                p.sendMessage(ChatColor.YELLOW + player.getName() + " left the party, there are " + bedwarsSpecialEntities.size() + " in room.");
-            }
-
-            if (player.equals(hostedBy)) {
+            roomBroadcast(ChatColor.YELLOW + player.getName() + " left the party, there are " + bedwarsSpecialEntities.size() + " in room.");
+            if (player.equals(hostedBy) && !isInGameOn) {
                 List<Player> plys = new ArrayList<Player>();
                 plys.addAll(bedwarsSpecialEntities.keySet());
                 hostedBy = plys.get(0);
@@ -147,7 +146,7 @@ public class SleepingRoom {
     public void gameStart() {
         // Announcement
         for (Player p : bedwarsSpecialEntities.keySet()) {
-            p.sendMessage(ChatColor.LIGHT_PURPLE + "Starting...");
+            p.sendMessage(ChatColor.GREEN + "Starting...");
         }
         // Initialize game
         // Creating teams
@@ -160,9 +159,10 @@ public class SleepingRoom {
         isResourceSpawning(true);
         timer.start();
         checkRemainingTeam();
-
+        inGameEvents.get(timelineIndex).start();
         isInGameOn = true;
-        objectiveLocalSB.setDisplayName(ChatColor.YELLOW + "Next Event");
+
+        // Scoreboard
         localScoreBoard.resetScores("Player Count");
         objectiveTeamSB = localScoreBoard.registerNewObjective("remainder", "laststand", ChatColor.WHITE + "Team List");
     }
@@ -177,11 +177,13 @@ public class SleepingRoom {
             ppl.getValue().returnEntity();
             p.sendMessage(ChatColor.YELLOW + "Game Ended, teleporting back to where you were.");
             p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            p.getInventory().clear();
         }
 
         // Stop all schedules
         isResourceSpawning(false);
-        inGameEvents.get(timelineIndex).stop();
+        if (timelineIndex < inGameEvents.size())
+            inGameEvents.get(timelineIndex).stop();
 
         File worldDir = gameWorld.getWorldFolder();
         SleepingWarsPlugin.getGameManager().allLeave(bedwarsSpecialEntities.keySet());
@@ -202,16 +204,18 @@ public class SleepingRoom {
             if (isInGameOn) {
                 // Next Event
                 if (timelineIndex < inGameEvents.size()) {
-                    // Time
+                    // Time display
                     float rawSeconds = inGameEvents.get(timelineIndex).getCounter();
                     int minutes = (int)rawSeconds / 60;
                     int seconds = (int)rawSeconds % 60;
                     String timeString = seconds < 10 ? String.format("%d:0%d", minutes, seconds) : String.format("%d:%d", minutes, seconds);
 
+                    objectiveLocalSB.setDisplayName(String.format("%sNext Event [%s]", ChatColor.ITALIC + "", timeString));
                     String nextEventName = inGameEvents.get(timelineIndex).getBedwarsEventName();
-                    Score scevent = objectiveLocalSB.getScore(String.format("%s%s %s", timeString, ChatColor.GRAY + "", nextEventName));
-                    scevent.setScore(inGameEvents.size() - timelineIndex);
+                    Score scevent = objectiveLocalSB.getScore(String.format("%s%s", ChatColor.GRAY + "", nextEventName));
+                    scevent.setScore(timelineIndex + 1);
                 } else {
+                    objectiveLocalSB.setDisplayName(String.format("%sNext Event [%d]", ChatColor.ITALIC + "", 0));
                     Score scevent = objectiveLocalSB.getScore(ChatColor.GRAY + "" + ChatColor.ITALIC + "[No Events]");
                     scevent.setScore(0);
                 }
@@ -323,6 +327,10 @@ public class SleepingRoom {
 
     public void putBlock(Block block) {
         putedBlock.add(block);
+    }
+
+    public Scoreboard getScoreboard() {
+        return localScoreBoard;
     }
 
     public List<TeamGroupMaker> getAllTeams() {

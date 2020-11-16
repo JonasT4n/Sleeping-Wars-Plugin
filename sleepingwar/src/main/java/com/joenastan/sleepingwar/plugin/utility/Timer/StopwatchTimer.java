@@ -22,7 +22,7 @@ public class StopwatchTimer {
             public void run() {
                 if (counter <= 0f) {
                     runEvent();
-                    stop();
+                    reset();
                     return;
                 }
 

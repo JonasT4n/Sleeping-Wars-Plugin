@@ -8,7 +8,6 @@ import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -56,7 +55,7 @@ public class OnGameEvent implements Listener {
                 SleepingRoom room = gameManager.getRoomByName(inWorldName);
                 TeamGroupMaker team = room.getTeam(player);
                 if (clickedItem != null && team != null) {
-                    if (room.getShopMenus().isBedwarsShopMenu(event.getView())) {
+                    if (room.getShopMenus().isBedwarsShopMenu(event.getView()) && slot < 9) {
                         ItemMeta clickedItemMeta = clickedItem.getItemMeta();
                         room.getShopMenus().openMenu(player, ChatColor.stripColor(clickedItemMeta.getDisplayName()));
                         event.setCancelled(true);
@@ -87,14 +86,25 @@ public class OnGameEvent implements Listener {
                 } else {
                     if (isMaterialBed(block.getType())) {
                         TeamGroupMaker bedTeamDestroyed = null;
+                        Location blockLoc = block.getLocation();
                         for (TeamGroupMaker t : room.getAllTeams()) {
-                            if (t.getTeamBedLocation().equals(block.getLocation()))
+                            Location bedTeamLoc = t.getTeamBedLocation();
+                            if (blockLoc.getBlockX() == bedTeamLoc.getBlockX() && blockLoc.getBlockY() == bedTeamLoc.getBlockY() && 
+                                    blockLoc.getBlockZ() == bedTeamLoc.getBlockZ()) {
                                 bedTeamDestroyed = t;
+                                break;
+                            }
                         }
                         if (bedTeamDestroyed != null) {
                             TeamGroupMaker byTeam = room.getTeam(player);
-                            BedwarsGameBedDestroyedEvent ev = new BedwarsGameBedDestroyedEvent(player, bedTeamDestroyed, byTeam);
-                            Bukkit.getPluginManager().callEvent(ev);
+                            if (byTeam.equals(bedTeamDestroyed)) {
+                                player.sendMessage(ChatColor.RED + "You can't destroy your own bed.");
+                                event.setCancelled(true);
+                            } else {
+                                block.getDrops().clear();
+                                BedwarsGameBedDestroyedEvent ev = new BedwarsGameBedDestroyedEvent(player, bedTeamDestroyed, byTeam);
+                                Bukkit.getPluginManager().callEvent(ev);
+                            }
                         }
                     } else if (!room.destroyBlock(block)) {
                         event.setCancelled(true);
@@ -185,16 +195,13 @@ public class OnGameEvent implements Listener {
         String inWorldName = player.getWorld().getName();
         Player killer = event.getEntity().getKiller();
         SleepingRoom room = gameManager.getRoomByName(inWorldName);
-        if (gameManager.getAllRoom().keySet().contains(inWorldName) && room != null) {
+        if (gameManager.getAllRoom().containsKey(inWorldName) && room != null) {
+            TeamGroupMaker teamVictim = room.getTeam(player);
             if (room.isGameProcessing()) {
+                teamVictim.reviving(player);
+                BedwarsGamePlayerDeathEvent e = new BedwarsGamePlayerDeathEvent(player, room, room.getTeam(player), killer);
+                Bukkit.getServer().getPluginManager().callEvent(e);
                 event.setCancelled(true);
-                if (killer == null) {
-                    BedwarsGamePlayerDeathEvent e = new BedwarsGamePlayerDeathEvent(player, room, room.getTeam(player));
-                    Bukkit.getServer().getPluginManager().callEvent(e);
-                } else {
-                    BedwarsGamePlayerKillEvent e = new BedwarsGamePlayerKillEvent(room, player, killer);
-                    Bukkit.getServer().getPluginManager().callEvent(e);
-                }
             }
         }
     }
@@ -222,7 +229,7 @@ public class OnGameEvent implements Listener {
         String inWorldName = player.getWorld().getName();
         if (gameManager.getAllPlayerInGame().containsKey(player) || systemConfig.getAllWorldName().contains(inWorldName)) {
             SleepingRoom room = gameManager.getRoomByName(inWorldName);
-            TeamGroupMaker team = room.getTeam(player);
+            TeamGroupMaker team = room == null ? null : room.getTeam(player);
             if (entType == EntityType.VILLAGER && room != null && team != null) {
                 String customName = event.getRightClicked().getCustomName();
                 // Upgrade Villager
@@ -267,18 +274,32 @@ public class OnGameEvent implements Listener {
         Entity entDamager = event.getDamager();
         String inWorldName = entGotHit.getWorld().getName();
         SleepingRoom room = gameManager.getRoomByName(inWorldName);
-        if (room != null && entGotHit instanceof LivingEntity && cause == DamageCause.ENTITY_EXPLOSION) {
+        if (room != null && entGotHit instanceof LivingEntity) {
             LivingEntity entLiveGotHit = (LivingEntity)entGotHit;
-            if (entLiveGotHit.getType() == EntityType.VILLAGER) {
-                event.setCancelled(true);
+            // Cause by any explosion
+            if (cause == DamageCause.ENTITY_EXPLOSION) {
+                if (entLiveGotHit.getType() == EntityType.VILLAGER) {
+                    event.setCancelled(true);
+                }
             }
-
-            if (entGotHit instanceof Player && entDamager instanceof Player) {
-                Player playerGotHit = (Player)entGotHit;
-                Player playerDamager = (Player)entDamager;
-                TeamGroupMaker teamVictim = room.getTeam(playerGotHit);
-                TeamGroupMaker teamKiller = room.getTeam(playerDamager);
-                if (!room.isGameProcessing() || teamVictim.equals(teamKiller)) {
+            // Cause by any attack by something or somebody
+            else if (cause == DamageCause.ENTITY_ATTACK) {
+                if (entLiveGotHit.getType() == EntityType.VILLAGER) {
+                    event.setCancelled(true);
+                }
+                if (entGotHit instanceof Player && entDamager instanceof Player) {
+                    Player playerGotHit = (Player)entGotHit;
+                    Player playerDamager = (Player)entDamager;
+                    TeamGroupMaker teamVictim = room.getTeam(playerGotHit);
+                    TeamGroupMaker teamKiller = room.getTeam(playerDamager);
+                    if (!room.isGameProcessing() || teamVictim.equals(teamKiller)) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+            // Cause by any explosion
+            else if (cause == DamageCause.ENTITY_SWEEP_ATTACK) {
+                if (entLiveGotHit.getType() == EntityType.VILLAGER) {
                     event.setCancelled(true);
                 }
             }
@@ -291,35 +312,21 @@ public class OnGameEvent implements Listener {
         Player player = event.getPlayer();
         TeamGroupMaker team = event.getTeam();
         SleepingRoom room = event.getRoom();
-        player.setHealth(20d);
-        player.teleport(room.getWorldQueueSpawn());
-        player.setGameMode(GameMode.SPECTATOR);
+        Player killer = event.getKiller();
 
-        // Check if team has it's bed
-        if (!team.isBedBroken()) {
-            room.roomBroadcast(ChatColor.MAGIC + player.getName() + " died");
-            team.reviving(player);
+        if (killer == null) {
+            room.roomBroadcast(String.format("%s%s %sdied", team.getColor(), player.getName(), ChatColor.WHITE + ""));
+        } else {
+            room.roomBroadcast(String.format("%s%s %shas been killed by %s%s", team.getColor(), player.getName(), ChatColor.WHITE + "", 
+                    room.getTeam(killer) == null ? ChatColor.WHITE + "" : room.getTeam(killer).getColor(), killer.getName()));
         }
-        // else then check player and team is still alive, and check remaining and last team
-        else {
-            team.addElimination();
-            room.roomBroadcast(ChatColor.LIGHT_PURPLE + player.getName() + " has been eliminated.");
-            if (team.isAllMemberElimineted()) {
-                room.roomBroadcast(ChatColor.DARK_PURPLE + "Team " + team.getName() + ChatColor.DARK_PURPLE + " has been elimineted.");
-                room.checkRemainingTeam();
-            }
-        }
-    }
 
-    @EventHandler
-    public void onGamePlayerKilled(BedwarsGamePlayerKillEvent event) {
-        // TODO: Player killed by player event
-    }
+        // if Bed is broken
+        if (team.isBedBroken())
+            room.roomBroadcast(String.format("%s%s %shas been eliminated.", team.getColor(), player.getName(), ChatColor.WHITE + ""));
 
-    @EventHandler
-    public void onPlayerRevive(BedwarsGamePlayerReviveEvent event) {
-        Player player = event.getPlayer();
-        player.removePotionEffect(PotionEffectType.INVISIBILITY);
+        // Check remaining teams
+        room.checkRemainingTeam();
     }
 
     @EventHandler
@@ -363,7 +370,10 @@ public class OnGameEvent implements Listener {
 
     @EventHandler
     public void onBedDestroyed(BedwarsGameBedDestroyedEvent event) {
-
+        TeamGroupMaker victim = event.getVictim();
+        SleepingRoom room = victim.getRoom();
+        room.roomBroadcast(String.format("Team %s%s's bed got destroyed by %s%s", victim.getName(), 
+                ChatColor.WHITE + "", event.getTeamDestroyer().getColor(), event.byWho().getName()));
     }
 
     private boolean isMaterialBed(Material material) {

@@ -1,20 +1,22 @@
 package com.joenastan.sleepingwar.plugin.utility.Timer;
 
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGamePlayerReviveEvent;
 import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class PlayerReviveTimer extends StopwatchTimer {
 
+    private Location teamSpawner;
     private Player player;
     private TeamGroupMaker team;
 
-    public PlayerReviveTimer(float duration, Player player, TeamGroupMaker team) {
+    public PlayerReviveTimer(float duration, Player player, TeamGroupMaker team, Location teamSpawner) {
         super(duration);
         this.player = player;
         this.team = team;
+        this.teamSpawner = teamSpawner;
     }
 
     @Override
@@ -24,23 +26,21 @@ public class PlayerReviveTimer extends StopwatchTimer {
             public void run() {
                 if (counter <= 0f) {
                     runEvent();
-                    stop();
+                    reset();
                     return;
                 }
 
-                counter -= 0.5f;
-                player.sendTitle("Reviving...", String.format("In %.1f...", counter), 0, 10, 0);
+                counter -= 0.05f;
+                player.sendTitle("Reviving...", String.format("In %.1f...", counter), 0, 12, 0);
             }
-        }, 0L, 10L);
+        }, 0L, 1L);
     }
 
     @Override
     protected void runEvent() {
-        player.teleport(team.getSpawnLoc());
+        player.teleport(teamSpawner);
         player.setGameMode(GameMode.SURVIVAL);
         team.setStarterPack(player);
-        BedwarsGamePlayerReviveEvent event = new BedwarsGamePlayerReviveEvent(player, team);
-        Bukkit.getPluginManager().callEvent(event);
     }
 
 }

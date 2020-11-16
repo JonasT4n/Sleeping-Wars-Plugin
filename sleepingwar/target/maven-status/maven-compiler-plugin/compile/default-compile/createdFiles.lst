@@ -25,7 +25,6 @@ com\joenastan\sleepingwar\plugin\game\TeamGroupMaker$1.class
 com\joenastan\sleepingwar\plugin\commands\WorldMakerCommand.class
 com\joenastan\sleepingwar\plugin\game\InventoryMenus\BedwarsMenus.class
 com\joenastan\sleepingwar\plugin\utility\PlayerBedwarsEntity.class
-com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerKillEvent.class
 com\joenastan\sleepingwar\plugin\utility\Timer\PlayerReviveTimer.class
 com\joenastan\sleepingwar\plugin\utility\Timer\ResourceSpawnTimer.class
 com\joenastan\sleepingwar\plugin\utility\GameSystemConfig.class
@@ -34,7 +33,6 @@ com\joenastan\sleepingwar\plugin\events\OnBuilderModeEvents.class
 com\joenastan\sleepingwar\plugin\game\InventoryMenus\BedwarsUpgradeMenus.class
 com\joenastan\sleepingwar\plugin\utility\Timer\ResourceSpawnTimer$1.class
 com\joenastan\sleepingwar\plugin\events\Tasks\DeleteWorldDelayed.class
-com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerReviveEvent.class
 com\joenastan\sleepingwar\plugin\game\InventoryMenus\BedwarsShopMenus.class
 com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameOnUpgradeEvent.class
 com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerJoinEvent.class
