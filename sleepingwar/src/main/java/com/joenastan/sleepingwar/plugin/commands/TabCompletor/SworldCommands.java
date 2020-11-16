@@ -1,5 +1,6 @@
 package com.joenastan.sleepingwar.plugin.commands.TabCompletor;
 
+import com.joenastan.sleepingwar.plugin.game.BedwarsShopType;
 import com.joenastan.sleepingwar.plugin.game.ResourcesType;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
@@ -9,7 +10,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,15 +20,18 @@ public class SworldCommands implements TabCompleter {
     private String removeEventCMD = "delevent"; // delete event timeline
     private String createCMD = "create"; // command to create the world
     private String deleteResSpawnCMD = "delrspawn"; // delete resource spawner by name
+    private String deleteShopLocCMD = "delshop"; // delete shop spawner
     private String editWorldCMD = "edit"; // command to go teleport into bedwars and set to builder mode
     private String sworldHelpCMD = "help"; // Help menu for world builder
     private String leaveWorldCMD = "leave"; // leave world back to where you were
-    private String openBuilderCMD = "openb"; // exclusive kit for bedwars
+    //private String openBuilderCMD = "openb"; // exclusive kit for bedwars
     private String resSpawnerInfo = "rsinfo"; // Look up resource spawner info
     private String setBedLocCMD = "setbed"; // set bed location
     private String setBlockCMD = "setblock"; // set block on, for default bedrock will be spawned on location
+    private String setShopLocationCMD = "setshop"; // set villager shop location
     private String queueSpawnCMD = "setqspawn"; // set queue spawn for hosting a bedwars
     private String setSpawnCMD = "setspawn"; // set world default spawn, this can be use in all kinds of world
+    private String spawnShopCMD = "spawnshop"; // Spawn the shops safely in world
     private String setResourceSpawnerCMD = "setrspawn"; // Set Resource Spawner with it's type
     private String setTeamSpawnCMD = "teamspawn"; // Set Team Spawn by name on that location
     private String teamInfoCMD = "teaminfo"; // Look up the team in world info
@@ -47,16 +50,18 @@ public class SworldCommands implements TabCompleter {
                 sworldSubs.add(createCMD);
                 sworldSubs.add(editWorldCMD);
                 sworldSubs.add(deleteResSpawnCMD);
+                sworldSubs.add(deleteShopLocCMD);
                 sworldSubs.add(sworldHelpCMD);
                 sworldSubs.add(leaveWorldCMD);
-                sworldSubs.add(openBuilderCMD);
+                //sworldSubs.add(openBuilderCMD);
                 sworldSubs.add(resSpawnerInfo);
                 sworldSubs.add(setBedLocCMD);
+                sworldSubs.add(setShopLocationCMD);
                 sworldSubs.add(queueSpawnCMD);
                 sworldSubs.add(setSpawnCMD);
                 sworldSubs.add(setBlockCMD);
+                sworldSubs.add(spawnShopCMD);
                 sworldSubs.add(setResourceSpawnerCMD);
-                sworldSubs.add(openBuilderCMD);
                 sworldSubs.add(setTeamSpawnCMD);
                 sworldSubs.add(teamInfoCMD);
                 sworldSubs.add(testResourceSpawnCMD);
@@ -73,6 +78,12 @@ public class SworldCommands implements TabCompleter {
                     List<String> setBlockHint = new ArrayList<String>();
                     setBlockHint.add("X");
                     return setBlockHint;
+                }
+                // Hint for world name
+                else if (args[0].equalsIgnoreCase(createCMD)) {
+                    List<String> createWorldHint = new ArrayList<String>();
+                    createWorldHint.add("<world|map-name>");
+                    return createWorldHint;
                 }
                 // Gives team names hint for setTeamSpawnCMD, teamInfoCMD, and setBedLocCMD
                 else if (args[0].equalsIgnoreCase(setTeamSpawnCMD) || args[0].equalsIgnoreCase(teamInfoCMD) || args[0].equalsIgnoreCase(setBedLocCMD)) {
@@ -100,15 +111,6 @@ public class SworldCommands implements TabCompleter {
                         return names;
                     }
                 }
-                // Gives resource type hint
-                else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD)) {
-                    List<String> resourceType = new ArrayList<String>();
-                    resourceType.add(ResourcesType.IRON.toString());
-                    resourceType.add(ResourcesType.GOLD.toString());
-                    resourceType.add(ResourcesType.DIAMOND.toString());
-                    resourceType.add(ResourcesType.EMERALD.toString());
-                    return resourceType;
-                }
                 // Gives add event hint
                 else if (args[0].equalsIgnoreCase(addEventCMD)) {
                     List<String> eventType = new ArrayList<String>();
@@ -127,6 +129,13 @@ public class SworldCommands implements TabCompleter {
                         return names;
                     }
                 }
+                // Gives hint of resource spawner codename
+                else if (args[0].equalsIgnoreCase(deleteResSpawnCMD) || args[0].equalsIgnoreCase(setShopLocationCMD)) {
+                    List<String> shopTypeNames = new ArrayList<String>();
+                    shopTypeNames.add(BedwarsShopType.ITEMS_SHOP.toString());
+                    shopTypeNames.add(BedwarsShopType.PERMA_SHOP.toString());
+                    return shopTypeNames;
+                }
             } else if (args.length == 3) {
                 // Gives coordinate Y hint
                 if (args[0].equalsIgnoreCase(setBlockCMD)) {
@@ -139,6 +148,15 @@ public class SworldCommands implements TabCompleter {
                     List<String> eventType = new ArrayList<String>();
                     eventType.add("<duration-in-second>");
                     return eventType;
+                }
+                // Gives resource type hint
+                else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD)) {
+                    List<String> resourceType = new ArrayList<String>();
+                    resourceType.add(ResourcesType.IRON.toString());
+                    resourceType.add(ResourcesType.GOLD.toString());
+                    resourceType.add(ResourcesType.DIAMOND.toString());
+                    resourceType.add(ResourcesType.EMERALD.toString());
+                    return resourceType;
                 }
             } else if (args.length == 4) {
                 // Gives coordinate Z hint

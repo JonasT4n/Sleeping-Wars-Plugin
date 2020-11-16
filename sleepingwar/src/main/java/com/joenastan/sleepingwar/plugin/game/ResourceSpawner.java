@@ -28,7 +28,7 @@ public class ResourceSpawner {
         switch (typeSpawnResource) {
             case GOLD:
                 mat = Material.GOLD_INGOT;
-                looper = new ResourceSpawnTimer(10f, this);
+                looper = new ResourceSpawnTimer(4f, this);
                 break;
             case DIAMOND:
                 mat = Material.DIAMOND;
@@ -40,7 +40,7 @@ public class ResourceSpawner {
                 break;
             default: // Default is IRON
                 mat = Material.IRON_INGOT;
-                looper = new ResourceSpawnTimer(2.5f, this);
+                looper = new ResourceSpawnTimer(1f, this);
                 break;
         }
     }

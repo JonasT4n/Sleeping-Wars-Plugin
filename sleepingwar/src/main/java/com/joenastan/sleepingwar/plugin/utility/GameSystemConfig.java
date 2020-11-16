@@ -2,6 +2,7 @@ package com.joenastan.sleepingwar.plugin.utility;
 
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.TimelineEventType;
+import com.joenastan.sleepingwar.plugin.game.BedwarsShopType;
 import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
 import com.joenastan.sleepingwar.plugin.game.ResourcesType;
 import org.bukkit.Bukkit;
@@ -25,6 +26,7 @@ public class GameSystemConfig extends AbstractFile {
     private Map<String, Map<String, Map<String, ResourceSpawner>>> resourceSpawners = new HashMap<String, Map<String, Map<String, ResourceSpawner>>>();
     private Map<String, List<BedwarsGameTimelineEvent>> timelineEvent = new HashMap<String, List<BedwarsGameTimelineEvent>>();
     private Map<String, Map<String, Location>> teamBedLocations = new HashMap<String, Map<String, Location>>();
+    private Map<String, Map<BedwarsShopType, List<Location>>> shopsLocation = new HashMap<String, Map<BedwarsShopType, List<Location>>>();
 
     public GameSystemConfig(Plugin main, String filename) {
         super(main, filename);
@@ -57,21 +59,39 @@ public class GameSystemConfig extends AbstractFile {
         return null;
     }
 
+    public Map<BedwarsShopType, List<Location>> getShopLocations(String world) {
+        if (shopsLocation.containsKey(world)) 
+            return shopsLocation.get(world);
+        return new HashMap<BedwarsShopType, List<Location>>();
+    }
+
     public boolean deleteResourceSpawner(String world, String codename) {
         if (resourceSpawners.containsKey(world)) {
             for (Map.Entry<String, Map<String, ResourceSpawner>> collectionSpawner : resourceSpawners.get(world).entrySet()) {
                 if (resourceSpawners.get(world).get(collectionSpawner.getKey()).containsKey(codename)) {
                     ResourceSpawner delSpawner = collectionSpawner.getValue().remove(codename);
-                    if (delSpawner.isRunning()) {
+                    if (delSpawner.isRunning())
                         delSpawner.isRunning(false);
-                    }
 
-                    if (collectionSpawner.getKey().equals("PUBLIC")) {
+                    if (collectionSpawner.getKey().equals("PUBLIC"))
                         filecon.set("worlds." + world + ".public-resources-spawner." + codename, null);
-                    } else {
+                    else
                         filecon.set("worlds." + world + ".teams." + collectionSpawner.getKey() + ".resources", null);
-                    }
 
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean deleteShopLocation(String world, BedwarsShopType type, int index) {
+        if (shopsLocation.containsKey(world)) {
+            if (shopsLocation.get(world).containsKey(type)) {
+                if (index < shopsLocation.get(world).get(type).size()) {
+                    shopsLocation.get(world).get(type).remove(index);
+                    filecon.set("worlds." + world + ".shop-location", new HashMap<>());
+                    saveShopLocation();
                     return true;
                 }
             }
@@ -150,16 +170,18 @@ public class GameSystemConfig extends AbstractFile {
         } else {
             // Loop by World Name
             for (String key : filecon.getConfigurationSection("worlds").getKeys(false)) {
+                // load world creator
                 WorldCreator creator = new WorldCreator(key).environment(Environment.values()[filecon.getInt("worlds." + key + ".env")])
                         .hardcore(filecon.getBoolean("worlds." + key + ".hardcore"))
                         .generateStructures(filecon.getBoolean("worlds." + key + ".structure"));
                 World w = Bukkit.createWorld(creator);
                 worlds.put(key, creator);
 
+                // load world queue location
                 Location thisWorldQueueLoc = new Location(w,
-                        filecon.getInt("worlds." + key + ".queueloc.x"),
-                        filecon.getInt("worlds." + key + ".queueloc.y"),
-                        filecon.getInt("worlds." + key + ".queueloc.z"));
+                        filecon.getDouble("worlds." + key + ".queueloc.x"),
+                        filecon.getDouble("worlds." + key + ".queueloc.y"),
+                        filecon.getDouble("worlds." + key + ".queueloc.z"));
                 queueLocations.put(key, thisWorldQueueLoc);
 
                 // Loop by Team Name
@@ -198,9 +220,9 @@ public class GameSystemConfig extends AbstractFile {
                             filecon.createSection("worlds." + key + ".teams." + tString + ".spawner");
                             thisTeamSpawn = w.getSpawnLocation();
                         } else {
-                            thisTeamSpawn = new Location(w, filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.x"),
-                                    filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.y"),
-                                    filecon.getInt("worlds." + key + ".teams." + tString + ".spawner.z"));
+                            thisTeamSpawn = new Location(w, filecon.getDouble("worlds." + key + ".teams." + tString + ".spawner.x"),
+                                    filecon.getDouble("worlds." + key + ".teams." + tString + ".spawner.y"),
+                                    filecon.getDouble("worlds." + key + ".teams." + tString + ".spawner.z"));
                         }
                         inTeamGameSpawners.get(key).put(tString, thisTeamSpawn);
 
@@ -211,9 +233,9 @@ public class GameSystemConfig extends AbstractFile {
                             thisTeamBedLocation = w.getSpawnLocation();
                         } else {
                             thisTeamBedLocation= new Location(w, 
-                                    filecon.getInt("worlds." + key + ".teams." + tString + ".bed-location.x"), 
-                                    filecon.getInt("worlds." + key + ".teams." + tString + ".bed-location.y"), 
-                                    filecon.getInt("worlds." + key + ".teams." + tString + ".bed-location.z"));
+                                    filecon.getDouble("worlds." + key + ".teams." + tString + ".bed-location.x"), 
+                                    filecon.getDouble("worlds." + key + ".teams." + tString + ".bed-location.y"), 
+                                    filecon.getDouble("worlds." + key + ".teams." + tString + ".bed-location.z"));
                         }
                         teamBedLocations.get(key).put(tString, thisTeamBedLocation);
     
@@ -223,9 +245,9 @@ public class GameSystemConfig extends AbstractFile {
                             filecon.createSection("worlds." + key + ".teams." + tString + ".resources", new HashMap<>());
                         } else {
                             for (String rsName : filecon.getConfigurationSection("worlds." + key + ".teams." + tString + ".resources").getKeys(false)) {
-                                Location rspawnerLoc = new Location(w, filecon.getInt("worlds." + key + ".teams." + tString + ".resources.spawnloc.x"),
-                                        filecon.getInt("worlds." + key + ".teams." + tString + ".resources.spawnloc.y"),
-                                        filecon.getInt("worlds." + key + ".teams." + tString + ".resources.spawnloc.z"));
+                                Location rspawnerLoc = new Location(w, filecon.getDouble("worlds." + key + ".teams." + tString + ".resources.spawnloc.x"),
+                                        filecon.getDouble("worlds." + key + ".teams." + tString + ".resources.spawnloc.y"),
+                                        filecon.getDouble("worlds." + key + ".teams." + tString + ".resources.spawnloc.z"));
                                 ResourceSpawner rspawner = new ResourceSpawner(rsName, rspawnerLoc,
                                         ResourcesType.values()[filecon.getInt("worlds." + key + ".teams." + tString + ".resources.type")]);
                                 resourceSpawnersLocal.put(rsName, rspawner);
@@ -243,9 +265,9 @@ public class GameSystemConfig extends AbstractFile {
                     resourceSpawners.get(key).put("PUBLIC", new HashMap<String, ResourceSpawner>());
                 } else {
                     for (String rsName : filecon.getConfigurationSection("worlds." + key + ".public-resources-spawner").getKeys(false)) {
-                        Location rspawnerLoc = new Location(w, filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.x"),
-                                filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.y"),
-                                filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.z"));
+                        Location rspawnerLoc = new Location(w, filecon.getDouble("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.x"),
+                                filecon.getDouble("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.y"),
+                                filecon.getDouble("worlds." + key + ".public-resources-spawner." + rsName + ".spawnloc.z"));
                         ResourceSpawner rspawner = new ResourceSpawner(rsName, rspawnerLoc,
                                 ResourcesType.values()[filecon.getInt("worlds." + key + ".public-resources-spawner." + rsName + ".type")]);
                         publicResourceSpawnersLocal.put(rsName, rspawner);
@@ -267,6 +289,32 @@ public class GameSystemConfig extends AbstractFile {
                     }
                 }
                 timelineEvent.put(key, configEvents);
+
+                // Get all shop locations
+                Map<BedwarsShopType, List<Location>> loadShopLocations = new HashMap<BedwarsShopType, List<Location>>();
+                if (filecon.getConfigurationSection("worlds." + key + ".shop-location") == null) {
+                    filecon.createSection("worlds." + key + ".shop-location", new HashMap<>());
+                    filecon.createSection("worlds." + key + ".shop-location." + BedwarsShopType.ITEMS_SHOP.toString(), new HashMap<>());
+                    filecon.createSection("worlds." + key + ".shop-location." + BedwarsShopType.PERMA_SHOP.toString(), new HashMap<>());
+
+                    loadShopLocations.put(BedwarsShopType.ITEMS_SHOP, new ArrayList<Location>());
+                    loadShopLocations.put(BedwarsShopType.PERMA_SHOP, new ArrayList<Location>());
+                } else {
+                    for (String shopTypeString : filecon.getConfigurationSection("worlds." + key + ".shop-location").getKeys(false)) {
+                        List<Location> listShopLocations = new ArrayList<Location>();
+                        BedwarsShopType st = BedwarsShopType.fromString(shopTypeString);
+                        if (st != null) {
+                            for (String shopLoc : filecon.getConfigurationSection("worlds." + key + ".shop-location." + st.toString()).getKeys(false)) {
+                                Location loc = new Location(w, filecon.getDouble("worlds." + key + ".shop-location." + st.toString() + "." + shopLoc + ".x"), 
+                                        filecon.getDouble("worlds." + key + ".shop-location." + st.toString() + "." + shopLoc + ".y"), 
+                                        filecon.getDouble("worlds." + key + ".shop-location." + st.toString() + "." + shopLoc + ".z"));
+                                listShopLocations.add(loc);
+                            }
+                            loadShopLocations.put(st, listShopLocations);
+                        }
+                    }
+                }
+                shopsLocation.put(key, loadShopLocations);
             }
         }
     }
@@ -292,7 +340,11 @@ public class GameSystemConfig extends AbstractFile {
         filecon.createSection("worlds." + worldName + ".public-resources-spawner", new HashMap<>());
         filecon.createSection("worlds." + worldName + ".timeline", new HashMap<>());
 
-        // Default Team Spawner
+        filecon.createSection("worlds." + worldName + ".shop-location", new HashMap<>());
+        filecon.createSection("worlds." + worldName + ".shop-location." + BedwarsShopType.ITEMS_SHOP.toString(), new HashMap<>());
+        filecon.createSection("worlds." + worldName + ".shop-location." + BedwarsShopType.PERMA_SHOP.toString(), new HashMap<>());
+
+        // Default Team YML Initializer
         inTeamGameSpawners.put(worldName, new HashMap<String, Location>());
         for (String teamName : teamPrefix.get(worldName).keySet()) {
             inTeamGameSpawners.get(worldName).put(teamName, defaultSpawnLoc);
@@ -312,6 +364,7 @@ public class GameSystemConfig extends AbstractFile {
         saveResourceSpawnersData();
         savePlayerPrefix();
         saveBedLocation();
+        saveShopLocation();
         
         super.Save();
     }
@@ -327,11 +380,11 @@ public class GameSystemConfig extends AbstractFile {
                         filecon.set("worlds." + entryRS.getKey() + ".public-resources-spawner." + publicSpawner.getKey() + ".type",
                                 publicSpawner.getValue().getTypeResourceSpawner().ordinal());
                         filecon.set("worlds." + entryRS.getKey() + ".public-resources-spawner." + publicSpawner.getKey() + ".spawnloc.x",
-                                spawnLoc.getBlockX());
+                                spawnLoc.getX());
                         filecon.set("worlds." + entryRS.getKey() + ".public-resources-spawner." + publicSpawner.getKey() + ".spawnloc.y",
-                                spawnLoc.getBlockY());
+                                spawnLoc.getY());
                         filecon.set("worlds." + entryRS.getKey() + ".public-resources-spawner." + publicSpawner.getKey() + ".spawnloc.z",
-                                spawnLoc.getBlockZ());
+                                spawnLoc.getZ());
                     }
                 }
                 // Team owned resources spawner
@@ -364,9 +417,9 @@ public class GameSystemConfig extends AbstractFile {
     private void saveWorldQueueSpawn() {
         // Save All World queue spawn data
         for (Map.Entry<String, Location> entry : queueLocations.entrySet()) {
-            filecon.set("worlds." + entry.getKey() + ".queueloc.x", entry.getValue().getBlockX());
-            filecon.set("worlds." + entry.getKey() + ".queueloc.y", entry.getValue().getBlockY());
-            filecon.set("worlds." + entry.getKey() + ".queueloc.z", entry.getValue().getBlockZ());
+            filecon.set("worlds." + entry.getKey() + ".queueloc.x", entry.getValue().getX());
+            filecon.set("worlds." + entry.getKey() + ".queueloc.y", entry.getValue().getY());
+            filecon.set("worlds." + entry.getKey() + ".queueloc.z", entry.getValue().getZ());
         }
     }
 
@@ -376,11 +429,11 @@ public class GameSystemConfig extends AbstractFile {
             for (Map.Entry<String, String> prefix : teamPrefix.get(wEntry.getKey()).entrySet()) {
                 filecon.set("worlds." + wEntry.getKey() + ".teams." + prefix.getKey() + ".color", prefix.getValue());
                 filecon.set("worlds." + wEntry.getKey() + ".teams." + prefix.getKey() + ".spawner.x",
-                        inTeamGameSpawners.get(wEntry.getKey()).get(prefix.getKey()).getBlockX());
+                        inTeamGameSpawners.get(wEntry.getKey()).get(prefix.getKey()).getX());
                 filecon.set("worlds." + wEntry.getKey() + ".teams." + prefix.getKey() + ".spawner.y",
-                        inTeamGameSpawners.get(wEntry.getKey()).get(prefix.getKey()).getBlockY());
+                        inTeamGameSpawners.get(wEntry.getKey()).get(prefix.getKey()).getY());
                 filecon.set("worlds." + wEntry.getKey() + ".teams." + prefix.getKey() + ".spawner.z",
-                        inTeamGameSpawners.get(wEntry.getKey()).get(prefix.getKey()).getBlockZ());
+                        inTeamGameSpawners.get(wEntry.getKey()).get(prefix.getKey()).getZ());
             }
         }
     }
@@ -401,9 +454,25 @@ public class GameSystemConfig extends AbstractFile {
         for (Map.Entry<String, Map<String, Location>> bedLocEntry : teamBedLocations.entrySet()) {
             for (Map.Entry<String, Location> teamEntry : teamBedLocations.get(bedLocEntry.getKey()).entrySet()) {
                 Location loc = teamEntry.getValue();
-                filecon.set("worlds." + bedLocEntry.getKey() + ".teams." + teamEntry.getKey() + ".bed-location.x", loc.getBlockX());
-                filecon.set("worlds." + bedLocEntry.getKey() + ".teams." + teamEntry.getKey() + ".bed-location.y", loc.getBlockY());
-                filecon.set("worlds." + bedLocEntry.getKey() + ".teams." + teamEntry.getKey() + ".bed-location.z", loc.getBlockZ());
+                filecon.set("worlds." + bedLocEntry.getKey() + ".teams." + teamEntry.getKey() + ".bed-location.x", loc.getX());
+                filecon.set("worlds." + bedLocEntry.getKey() + ".teams." + teamEntry.getKey() + ".bed-location.y", loc.getY());
+                filecon.set("worlds." + bedLocEntry.getKey() + ".teams." + teamEntry.getKey() + ".bed-location.z", loc.getZ());
+            }
+        }
+    }
+
+    private void saveShopLocation() {
+        // Save all shop spawn locations
+        for (Map.Entry<String, Map<BedwarsShopType, List<Location>>> shopEntry : shopsLocation.entrySet()) {
+            for (Map.Entry<BedwarsShopType, List<Location>> shopTypeEntry : shopEntry.getValue().entrySet()) {
+                for (int i = 0; i < shopTypeEntry.getValue().size(); i++) {
+                    filecon.set("worlds." + shopEntry.getKey() + ".shop-location." + shopTypeEntry.getKey().toString() + ".shop" + i + ".x", 
+                            shopTypeEntry.getValue().get(i).getX());
+                    filecon.set("worlds." + shopEntry.getKey() + ".shop-location." + shopTypeEntry.getKey().toString() + ".shop" + i + ".y", 
+                            shopTypeEntry.getValue().get(i).getY());
+                    filecon.set("worlds." + shopEntry.getKey() + ".shop-location." + shopTypeEntry.getKey().toString() + ".shop" + i + ".z", 
+                            shopTypeEntry.getValue().get(i).getZ());
+                }
             }
         }
     }

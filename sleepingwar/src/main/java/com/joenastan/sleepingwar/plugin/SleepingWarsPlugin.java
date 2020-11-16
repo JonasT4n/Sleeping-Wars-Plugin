@@ -9,6 +9,8 @@ import com.joenastan.sleepingwar.plugin.events.OnBuilderModeEvents;
 import com.joenastan.sleepingwar.plugin.events.OnGameEvent;
 import com.joenastan.sleepingwar.plugin.game.GameManager;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
+
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -17,6 +19,7 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
     private static JavaPlugin plugin;
     private static GameSystemConfig systemConfig;
+    private static GameManager gameManager;
 
     // Private Variable Getter
     public static JavaPlugin getPlugin() {
@@ -25,6 +28,10 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
     public static GameSystemConfig getGameSystemConfig() {
         return systemConfig;
+    }
+
+    public static GameManager getGameManager() {
+        return gameManager;
     }
 
     @Override
@@ -49,14 +56,15 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        System.out.println("Sleeping war is over, see you next time!");
-
         // Free up memories
         plugin = null;
         systemConfig.Save();
         systemConfig = null;
-        GameManager.cleanManager();
+        gameManager.cleanManager();
         OnBuilderModeEvents.clearStatic();
+        HandlerList.unregisterAll(this);
+
+        System.out.println("Sleeping war is over, see you next time!");
     }
 
     // Other Stuff in plugin
@@ -74,5 +82,6 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
         // Create Configuration Files
         systemConfig = new GameSystemConfig(plugin, "worlds.yml");
+        gameManager = new GameManager();
     }
 }

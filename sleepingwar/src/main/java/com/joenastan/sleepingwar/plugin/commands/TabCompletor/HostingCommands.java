@@ -1,6 +1,5 @@
 package com.joenastan.sleepingwar.plugin.commands.TabCompletor;
 
-import com.joenastan.sleepingwar.plugin.game.GameManager;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import org.bukkit.command.Command;
@@ -28,7 +27,7 @@ public class HostingCommands implements TabCompleter {
                 return systemConfig.getAllWorldName();
             } else if (args[0].equalsIgnoreCase("join")) {
                 List<String> roomNames = new ArrayList<String>();
-                roomNames.addAll(GameManager.getAllRoom().keySet());
+                roomNames.addAll(SleepingWarsPlugin.getGameManager().getAllRoom().keySet());
                 return roomNames;
             }
         }

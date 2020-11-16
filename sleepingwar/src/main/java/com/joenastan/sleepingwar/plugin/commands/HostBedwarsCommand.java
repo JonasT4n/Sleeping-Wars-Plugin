@@ -1,7 +1,6 @@
 package com.joenastan.sleepingwar.plugin.commands;
 
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameStartEvent;
-import com.joenastan.sleepingwar.plugin.game.GameManager;
 import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
@@ -34,25 +33,15 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
                 }
                 // Join Command
                 else if (subCommand.equalsIgnoreCase(joinCMD)) {
-                    if (args.length < 2) {
-                        sender.sendMessage(ChatColor.RED + "Insert a room mate name.");
-                    } else {
-                        GameManager.joinBedwars(player, args[1]);
-                    }
+                    joinRoom(player, args);
                 }
                 // Start Command
                 else if (subCommand.equalsIgnoreCase(startCMD)) {
-                    SleepingRoom r = GameManager.getRoomByPlayer(player);
-                    if (r.isPlayerHost(player)) {
-                        BedwarsGameStartEvent event = new BedwarsGameStartEvent(r);
-                        Bukkit.getServer().getPluginManager().callEvent(event);
-                    } else {
-                        player.sendMessage(ChatColor.YELLOW + "You aren't the host. Unable to use this command.");
-                    }
+                    startBedwars(player, args);
                 }
                 // Exit Command
                 else if (subCommand.equalsIgnoreCase(exitCMD)) {
-                    GameManager.leaveBedwars(player);
+                    leaveBedwars(player);
                 }
             } else {
                 bedwarsHelpMessage(sender);
@@ -69,17 +58,44 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
                 "leave => Leave room, cannot use while on game");
     }
 
+    private void joinRoom(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage(ChatColor.RED + "Insert a room mate name.");
+        } else {
+            SleepingWarsPlugin.getGameManager().joinBedwars(player, args[1]);
+        }
+    }
+
+    private void startBedwars(Player player, String[] args) {
+        SleepingRoom r = SleepingWarsPlugin.getGameManager().getRoomByPlayer(player);
+        if (r.isPlayerHost(player)) {
+            BedwarsGameStartEvent event = new BedwarsGameStartEvent(r);
+            Bukkit.getServer().getPluginManager().callEvent(event);
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You aren't the host. Unable to use this command.");
+        }
+    }
+
     private void hostBedwars(Player player, String[] args) {
         if (args.length < 2) {
             player.sendMessage(ChatColor.GOLD + "Include a world name (/bedwars host <worldname>), use one of the map that you have made.");
         } else {
             if (systemConf.getAllWorldName().contains(args[1])) {
-                World useMap = Bukkit.getWorld(args[1]);
-                GameManager.hostingBedwars(player, useMap);
+                // Check if world still contains Player
+                if(Bukkit.getWorld(args[1]).getPlayers().size() == 0) {
+                    World useMap = Bukkit.getWorld(args[1]);
+                    SleepingWarsPlugin.getGameManager().hostingBedwars(player, useMap);
+                    return;
+                }
+                player.sendMessage(ChatColor.YELLOW + "Currently under construction, you cannot play this map yet.");
             } else {
                 player.sendMessage(ChatColor.GOLD + "World not available.");
             }
         }
+    }
+
+    private void leaveBedwars(Player player) {
+        SleepingWarsPlugin.getGameManager().leaveBedwars(player);
     }
 
 }

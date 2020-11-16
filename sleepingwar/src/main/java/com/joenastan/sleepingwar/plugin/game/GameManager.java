@@ -27,11 +27,15 @@ public class GameManager {
     private static final String alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
     private static final GameSystemConfig gameConfig = SleepingWarsPlugin.getGameSystemConfig();
-    private static Map<String, SleepingRoom> rooms = new HashMap<String, SleepingRoom>();
-    private static Map<Player, String> playerList = new HashMap<Player, String>();
+    private Map<String, SleepingRoom> rooms = new HashMap<String, SleepingRoom>();
+    private Map<Player, String> playerList = new HashMap<Player, String>();
+
+    public GameManager() {
+        // TODO: Manager performance
+    }
 
     // Player create a room
-    public static void hostingBedwars(Player player, World useMap) {
+    public void hostingBedwars(Player player, World useMap) {
         if (!checkAlreadyHosted(player)) {
             String createdID = bedwarsWorldID();
             // Copy World
@@ -55,7 +59,7 @@ public class GameManager {
     }
 
     // Player join the room
-    public static void joinBedwars(Player player, String worldpw) {
+    public void joinBedwars(Player player, String worldpw) {
         if (rooms.containsKey(worldpw)) {
             player.sendMessage(ChatColor.GREEN + "Joining...");
             SleepingRoom room = rooms.get(worldpw);
@@ -71,7 +75,7 @@ public class GameManager {
     }
 
     // Player leave the room
-    public static void leaveBedwars(Player player) {
+    public void leaveBedwars(Player player) {
         if (playerList.containsKey(player)) {
             String worldKey = playerList.get(player);
             // Check world
@@ -92,7 +96,7 @@ public class GameManager {
     }
 
     // This function only for when the room will be destroy
-    public static void allLeave(Set<Player> ppl) {
+    public void allLeave(Set<Player> ppl) {
         for (Player p : ppl) {
             if (playerList.containsKey(p)) {
                 playerList.remove(p);
@@ -100,7 +104,7 @@ public class GameManager {
         }
     }
 
-    public static SleepingRoom getRoomByPlayer(Player player) {
+    public SleepingRoom getRoomByPlayer(Player player) {
         for (SleepingRoom room : rooms.values()) {
             if (room.isPlayerInRoom(player))
                 return room;
@@ -109,7 +113,7 @@ public class GameManager {
         return null;
     }
 
-    public static SleepingRoom getRoomByName(String roomName) {
+    public SleepingRoom getRoomByName(String roomName) {
         for (Map.Entry<String, SleepingRoom> roomEntry : rooms.entrySet()) {
             if (roomEntry.getKey().equals(roomName))
                 return roomEntry.getValue();
@@ -118,19 +122,19 @@ public class GameManager {
         return null;
     }
 
-    public static Map<String, SleepingRoom> getAllRoom() {
+    public Map<String, SleepingRoom> getAllRoom() {
         return rooms;
     }
 
-    public static Map<Player, String> getAllPlayerInGame() {
+    public Map<Player, String> getAllPlayerInGame() {
         return playerList;
     }
 
-    public static Map<Player, String> getPlayerInGameList() {
+    public Map<Player, String> getPlayerInGameList() {
         return playerList;
     }
 
-    private static String bedwarsWorldID() {
+    private String bedwarsWorldID() {
         String result = "";
         Random rand = new Random();
         while (result.length() < IDRange) {
@@ -143,7 +147,7 @@ public class GameManager {
         return result;
     }
 
-    private static boolean checkAlreadyHosted(Player player) {
+    private boolean checkAlreadyHosted(Player player) {
         Collection<SleepingRoom> allRooms = rooms.values();
         for (SleepingRoom s : allRooms) {
             if (s.getHost().equals(player))
@@ -152,7 +156,7 @@ public class GameManager {
         return false;
     }
 
-    public static void cleanManager() {
+    public void cleanManager() {
         for (Map.Entry<String, SleepingRoom> sp : rooms.entrySet()) {
             sp.getValue().destroyRoom();
         }
@@ -163,7 +167,7 @@ public class GameManager {
         playerList = null;
     }
 
-    private static void copyWorld(File source, File target){
+    private void copyWorld(File source, File target){
         try {
             ArrayList<String> ignore = new ArrayList<String>(Arrays.asList("uid.dat", "session.dat"));
             if(!ignore.contains(source.getName())) {

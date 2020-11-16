@@ -22,4 +22,12 @@ public class TimelineTimer extends StopwatchTimer {
         room.timelineUpdate();
     }
 
+    public String getBedwarsEventName() {
+        return event.getName();
+    }
+
+    public float getCounter() {
+        return counter;
+    }
+
 }

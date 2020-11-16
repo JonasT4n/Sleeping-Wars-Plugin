@@ -2,6 +2,7 @@ package com.joenastan.sleepingwar.plugin.game;
 
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameEndedEvent;
 import com.joenastan.sleepingwar.plugin.events.Tasks.DeleteWorldDelayed;
+import com.joenastan.sleepingwar.plugin.game.InventoryMenus.BedwarsShopMenus;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.utility.PlayerBedwarsEntity;
@@ -42,12 +43,12 @@ public class SleepingRoom {
         public void destroyUpdater() {
             Bukkit.getScheduler().cancelTask(taskID);
         }
-
     }
 
     // Constants
     private final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
     private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
+    private final BedwarsShopMenus shopMenus = new BedwarsShopMenus();
 
     // Attributes
     private Player hostedBy;
@@ -72,6 +73,7 @@ public class SleepingRoom {
     private RoomUpdater updater;
     private Scoreboard localScoreBoard;
     private Objective objectiveLocalSB;
+    private Objective objectiveTeamSB;
 
     public SleepingRoom(String worldOriginalName, Player host, World bedwarsWorld, Location queueSpawn, long maxGameDuration) {
         // Add host to bedwars entity list
@@ -156,11 +158,13 @@ public class SleepingRoom {
         }
         // Scheduling the game ended
         isResourceSpawning(true);
-        isInGameOn = true;
-        localScoreBoard.resetScores("Player Count");
-        objectiveLocalSB.setDisplayName(ChatColor.GRAY + "Team List");
         timer.start();
         checkRemainingTeam();
+
+        isInGameOn = true;
+        objectiveLocalSB.setDisplayName(ChatColor.YELLOW + "Next Event");
+        localScoreBoard.resetScores("Player Count");
+        objectiveTeamSB = localScoreBoard.registerNewObjective("remainder", "laststand", ChatColor.WHITE + "Team List");
     }
 
     public void destroyRoom() {
@@ -175,12 +179,13 @@ public class SleepingRoom {
             p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
         }
 
-        // Stop all resources spawn schedules
+        // Stop all schedules
         isResourceSpawning(false);
+        inGameEvents.get(timelineIndex).stop();
 
         File worldDir = gameWorld.getWorldFolder();
-        GameManager.allLeave(bedwarsSpecialEntities.keySet());
-        GameManager.getAllRoom().remove(gameWorld.getName());
+        SleepingWarsPlugin.getGameManager().allLeave(bedwarsSpecialEntities.keySet());
+        SleepingWarsPlugin.getGameManager().getAllRoom().remove(gameWorld.getName());
         Bukkit.unloadWorld(gameWorld, false);
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(),
                 new DeleteWorldDelayed(worldDir), 60L);
@@ -189,6 +194,38 @@ public class SleepingRoom {
     public void roomBroadcast(String message) {
         for (Map.Entry<Player, PlayerBedwarsEntity> ppl : bedwarsSpecialEntities.entrySet()) {
             ppl.getKey().sendMessage(message);
+        }
+    }
+
+    public void updateScoreBoard() {
+        for (Player player : bedwarsSpecialEntities.keySet()) {
+            if (isInGameOn) {
+                // Next Event
+                if (timelineIndex < inGameEvents.size()) {
+                    // Time
+                    float rawSeconds = inGameEvents.get(timelineIndex).getCounter();
+                    int minutes = (int)rawSeconds / 60;
+                    int seconds = (int)rawSeconds % 60;
+                    String timeString = seconds < 10 ? String.format("%d:0%d", minutes, seconds) : String.format("%d:%d", minutes, seconds);
+
+                    String nextEventName = inGameEvents.get(timelineIndex).getBedwarsEventName();
+                    Score scevent = objectiveLocalSB.getScore(String.format("%s%s %s", timeString, ChatColor.GRAY + "", nextEventName));
+                    scevent.setScore(inGameEvents.size() - timelineIndex);
+                } else {
+                    Score scevent = objectiveLocalSB.getScore(ChatColor.GRAY + "" + ChatColor.ITALIC + "[No Events]");
+                    scevent.setScore(0);
+                }
+                
+                for (Map.Entry<String, TeamGroupMaker> t : teams.entrySet()) {
+                    Score scteam = objectiveTeamSB.getScore(t.getValue().getName());
+                    scteam.setScore(t.getValue().getRemainingPlayers());
+                }
+            } else {
+                Score sc = objectiveLocalSB.getScore(ChatColor.GREEN + "Player Count");
+                sc.setScore(bedwarsSpecialEntities.size());
+            }
+
+            player.setScoreboard(localScoreBoard);
         }
     }
 
@@ -314,22 +351,6 @@ public class SleepingRoom {
         return false;
     }
 
-    public void updateScoreBoard() {
-        for (Player player : bedwarsSpecialEntities.keySet()) {
-            if (isInGameOn) {
-                for (Map.Entry<String, TeamGroupMaker> t : teams.entrySet()) {
-                    Score sc = objectiveLocalSB.getScore(t.getValue().getName());
-                    sc.setScore(t.getValue().getRemainingPlayers());
-                }
-            } else {
-                Score sc = objectiveLocalSB.getScore(ChatColor.GREEN + "Player Count");
-                sc.setScore(bedwarsSpecialEntities.size());
-            }
-
-            player.setScoreboard(localScoreBoard);
-        }
-    }
-
     public void timelineUpdate() {
         // Go to next update
         timelineIndex++;
@@ -378,6 +399,10 @@ public class SleepingRoom {
 
     public List<ResourceSpawner> getResourcesSpawner() {
         return publicResourceSpawners;
+    }
+
+    public BedwarsShopMenus getShopMenus() {
+        return shopMenus;
     }
 
 }

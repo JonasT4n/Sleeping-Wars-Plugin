@@ -1,5 +1,6 @@
 package com.joenastan.sleepingwar.plugin.commands;
 
+import com.joenastan.sleepingwar.plugin.game.BedwarsShopType;
 import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
 import com.joenastan.sleepingwar.plugin.game.ResourcesType;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
@@ -15,12 +16,18 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+// import org.bukkit.inventory.Inventory;
+// import org.bukkit.inventory.ItemStack;
+// import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
-import java.util.Arrays;
+// import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,15 +38,18 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
     private String removeEventCMD = "delevent"; // delete event timeline
     private String createCMD = "create"; // command to create the world
     private String deleteResSpawnCMD = "delrspawn"; // delete resource spawner by name
+    private String deleteShopLocCMD = "delshop"; // delete shop spawner
     private String editWorldCMD = "edit"; // command to go teleport into bedwars and set to builder mode
     private String sworldHelpCMD = "help"; // Help menu for world builder
     private String leaveWorldCMD = "leave"; // leave world back to where you were
-    private String openBuilderCMD = "openb"; // exclusive kit for bedwars
+    //private String openBuilderCMD = "openb"; // exclusive kit for bedwars
     private String resSpawnerInfo = "rsinfo"; // Look up resource spawner info
     private String setBedLocCMD = "setbed"; // set bed location
     private String setBlockCMD = "setblock"; // set block on, for default bedrock will be spawned on location
+    private String setShopLocationCMD = "setshop"; // set villager shop location
     private String queueSpawnCMD = "setqspawn"; // set queue spawn for hosting a bedwars
     private String setSpawnCMD = "setspawn"; // set world default spawn, this can be use in all kinds of world
+    private String spawnShopCMD = "spawnshop"; // Spawn the shops safely in world
     private String setResourceSpawnerCMD = "setrspawn"; // Set Resource Spawner with it's type
     private String setTeamSpawnCMD = "teamspawn"; // Set Team Spawn by name on that location
     private String teamInfoCMD = "teaminfo"; // Look up the team in world info
@@ -98,13 +108,25 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 else if (initialSubCommand.equalsIgnoreCase(setBlockCMD) && player.hasPermission("sleepywar.builder")) {
                     setBlockOnWorld(player, args);
                 }
-                // Open Builder GUI
-                else if (initialSubCommand.equalsIgnoreCase(openBuilderCMD) && player.hasPermission("sleepywar.builder")) {
-                    openBuilderGUI(player);
+                // Set shop location
+                else if (initialSubCommand.equalsIgnoreCase(setShopLocationCMD) && player.hasPermission("sleepywar.builder")) {
+                    setShopLocation(player, args);
                 }
+                // Delete shop location
+                else if (initialSubCommand.equalsIgnoreCase(deleteShopLocCMD) && player.hasPermission("sleepywar.builder")) {
+                    deleteShopLocation(player, args);
+                }
+                // // Open Builder GUI
+                // else if (initialSubCommand.equalsIgnoreCase(openBuilderCMD) && player.hasPermission("sleepywar.builder")) {
+                //     openBuilderGUI(player);
+                // }
                 // Test resource spawn
                 else if (initialSubCommand.equalsIgnoreCase(testResourceSpawnCMD) && player.hasPermission("sleepywar.builder")) {
                     testActivateResourceSpawner(player);
+                }
+                // Test shop spawn
+                else if (initialSubCommand.equalsIgnoreCase(spawnShopCMD) && player.hasPermission("sleepywar.builder")) {
+                    spawnShop(player);
                 }
                 // Delete resource spawn
                 else if (initialSubCommand.equalsIgnoreCase(deleteResSpawnCMD) && player.hasPermission("sleepywar.builder")) {
@@ -158,12 +180,13 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
         } else { // default is page 1
             sender.sendMessage(ChatColor.GOLD + "(Page 1/2) Sleeping World Maker Commands for World Building. " + ChatColor.AQUA + "List of sub-commands:\n" +
                 ChatColor.GREEN + "create => Create bedwars world\n" +
+                "help => This help menu\n" +
                 "edit => Teleport to bedwars world\n" +
                 "setqspawn => Set room queue spawn\n"+
                 "system => Check and edit game system in bedwars world\n" +
                 "setrspawn => Set resource spawner on your current location\n" +
-                "setspawn => Set world default spawn on your position\n" +
-                "openb => Open extra kit for building a bedwars");
+                "setspawn => Set world default spawn on your position\n");
+                //"openb => Open extra kit for building a bedwars");
         }
     }
 
@@ -178,7 +201,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             if (systemConfig.getAllWorldName().contains(worldName)) {
                 if (systemConfig.getTimelineEvents(worldName).size() < 10) {
                     TimelineEventType typeEvent = TimelineEventType.fromString(args[1]);
-                    if (typeEvent != null && isNumber(args[2])) {
+                    if (typeEvent != null && isPositiveNumber(args[2])) {
                         int dur = Integer.parseInt(args[2]);
                         BedwarsGameTimelineEvent nEvent = new BedwarsGameTimelineEvent(typeEvent, (float)dur, args[3]);
                         systemConfig.getTimelineEvents(worldName).add(nEvent);
@@ -231,7 +254,18 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
         String worldName = player.getWorld().getName();
         if (systemConfig.getAllWorldName().contains(worldName)) {
             if (args.length < 2) {
-                player.sendMessage(ChatColor.GREEN + "You need to insert team name. " + ChatColor.YELLOW + "/sworld setbed <teamname>");
+                player.sendMessage(ChatColor.GREEN + "You need to insert team name. " + ChatColor.YELLOW + "/sworld setbed <teamname>\n");
+                String description = ChatColor.GREEN + "All beds that has been set:";
+                for (Map.Entry<String, Location> bedLocEntry : systemConfig.getBedLocationMap(worldName).entrySet()) {
+                    Location bedLoc = bedLocEntry.getValue();
+                    if (isMaterialBed(bedLoc.getBlock().getType()))
+                        description += String.format("%s%s: %s%b; ", getColor(systemConfig.getTeamPrefix(worldName).get(bedLocEntry.getKey())), 
+                                bedLocEntry.getKey(), ChatColor.GREEN + "", true);
+                    else
+                        description += String.format("%s%s: %s%b; ", getColor(systemConfig.getTeamPrefix(worldName).get(bedLocEntry.getKey())), 
+                                bedLocEntry.getKey(), ChatColor.RED + "", false);
+                }
+                player.sendMessage(description);
             } else {
                 if (systemConfig.getAllTeamName(worldName).contains(args[1])) {
                     OnBuilderModeEvents.getCustomBuilderEntity().get(player).setTeamChoice(args[1]);
@@ -284,30 +318,95 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
         }
     }
 
-    private void openBuilderGUI(Player player) {
-        Inventory extraBuilderGUI = Bukkit.getServer().createInventory(null, 18, "Bedwars Builder Pack");
+    // private void openBuilderGUI(Player player) {
+    //     Inventory extraBuilderGUI = Bukkit.getServer().createInventory(null, 18, "Bedwars Builder Pack");
 
-        ItemStack upgradeMobEgg = new ItemStack(Material.VILLAGER_SPAWN_EGG);
-        ItemMeta upgradeEggMeta = upgradeMobEgg.getItemMeta();
-        upgradeEggMeta.setDisplayName("Bedwars Upgrade Villager");
-        upgradeEggMeta.setLore(Arrays.asList("A Perma Upgrade Shop"));
-        upgradeMobEgg.setItemMeta(upgradeEggMeta);
+    //     ItemStack upgradeMobEgg = new ItemStack(Material.VILLAGER_SPAWN_EGG);
+    //     ItemMeta upgradeEggMeta = upgradeMobEgg.getItemMeta();
+    //     upgradeEggMeta.setDisplayName("Bedwars Upgrade Villager");
+    //     upgradeEggMeta.setLore(Arrays.asList("A Perma Upgrade Shop"));
+    //     upgradeMobEgg.setItemMeta(upgradeEggMeta);
 
-        ItemStack shopMobEgg = new ItemStack(Material.VILLAGER_SPAWN_EGG);
-        ItemMeta shopEggMeta = shopMobEgg.getItemMeta();
-        shopEggMeta.setDisplayName("Bedwars Shop Villager");
-        shopEggMeta.setLore(Arrays.asList("All Bedwars Shop kit"));
-        shopMobEgg.setItemMeta(shopEggMeta);
+    //     ItemStack shopMobEgg = new ItemStack(Material.VILLAGER_SPAWN_EGG);
+    //     ItemMeta shopEggMeta = shopMobEgg.getItemMeta();
+    //     shopEggMeta.setDisplayName("Bedwars Shop Villager");
+    //     shopEggMeta.setLore(Arrays.asList("All Bedwars Shop kit"));
+    //     shopMobEgg.setItemMeta(shopEggMeta);
 
-        extraBuilderGUI.setItem(0, upgradeMobEgg);
-        extraBuilderGUI.setItem(1, shopMobEgg);
+    //     extraBuilderGUI.setItem(0, upgradeMobEgg);
+    //     extraBuilderGUI.setItem(1, shopMobEgg);
 
-        player.openInventory(extraBuilderGUI);
+    //     player.openInventory(extraBuilderGUI);
+    // }
+
+    private void setShopLocation(Player player, String[] args) {
+        String inWorldName = player.getWorld().getName();
+        if (systemConfig.getAllWorldName().contains(inWorldName)) {
+            if (args.length < 2) {
+                player.sendMessage(ChatColor.GREEN + "You need to insert type of shop. " + ChatColor.YELLOW + "/sworld setshop <type>");
+            } else {
+                BedwarsShopType pickedShopType = BedwarsShopType.fromString(args[1]);
+                if (pickedShopType != null) {
+                    if (systemConfig.getShopLocations(inWorldName).get(pickedShopType) == null) {
+                        systemConfig.getShopLocations(inWorldName).put(pickedShopType, new ArrayList<Location>());
+                    }
+                    
+                    systemConfig.getShopLocations(inWorldName).get(pickedShopType).add(player.getLocation());
+                    player.sendMessage(ChatColor.GREEN + pickedShopType.toString() + " settled on your location where you are standing.");
+                    return;
+                } 
+                player.sendMessage(ChatColor.RED + "Invalid Input argument");
+            }
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You are not in Bedwars world building.");
+        }
+    }
+
+    private void deleteShopLocation(Player player, String[] args) {
+        String inWorldName = player.getWorld().getName();
+        if (systemConfig.getAllWorldName().contains(inWorldName)) {
+            Map<BedwarsShopType, List<Location>> shopLocMap = systemConfig.getShopLocations(inWorldName);
+            if (args.length < 3) {
+                player.sendMessage(ChatColor.GREEN + "You need to insert the index number. " + ChatColor.YELLOW + "/sworld delshop <index>\n");
+                String description = ChatColor.LIGHT_PURPLE + "List of shop spawn:\n";
+                for (Map.Entry<BedwarsShopType, List<Location>> shopLocTypeEntry : shopLocMap.entrySet()) {
+                    // Set types by colors
+                    if (shopLocTypeEntry.getKey() == BedwarsShopType.ITEMS_SHOP)
+                        description += ChatColor.YELLOW + ": ";
+                    else if (shopLocTypeEntry.getKey() == BedwarsShopType.PERMA_SHOP)
+                        description += ChatColor.AQUA + ": ";
+                    else
+                        description += ChatColor.WHITE + ": ";
+
+                    for (int i = 0; i < shopLocTypeEntry.getValue().size(); i++) {
+                        Location loc = shopLocTypeEntry.getValue().get(i);
+                        description += String.format("[%d. X:%d Y:%d Z:%d]; ", i + 1, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+                    }
+                }
+                player.sendMessage(description);
+            } else {
+                BedwarsShopType typeSelect = BedwarsShopType.fromString(args[1]);
+                if (typeSelect != null && isPositiveNumber(args[2])) {
+                    if (systemConfig.deleteShopLocation(inWorldName, typeSelect, Integer.parseInt(args[2]) - 1))
+                        player.sendMessage(ChatColor.LIGHT_PURPLE + "Shop spawn successfully deleted");
+                    return;
+                }
+                player.sendMessage(ChatColor.RED + "Argument may be invalid, index exceeded, or failed");        
+            }
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You are not in Bedwars world building.");
+        }
     }
 
     private void setSpawn(Player player, World world) {
-        Location playerLoc = player.getLocation();
-        world.setSpawnLocation(playerLoc.getBlockX(), playerLoc.getBlockY(), playerLoc.getBlockZ());
+        String inWorldName = world.getName();
+        if (systemConfig.getAllWorldName().contains(inWorldName)) {
+            Location playerLoc = player.getLocation();
+            world.setSpawnLocation(playerLoc.getBlockX(), playerLoc.getBlockY(), playerLoc.getBlockZ());
+            player.sendMessage(ChatColor.GREEN + "Default world spawn settled");
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You are not in Bedwars world building.");
+        }
     }
 
     private void setTeamSpawn(Player player, String[] args) {
@@ -334,7 +433,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             player.sendMessage(ChatColor.YELLOW + "Invalid Argument, do /sworld setblock <X> <Y> <Z>");
         } else {
             if (systemConfig.getAllWorldName().contains(worldName)) {
-                if (isNumber(args[1]) && isNumber(args[2]) && isNumber(args[3])) {
+                if (isPositiveNumber(args[1]) && isPositiveNumber(args[2]) && isPositiveNumber(args[3])) {
                     World w = Bukkit.getWorld(worldName);
                     int x = Integer.parseInt(args[1]);
                     int y = Integer.parseInt(args[2]);
@@ -373,6 +472,32 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             }
         } else {
             player.sendMessage(ChatColor.RED + "World is not registered as Bedwars world.");
+        }
+    }
+
+    private void spawnShop(Player player) {
+        String inWorldName = player.getWorld().getName();
+        if (systemConfig.getAllWorldName().contains(inWorldName)) {
+            Map<BedwarsShopType, List<Location>> shopLoc = systemConfig.getShopLocations(inWorldName);
+            PotionEffect slowEffect = new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 9999);
+            for (Map.Entry<BedwarsShopType, List<Location>> shopLocEntry : shopLoc.entrySet()) {
+                for (Location loc : shopLocEntry.getValue()) {
+                    Entity ent = loc.getWorld().spawnEntity(loc, EntityType.VILLAGER);
+                    if (ent instanceof LivingEntity) {
+                        LivingEntity entLive = (LivingEntity)ent;
+                        entLive.addPotionEffect(slowEffect);
+                    }
+                    
+                    if (shopLocEntry.getKey() == BedwarsShopType.PERMA_SHOP) {
+                        ent.setCustomName("Bedwars Upgrade Villager");
+                    } else {
+                        ent.setCustomName("Bedwars Shop Villager");
+                    }
+                }
+            }
+            player.sendMessage(ChatColor.AQUA + "All shop spawned.");
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You are not in Bedwars world building.");
         }
     }
 
@@ -464,12 +589,14 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             for (int i = 0; i < tns.size(); i++) {
                 String teamName = tns.get(i);
                 if (i == tns.size() - 1) 
-                    description += getColor(teamNames.get(teamName)) + teamName + ChatColor.WHITE + ";\n\n";
+                    description += getColor(teamNames.get(teamName)) + teamName + ChatColor.WHITE + ";\n";
                 else
                     description += getColor(teamNames.get(teamName)) + teamName + ChatColor.WHITE + ", ";
             }
+            player.sendMessage(description);
+            // ENTER
             Location queueLoc = systemConfig.getQueueLocations(worldName);
-            description += String.format("Queue Location on: X:%d Y:%d Z:%d\n", queueLoc.getBlockX(), queueLoc.getBlockY(), queueLoc.getBlockZ());
+            description = String.format("Queue Location on: X:%d Y:%d Z:%d\n", queueLoc.getBlockX(), queueLoc.getBlockY(), queueLoc.getBlockZ());
             description += String.format("%sEvents in timeline count: %s%d\n", ChatColor.AQUA + "", ChatColor.LIGHT_PURPLE + "", 
                     systemConfig.getTimelineEvents(worldName).size());
             description += String.format("%sThere are %s%d %sResource Spawner(s)", ChatColor.AQUA + "", ChatColor.LIGHT_PURPLE + "", 
@@ -518,7 +645,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
         }
     }
 
-    private boolean isNumber(String numStr) {
+    private boolean isPositiveNumber(String numStr) {
         for (int i = 0; i < numStr.length(); i++) {
             switch (numStr.charAt(i)) {
                 case '1':
@@ -567,6 +694,45 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             return ChatColor.GRAY + "";
         } else {
             return ChatColor.WHITE + "";
+        }
+    }
+
+    private boolean isMaterialBed(Material material) {
+        switch (material) {
+            case BLACK_BED:
+                return true;
+            case BLUE_BED:
+                return true;
+            case BROWN_BED:
+                return true;
+            case CYAN_BED:
+                return true;
+            case GREEN_BED:
+                return true;
+            case YELLOW_BED:
+                return true;
+            case RED_BED:
+                return true;
+            case ORANGE_BED:
+                return true;
+            case GRAY_BED:
+                return true;
+            case LIGHT_BLUE_BED:
+                return true;
+            case LIME_BED:
+                return true;
+            case PINK_BED:
+                return true;
+            case MAGENTA_BED:
+                return true;
+            case PURPLE_BED:
+                return true;
+            case WHITE_BED:
+                return true;
+            case LIGHT_GRAY_BED:
+                return true;
+            default:
+                return false;
         }
     }
 
