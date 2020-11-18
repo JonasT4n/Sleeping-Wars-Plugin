@@ -26,6 +26,8 @@ import org.bukkit.scoreboard.Scoreboard;
 import java.io.File;
 import java.util.*;
 
+import javax.annotation.Nullable;
+
 public class SleepingRoom {
 
     private class RoomUpdater {
@@ -50,6 +52,7 @@ public class SleepingRoom {
     private final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
     private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
     private final BedwarsShopMenus shopMenus = new BedwarsShopMenus();
+    private final GameManager gameManager = SleepingWarsPlugin.getGameManager();
 
     // Attributes
     private Player hostedBy;
@@ -75,6 +78,7 @@ public class SleepingRoom {
     private Scoreboard localScoreBoard;
     private Objective objectiveLocalSB;
     private Objective objectiveTeamSB;
+    private Objective playerHealthDisplayer;
 
     public SleepingRoom(String worldOriginalName, Player host, World bedwarsWorld, Location queueSpawn, long maxGameDuration) {
         // Add host to bedwars entity list
@@ -104,50 +108,79 @@ public class SleepingRoom {
         hostedBy.sendMessage(ChatColor.GOLD + "Room Created, World name to enter the game: " + ChatColor.GREEN + bedwarsWorld.getName());
 
         for (BedwarsGameTimelineEvent eventEntry : systemConfig.getTimelineEvents(worldOriginalName)) {
-            inGameEvents.add(new TimelineTimer(eventEntry.getTriggerSeconds(), this, eventEntry));
+            eventEntry.setRoom(this);
+            inGameEvents.add(new TimelineTimer(eventEntry.getTriggerSeconds(), this, eventEntry, publicResourceSpawners));
         }
     }
 
-    public void playerEnter(Player player) {
-        bedwarsSpecialEntities.put(player, new PlayerBedwarsEntity(player, player.getLocation(), player.getGameMode()));
-        player.teleport(worldQueueSpawn);
-        for (Player pplInRoom : bedwarsSpecialEntities.keySet()) {
-            pplInRoom.sendMessage(ChatColor.GOLD + player.getName() + " joined the party, there are " + bedwarsSpecialEntities.size() + " in room.");
+    // TODO: Pass the old entity from other room if it is not null
+    public void playerEnter(Player player, @Nullable PlayerBedwarsEntity entity) {
+        if (entity != null)
+            bedwarsSpecialEntities.put(player, entity);
+        else
+            bedwarsSpecialEntities.put(player, new PlayerBedwarsEntity(player, player.getLocation(), player.getGameMode()));
+
+        if (!isInGameOn) {
+            player.teleport(worldQueueSpawn);
+            for (Player pplInRoom : bedwarsSpecialEntities.keySet()) {
+                pplInRoom.sendMessage(ChatColor.GOLD + player.getName() + " joined the party, there are " + bedwarsSpecialEntities.size() + " in room.");
+            }
+            player.setGameMode(GameMode.SURVIVAL);
+        } else {
+            TeamGroupMaker team = getTeam(player);
+            if (team != null) {
+                team.playerReconnected(player);
+            } else {
+                player.teleport(worldQueueSpawn);
+                player.setGameMode(GameMode.SPECTATOR);
+            }
         }
-        player.setGameMode(GameMode.SURVIVAL);
     }
 
     public void playerLeave(Player player) {
-        // player leave
-        if (bedwarsSpecialEntities.get(player) != null) {
-            bedwarsSpecialEntities.remove(player).returnEntity();
-            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-            checkRemainingTeam();
-        }
+        if (!isInGameOn) {
+            // player leave
+            if (bedwarsSpecialEntities.get(player) != null) {
+                bedwarsSpecialEntities.remove(player).returnEntity();
+                player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            }
 
-        // If nobody inside the room then destroy it
-        if (bedwarsSpecialEntities.size() == 0 || gameWorld.getPlayerCount() == 0) {
-            destroyRoom();
-        } else {
+            // If nobody inside the room then destroy it
+            if (bedwarsSpecialEntities.size() == 0 || gameWorld.getPlayerCount() == 0) {
+                destroyRoom();
+                return;
+            }
+
             // Announcement
             roomBroadcast(ChatColor.YELLOW + player.getName() + " left the party, there are " + bedwarsSpecialEntities.size() + " in room.");
-            if (player.equals(hostedBy) && !isInGameOn) {
+            if (player.equals(hostedBy)) {
                 List<Player> plys = new ArrayList<Player>();
                 plys.addAll(bedwarsSpecialEntities.keySet());
                 hostedBy = plys.get(0);
-
-                for (Player p : bedwarsSpecialEntities.keySet()) {
-                    p.sendMessage(ChatColor.YELLOW + hostedBy.getName() + " is now the host.");
-                }
+                roomBroadcast(ChatColor.YELLOW + hostedBy.getName() + " is now the host.");
             }
+        } else {
+            TeamGroupMaker playerInTeam = getTeam(player);
+            if (playerInTeam != null) {
+                bedwarsSpecialEntities.remove(player).returnEntity();
+                player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+                playerInTeam.playerDisconnected(player);
+            }
+
+            // If nobody inside the room then destroy it
+            if (gameWorld.getPlayerCount() == 0) {
+                destroyRoom();
+                return;
+            }
+
+            if (bedwarsSpecialEntities.get(player) != null)
+                checkRemainingTeam();
         }
     }
 
     public void gameStart() {
         // Announcement
-        for (Player p : bedwarsSpecialEntities.keySet()) {
-            p.sendMessage(ChatColor.GREEN + "Starting...");
-        }
+        roomBroadcast(ChatColor.GREEN + "Starting...");
         // Initialize game
         // Creating teams
         createTeam();
@@ -162,9 +195,17 @@ public class SleepingRoom {
         inGameEvents.get(timelineIndex).start();
         isInGameOn = true;
 
-        // Scoreboard
-        localScoreBoard.resetScores("Player Count");
-        objectiveTeamSB = localScoreBoard.registerNewObjective("remainder", "laststand", ChatColor.WHITE + "Team List");
+        // Init Scoreboard
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+            @Override
+            public void run() {
+                localScoreBoard.resetScores("Player Count");
+            }
+        }, 20L); 
+        objectiveTeamSB = localScoreBoard.registerNewObjective("remainder", "laststand", ChatColor.WHITE + "Team Score");
+        objectiveTeamSB.setDisplaySlot(DisplaySlot.SIDEBAR);
+        playerHealthDisplayer = localScoreBoard.registerNewObjective("player-health", "health", " HP");
+        playerHealthDisplayer.setDisplaySlot(DisplaySlot.BELOW_NAME);
     }
 
     public void destroyRoom() {
@@ -174,10 +215,21 @@ public class SleepingRoom {
         // Teleport Players back to where they were
         for (Map.Entry<Player, PlayerBedwarsEntity> ppl : bedwarsSpecialEntities.entrySet()) {
             Player p = ppl.getKey();
+            p.getInventory().clear();
             ppl.getValue().returnEntity();
+            gameManager.getAllPlayerInGame().remove(p);
             p.sendMessage(ChatColor.YELLOW + "Game Ended, teleporting back to where you were.");
             p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-            p.getInventory().clear();
+        }
+
+        // Clear Team if the game is still on
+        if (isInGameOn) {
+            for (TeamGroupMaker t : teams.values()) {
+                for (ResourceSpawner rsp : t.getAllResourceSpawners()) {
+                    if (rsp.isRunning())
+                        rsp.isRunning(false);
+                }
+            }
         }
 
         // Stop all schedules
@@ -185,12 +237,11 @@ public class SleepingRoom {
         if (timelineIndex < inGameEvents.size())
             inGameEvents.get(timelineIndex).stop();
 
+        // Delete world file
         File worldDir = gameWorld.getWorldFolder();
-        SleepingWarsPlugin.getGameManager().allLeave(bedwarsSpecialEntities.keySet());
-        SleepingWarsPlugin.getGameManager().getAllRoom().remove(gameWorld.getName());
+        gameManager.getAllRoom().remove(gameWorld.getName());
         Bukkit.unloadWorld(gameWorld, false);
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(),
-                new DeleteWorldDelayed(worldDir), 60L);
+        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new DeleteWorldDelayed(worldDir), 60L);
     }
 
     public void roomBroadcast(String message) {
@@ -201,6 +252,9 @@ public class SleepingRoom {
 
     public void updateScoreBoard() {
         for (Player player : bedwarsSpecialEntities.keySet()) {
+            if (Bukkit.getPlayer(player.getName()) == null)
+                continue;
+
             if (isInGameOn) {
                 // Next Event
                 if (timelineIndex < inGameEvents.size()) {
@@ -220,6 +274,7 @@ public class SleepingRoom {
                     scevent.setScore(0);
                 }
                 
+                // Show up team remaining survivor
                 for (Map.Entry<String, TeamGroupMaker> t : teams.entrySet()) {
                     Score scteam = objectiveTeamSB.getScore(t.getValue().getName());
                     scteam.setScore(t.getValue().getRemainingPlayers());
@@ -229,6 +284,7 @@ public class SleepingRoom {
                 sc.setScore(bedwarsSpecialEntities.size());
             }
 
+            player.setHealth(player.getHealth());
             player.setScoreboard(localScoreBoard);
         }
     }
@@ -246,9 +302,8 @@ public class SleepingRoom {
 
         // if last one standing then game ended
         if (remainingCount <= 1 && lastStanding != null) {
-            BedwarsGameEndedEvent gameEndedEvent = new BedwarsGameEndedEvent(this);
+            BedwarsGameEndedEvent gameEndedEvent = new BedwarsGameEndedEvent(this, lastStanding);
             Bukkit.getPluginManager().callEvent(gameEndedEvent);
-            roomBroadcast(lastStanding.getName() + ChatColor.GOLD + " team WIN the game!");
             Bukkit.getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(), new Runnable(){
                 @Override
                 public void run() {

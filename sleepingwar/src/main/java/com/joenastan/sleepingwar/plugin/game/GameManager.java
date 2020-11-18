@@ -60,13 +60,34 @@ public class GameManager {
 
     // Player join the room
     public void joinBedwars(Player player, String worldpw) {
-        if (rooms.containsKey(worldpw)) {
+        String inWorldName = player.getWorld().getName();
+        SleepingRoom currentRoom = rooms.get(inWorldName);
+
+        // Check if player already in room
+        if (currentRoom != null && rooms.containsKey(worldpw)) {
+            if (inWorldName.equals(worldpw)) {
+                player.sendMessage(ChatColor.YELLOW + "You are already in this room.");
+            } else {
+                // Leave previous room
+                currentRoom.playerLeave(player);
+
+                // Join new room
+                player.sendMessage(ChatColor.GREEN + "Joining...");
+                SleepingRoom room = rooms.get(worldpw);
+                room.playerEnter(player, null);
+                playerList.put(player, worldpw);
+                
+                // Call player joined bedwars event
+                BedwarsGamePlayerJoinEvent event = new BedwarsGamePlayerJoinEvent(player, room);
+                Bukkit.getServer().getPluginManager().callEvent(event);
+            }
+        } else if (currentRoom == null && rooms.containsKey(worldpw)) {
             player.sendMessage(ChatColor.GREEN + "Joining...");
             SleepingRoom room = rooms.get(worldpw);
-            room.playerEnter(player);
+            room.playerEnter(player, null);
             playerList.put(player, worldpw);
-            player.sendMessage(ChatColor.AQUA + "This game hosted by " + ChatColor.LIGHT_PURPLE + room.getHost().getName());
 
+            // Call player joined bedwars event
             BedwarsGamePlayerJoinEvent event = new BedwarsGamePlayerJoinEvent(player, room);
             Bukkit.getServer().getPluginManager().callEvent(event);
         } else {
@@ -95,21 +116,11 @@ public class GameManager {
         player.sendMessage(ChatColor.YELLOW + "You are not in game.");
     }
 
-    // This function only for when the room will be destroy
-    public void allLeave(Set<Player> ppl) {
-        for (Player p : ppl) {
-            if (playerList.containsKey(p)) {
-                playerList.remove(p);
-            }
-        }
-    }
-
     public SleepingRoom getRoomByPlayer(Player player) {
         for (SleepingRoom room : rooms.values()) {
             if (room.isPlayerInRoom(player))
                 return room;
         }
-
         return null;
     }
 
@@ -118,7 +129,6 @@ public class GameManager {
             if (roomEntry.getKey().equals(roomName))
                 return roomEntry.getValue();
         }
-
         return null;
     }
 

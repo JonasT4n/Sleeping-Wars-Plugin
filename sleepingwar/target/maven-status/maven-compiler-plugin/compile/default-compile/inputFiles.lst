@@ -1,5 +1,6 @@
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\TimelineEventType.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\utility\PlayerBedwarsEntity.java
+D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\utility\Timer\AreaEffectTimer.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameBedDestroyedEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\commands\SleepingWarsPermissionsCommand.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\ItemPrice\PricetagsItemsPotion.java
@@ -25,10 +26,12 @@ D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingw
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\ResourceSpawner.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerDeathEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\SleepingRoom.java
+D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\utility\UsefulStaticFunctions.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\BedwarsShopType.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\utility\VoidGenerator.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameShopBuyEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\commands\TabCompletor\HostingCommands.java
+D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\CustomEntityStatus.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\ResourcesType.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\BuilderTestRoom.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\commands\TabCompletor\SworldCommands.java

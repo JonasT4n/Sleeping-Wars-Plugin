@@ -30,10 +30,10 @@ public class PlayerReviveTimer extends StopwatchTimer {
                     return;
                 }
 
-                counter -= 0.05f;
-                player.sendTitle("Reviving...", String.format("In %.1f...", counter), 0, 12, 0);
+                counter -= 0.1f;
+                player.sendTitle("Reviving...", String.format("In %.1f...", counter), 0, 3, 0);
             }
-        }, 0L, 1L);
+        }, 0L, 2L);
     }
 
     @Override

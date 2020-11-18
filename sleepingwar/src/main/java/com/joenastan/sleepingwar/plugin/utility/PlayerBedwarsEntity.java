@@ -10,6 +10,8 @@ public class PlayerBedwarsEntity {
     private Location lastTpFrom;
     private String teamChoice;
     private GameMode lastGameMode;
+    // TODO: Put temporary item inventory
+    //private ItemStack 
 
     public PlayerBedwarsEntity(Player player, Location lastTpfrom, GameMode lastGameMode) {
         this.player = player;

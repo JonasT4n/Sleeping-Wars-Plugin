@@ -75,10 +75,20 @@ public class PricetagsItems {
 
     public void setPrice(int price) {
         this.price = price;
+        List<String> updateLore = meta.getLore();
+
+        // Remove line of current pricetag
+        updateLore.remove(updateLore.size() - 1);
+
+        // Readd line of new pricetag
+        updateLore.add(getPriceTag());
+
+        // Update Lore
+        meta.setLore(updateLore);
     }
 
     public int getPrice(int price) {
-        this.price = price;
+        setPrice(price);
         return price;
     }
 
@@ -105,6 +115,10 @@ public class PricetagsItems {
 
     public ItemMeta getMeta() {
         return meta;
+    }
+
+    public void setMeta(ItemMeta meta) {
+        this.meta = meta;
     }
 
     public int getDefaultAmount() {

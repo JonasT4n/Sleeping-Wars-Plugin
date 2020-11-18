@@ -1,6 +1,7 @@
 package com.joenastan.sleepingwar.plugin.commands;
 
 import com.joenastan.sleepingwar.plugin.game.BedwarsShopType;
+import com.joenastan.sleepingwar.plugin.game.GameManager;
 import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
 import com.joenastan.sleepingwar.plugin.game.ResourcesType;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
@@ -8,6 +9,7 @@ import com.joenastan.sleepingwar.plugin.events.OnBuilderModeEvents;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.TimelineEventType;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
+import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
 import com.joenastan.sleepingwar.plugin.utility.VoidGenerator;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
@@ -34,11 +36,14 @@ import java.util.Map;
 public class WorldMakerCommand implements Listener, CommandExecutor {
 
     private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
+    private final GameManager gameManager = SleepingWarsPlugin.getGameManager();
     private String addEventCMD = "addevent"; // Add event timeline
+    private String addTeamCMD = "addteam"; // Add another team
     private String createCMD = "create"; // command to create the world
     private String removeEventCMD = "delevent"; // delete event timeline
     private String deleteResSpawnCMD = "delrspawn"; // delete resource spawner by name
     private String deleteShopLocCMD = "delshop"; // delete shop spawner
+    private String deleteTeamCMD = "delteam"; // delete an existing team
     private String editWorldCMD = "edit"; // command to go teleport into bedwars and set to builder mode
     private String sworldHelpCMD = "help"; // Help menu for world builder
     private String leaveWorldCMD = "leave"; // leave world back to where you were
@@ -50,6 +55,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
     private String queueSpawnCMD = "setqspawn"; // set queue spawn for hosting a bedwars
     private String setSpawnCMD = "setspawn"; // set world default spawn, this can be use in all kinds of world
     private String spawnShopCMD = "spawnshop"; // Spawn the shops safely in world
+    private String setResSpawnerDurCMD = "setrdur"; // Set resource spawner duration per spawn specifically
     private String setResourceSpawnerCMD = "setrspawn"; // Set Resource Spawner with it's type
     private String setTeamSpawnCMD = "teamspawn"; // Set Team Spawn by name on that location
     private String teamInfoCMD = "teaminfo"; // Look up the team in world info
@@ -65,6 +71,12 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             // Only player in server can use this command
             if (sender instanceof Player) {
                 Player player = ((Player) sender);
+                // Check if player currently playing Bedwars
+                if (gameManager.getRoomByName(player.getWorld().getName()) != null) {
+                    player.sendMessage(ChatColor.RED + "You can't edit world while playing Bedwars");
+                    return true;
+                }
+
                 // Sworld Help Command
                 if (initialSubCommand.equalsIgnoreCase(sworldHelpCMD)) {
                     if (args.length < 2) 
@@ -131,6 +143,9 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 // Delete resource spawn
                 else if (initialSubCommand.equalsIgnoreCase(deleteResSpawnCMD) && player.hasPermission("sleepywar.builder")) {
                     deleteResourceSpawner(player, args);
+                }
+                else if (initialSubCommand.equalsIgnoreCase(setResSpawnerDurCMD) && player.hasPermission("sleepywar.builder")) {
+                    setResourceSpawnerDuration(player, args);
                 }
                 // Set Team Spawner
                 else if (initialSubCommand.equalsIgnoreCase(setTeamSpawnCMD) && player.hasPermission("sleepywar.builder")) {
@@ -259,7 +274,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 String description = "";
                 for (Map.Entry<String, Location> bedLocEntry : systemConfig.getBedLocationMap(worldName).entrySet()) {
                     Location bedLoc = bedLocEntry.getValue();
-                    if (isMaterialBed(bedLoc.getBlock().getType()))
+                    if (UsefulStaticFunctions.isMaterialBed(bedLoc.getBlock().getType()))
                         description += String.format("%s%s: %s%b; ", getColor(systemConfig.getTeamPrefix(worldName).get(bedLocEntry.getKey())), 
                                 bedLocEntry.getKey(), ChatColor.GREEN + "", true);
                     else
@@ -293,8 +308,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
 
     private void editWorld(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(ChatColor.GREEN + "You need to insert a world name. " +
-                    ChatColor.YELLOW + "/sworld edit <worldname>");
+            player.sendMessage(ChatColor.GREEN + "You need to insert a world name. " + ChatColor.YELLOW + "/sworld edit <worldname>");
         } else {
             World w = Bukkit.getServer().getWorld(args[1]);
             if (w != null) {
@@ -452,8 +466,8 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
     private void testActivateResourceSpawner(Player player) {
         String worldName = player.getWorld().getName();
         if (systemConfig.getAllWorldName().contains(worldName)) {
-            Map<String, ResourceSpawner> spawners = systemConfig.getResourceSpawnersPack(worldName);
-
+            Map<String, ResourceSpawner> spawners = systemConfig.getAllResourceSpawnersPack(worldName);
+            // Check if no resource spawners in world
             if (spawners.isEmpty() == true) {
                 player.sendMessage(ChatColor.YELLOW + "There are no spawner in this world.");
                 return;
@@ -503,30 +517,59 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
     }
 
     private void deleteResourceSpawner(Player player, String[] args) {
-        if (args.length < 2) {
-            player.sendMessage(ChatColor.GREEN + "You need to insert an existing spawner name. " +
-                    ChatColor.YELLOW + "/sworld delrspawn <codename>");
-        } else {
-            String availableWorldName = player.getWorld().getName();
-            if (systemConfig.getAllWorldName().contains(availableWorldName)) {
-                if (systemConfig.deleteResourceSpawner(availableWorldName, args[1])) {
-                    player.sendMessage(ChatColor.GREEN + "Resource spawner successfully deleted.");
-                    systemConfig.Save();
-                } else {
-                    player.sendMessage(ChatColor.RED + "Resource spawner may be not exists or failed.");
-                }
+        String availableWorldName = player.getWorld().getName();
+        if (systemConfig.getAllWorldName().contains(availableWorldName)) {
+            if (args.length < 3) {
+                player.sendMessage(ChatColor.GREEN + "You need to insert an existing spawner name. " + 
+                        ChatColor.YELLOW + "/sworld delrspawn <teamname|PUBLIC> <codename>");
             } else {
-                player.sendMessage(ChatColor.RED + "World is not registered as Bedwars world.");
+                if (systemConfig.deleteResourceSpawner(availableWorldName, args[1], args[2])) {
+                    player.sendMessage(ChatColor.GREEN + "Resource spawner successfully deleted.");
+                    return;
+                }
+                player.sendMessage(ChatColor.RED + "Resource spawner may be not exists or failed.");
             }
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You are not in Bedwars world building.");
+        }
+    }
+
+    private void setResourceSpawnerDuration(Player player, String[] args) {
+        String inWorldName = player.getWorld().getName();
+        if (systemConfig.getAllWorldName().contains(inWorldName)) {
+            if (args.length < 4) {
+                player.sendMessage(ChatColor.GREEN + "You need to insert an existing spawner name. " + 
+                        ChatColor.YELLOW + "/sworld setrdur <teamname|PUBLIC> <codename> <duration-per-spawn>");
+            } else {
+                if (isPositiveNumber(args[3])) {
+                    int dur = Integer.parseInt(args[3]);
+                    if (!systemConfig.getAllTeamName(inWorldName).contains(args[1]))
+                        args[1] = "PUBLIC";
+                        
+                    if (!systemConfig.getResourceSpawnersPack(inWorldName, args[1]).isEmpty()) {
+                        ResourceSpawner rs = systemConfig.getResourceSpawnersPack(inWorldName, args[1]).get(args[2]);
+                        if (rs != null) {
+                            rs.setSpawnInterval((float)dur);
+                            player.sendMessage(ChatColor.GREEN + rs.getCodename() + " resource spawner duration set: " + dur + " sec(s)");
+                            return;
+                        }
+                    }
+                    player.sendMessage(ChatColor.RED + "Invalid Input or Resource spawner not exists.");
+                } else {
+                    player.sendMessage(ChatColor.YELLOW + "Duration must be number.");
+                }
+            }
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You are not in Bedwars world building.");
         }
     }
 
     private void addResourceSpawner(Player player, String[] args) {
-        if (args.length < 4) {
-            player.sendMessage(ChatColor.DARK_PURPLE + "Invalid Input.");
-        } else {
-            String worldName = player.getWorld().getName();
-            if (systemConfig.getAllWorldName().contains(worldName)) {
+        String worldName = player.getWorld().getName();
+        if (systemConfig.getAllWorldName().contains(worldName)) {
+            if (args.length < 4) {
+                player.sendMessage(ChatColor.DARK_PURPLE + "Invalid Input.");
+            } else {
                 Location loc = player.getLocation();
                 String wname = player.getWorld().getName();
                 ResourcesType rcst = ResourcesType.fromString(args[2]);
@@ -535,29 +578,28 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 } else {
                     if (systemConfig.getAllTeamName(wname).contains(args[1])) {
                         ResourceSpawner newRSpawener = new ResourceSpawner(args[3], loc, rcst);
-                        systemConfig.getResourceSpawnersPack(wname, args[1]).put(args[3], newRSpawener);
-                        player.sendMessage(ChatColor.GREEN + "Added " + args[2] + " spawner with name \"" + args[3] + "\" on team " + args[1]);
-                    } else if (args[1].equalsIgnoreCase("public")) {
-                        ResourceSpawner newRSpawener = new ResourceSpawner(args[3], loc, rcst);
-                        systemConfig.getResourceSpawnersPack(wname, "PUBLIC").put(args[3], newRSpawener);
-                        player.sendMessage(ChatColor.GREEN + "Added public " + args[2] + " spawner with name \"" + args[3]);
+                        systemConfig.addResourceSpawner(wname, args[1], newRSpawener);
+                        player.sendMessage(ChatColor.GREEN + "Added " + rcst.toString() + " spawner with name \"" + args[3] + "\" for team " + args[1]);
                     } else {
-                        player.sendMessage(ChatColor.YELLOW + "There is no team named \"" + args[1] + "\" in this world.");
+                        ResourceSpawner newRSpawener = new ResourceSpawner(args[3], loc, rcst);
+                        systemConfig.addResourceSpawner(wname, "PUBLIC", newRSpawener);
+                        player.sendMessage(ChatColor.GREEN + "Added public " + rcst.toString() + " spawner with name \"" + args[3]);
                     }
                 }
-            } else {
-                player.sendMessage(ChatColor.RED + "You are not in Bedwars World Building.");
             }
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You are not in Bedwars world building.");
         }
+        
     }
 
     private void sendResourceSpawnerInfo(Player player) {
         String worldName = player.getWorld().getName();
         if (systemConfig.getAllWorldName().contains(worldName)) {
-            Map<String, ResourceSpawner> spawners = systemConfig.getResourceSpawnersPack(worldName);
+            Map<String, ResourceSpawner> spawners = systemConfig.getAllResourceSpawnersPack(worldName);
             String description = String.format("%s~[Resource Spawners in %s]~\n", ChatColor.GREEN + "", worldName);
             description += String.format("%sThere are %s%d %sResource Spawner(s)\n", ChatColor.AQUA + "", ChatColor.LIGHT_PURPLE + "", 
-                    systemConfig.getResourceSpawnersPack(worldName).size(), ChatColor.AQUA + "");
+                    systemConfig.getAllResourceSpawnersPack(worldName).size(), ChatColor.AQUA + "");
             for (Map.Entry<String, ResourceSpawner> rsp : spawners.entrySet()) {
                 ResourceSpawner rs = rsp.getValue();
                 if (rs.getTypeResourceSpawner() == ResourcesType.IRON) {
@@ -601,7 +643,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             description += String.format("%sEvents in timeline count: %s%d\n", ChatColor.AQUA + "", ChatColor.LIGHT_PURPLE + "", 
                     systemConfig.getTimelineEvents(worldName).size());
             description += String.format("%sThere are %s%d %sResource Spawner(s)", ChatColor.AQUA + "", ChatColor.LIGHT_PURPLE + "", 
-                    systemConfig.getResourceSpawnersPack(worldName).size(), ChatColor.AQUA + "");
+                    systemConfig.getAllResourceSpawnersPack(worldName).size(), ChatColor.AQUA + "");
             player.sendMessage(description);
         } else {
             player.sendMessage(ChatColor.RED + "You are not in Bedwars World Building.");
@@ -647,6 +689,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
     }
 
     private boolean isPositiveNumber(String numStr) {
+        int dotCount = 0;
         for (int i = 0; i < numStr.length(); i++) {
             switch (numStr.charAt(i)) {
                 case '1':
@@ -668,6 +711,11 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 case '9':
                     break;
                 case '0':
+                    break;
+                case '.':
+                    dotCount++;
+                    if (dotCount > 1) 
+                        return false;
                     break;
                 default:
                     return false;
@@ -695,45 +743,6 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
             return ChatColor.GRAY + "";
         } else {
             return ChatColor.WHITE + "";
-        }
-    }
-
-    private boolean isMaterialBed(Material material) {
-        switch (material) {
-            case BLACK_BED:
-                return true;
-            case BLUE_BED:
-                return true;
-            case BROWN_BED:
-                return true;
-            case CYAN_BED:
-                return true;
-            case GREEN_BED:
-                return true;
-            case YELLOW_BED:
-                return true;
-            case RED_BED:
-                return true;
-            case ORANGE_BED:
-                return true;
-            case GRAY_BED:
-                return true;
-            case LIGHT_BLUE_BED:
-                return true;
-            case LIME_BED:
-                return true;
-            case PINK_BED:
-                return true;
-            case MAGENTA_BED:
-                return true;
-            case PURPLE_BED:
-                return true;
-            case WHITE_BED:
-                return true;
-            case LIGHT_GRAY_BED:
-                return true;
-            default:
-                return false;
         }
     }
 

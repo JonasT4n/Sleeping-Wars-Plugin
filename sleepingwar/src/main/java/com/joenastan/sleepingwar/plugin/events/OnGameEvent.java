@@ -6,29 +6,43 @@ import com.joenastan.sleepingwar.plugin.game.GameManager;
 import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
+import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
+
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.*;
+import org.bukkit.block.data.type.Bed;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -48,8 +62,8 @@ public class OnGameEvent implements Listener {
         String inWorldName = entPlayer.getWorld().getName();
 
         // Change menu by clicking on item, only if player in Bedwars world able to do this
-        if ((gameManager.getAllRoom().containsKey(inWorldName) || systemConfig.getAllWorldName().contains(inWorldName)) && onInv != null) {
-            if ((onInv.getType() != InventoryType.PLAYER || onInv.getType() == InventoryType.CREATIVE) && entPlayer instanceof HumanEntity) {
+        if (gameManager.getAllRoom().containsKey(inWorldName) && onInv != null) {
+            if (onInv.getType() != InventoryType.PLAYER && entPlayer instanceof HumanEntity) {
                 Player player = (Player)entPlayer;
                 ItemStack clickedItem = onInv.getItem(slot);
                 SleepingRoom room = gameManager.getRoomByName(inWorldName);
@@ -68,6 +82,47 @@ public class OnGameEvent implements Listener {
                     }
                 }
             }
+
+            if (event.getSlotType() == SlotType.ARMOR) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityGotDamage(EntityDamageEvent event) {
+        Entity ent = event.getEntity();
+        if (ent instanceof Player) {
+            Player player = (Player)ent;
+            String inWorldName = player.getWorld().getName();
+            SleepingRoom room = gameManager.getRoomByName(inWorldName);
+            if (room != null) {
+                PlayerInventory playerInv = player.getInventory();
+                ItemStack[] armorSet = playerInv.getArmorContents();
+                for (ItemStack armorStack : armorSet) {
+                    if (armorStack != null) {
+                        ItemMeta armorMeta = armorStack.getItemMeta();
+                        if (armorMeta instanceof Damageable) {
+                            Damageable dmgMeta = (Damageable)armorMeta;
+                            dmgMeta.setDamage(0);
+                        }
+                        armorStack.setItemMeta(armorMeta);
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDropEvent(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        Item droppedItem = event.getItemDrop();
+        SleepingRoom room = gameManager.getRoomByName(player.getWorld().getName());
+
+        if (room != null) {
+            if (UsefulStaticFunctions.isSword(droppedItem.getItemStack().getType())) {
+                event.setCancelled(true);
+            }
         }
     }
 
@@ -84,13 +139,20 @@ public class OnGameEvent implements Listener {
                 if (!room.isGameProcessing()) {
                     event.setCancelled(true);
                 } else {
-                    if (isMaterialBed(block.getType())) {
+                    if (UsefulStaticFunctions.isMaterialBed(block.getType())) {
+                        //System.out.println("[DEBUG] Bed Broken");
                         TeamGroupMaker bedTeamDestroyed = null;
-                        Location blockLoc = block.getLocation();
+                        event.setDropItems(false);
                         for (TeamGroupMaker t : room.getAllTeams()) {
-                            Location bedTeamLoc = t.getTeamBedLocation();
-                            if (blockLoc.getBlockX() == bedTeamLoc.getBlockX() && blockLoc.getBlockY() == bedTeamLoc.getBlockY() && 
-                                    blockLoc.getBlockZ() == bedTeamLoc.getBlockZ()) {
+                            Block bedBlockTeam = t.getTeamBedLocation().getBlock();
+                            Bed thisTeamBed = UsefulStaticFunctions.isMaterialBed(bedBlockTeam.getType()) ? (Bed)bedBlockTeam.getBlockData() : null;
+                            //System.out.println("[DEBUG] Bed Facing: " + bed.getFacing());
+                            if (thisTeamBed == null)
+                                continue;
+
+                            Block headBedTeam = bedBlockTeam.getRelative(thisTeamBed.getFacing(), 1);
+                            // Check equal
+                            if (headBedTeam.equals(block) || bedBlockTeam.equals(block)) {
                                 bedTeamDestroyed = t;
                                 break;
                             }
@@ -101,13 +163,13 @@ public class OnGameEvent implements Listener {
                                 player.sendMessage(ChatColor.RED + "You can't destroy your own bed.");
                                 event.setCancelled(true);
                             } else {
-                                block.getDrops().clear();
+                                //System.out.println("[DEBUG] Bed Destroyed");
                                 BedwarsGameBedDestroyedEvent ev = new BedwarsGameBedDestroyedEvent(player, bedTeamDestroyed, byTeam);
                                 Bukkit.getPluginManager().callEvent(ev);
                             }
                         }
                     } else if (!room.destroyBlock(block)) {
-                        event.setCancelled(true);
+                        event.setCancelled(true); 
                     }
                 }
             }
@@ -141,16 +203,15 @@ public class OnGameEvent implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         String inWorldName = event.getPlayer().getWorld().getName();
         Player player = event.getPlayer();
+        SleepingRoom room = gameManager.getRoomByName(inWorldName);
 
         // Check if player enter the gameplay world
-        if (!gameManager.getAllRoom().isEmpty()) {
-            if (gameManager.getAllRoom().keySet().contains(inWorldName)) {
-                SleepingRoom room = gameManager.getRoomByPlayer(player);
-                if (room != null) {
-                    if (room.isGameProcessing()) {
-                        gameManager.getPlayerInGameList().put(player, inWorldName);
-                    }
-                }
+        if (room != null) {
+            if (!room.isGameProcessing()) {
+                gameManager.getPlayerInGameList().put(player, inWorldName);
+                room.playerEnter(player, null);
+            } else {
+                room.roomBroadcast(ChatColor.BLUE + player.getName() + " has reconnected to the game.");
             }
         }
     }
@@ -159,16 +220,15 @@ public class OnGameEvent implements Listener {
     public void onPlayerExit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         String inWorldName = event.getPlayer().getWorld().getName();
+        SleepingRoom room = gameManager.getRoomByName(inWorldName);
 
         // Check if player exit from the gameplay world
-        if (!gameManager.getAllRoom().isEmpty()) {
-            if (gameManager.getAllRoom().keySet().contains(inWorldName)) {
-                SleepingRoom room = gameManager.getRoomByPlayer(player);
+        if (room != null) {
+            if (!room.isGameProcessing()) {
                 gameManager.getPlayerInGameList().remove(player);
-
-                if (!room.isGameProcessing()) {
-                    room.playerLeave(player);
-                }
+                room.playerLeave(player);
+            } else {
+                room.roomBroadcast(ChatColor.DARK_AQUA + player.getName() + " is disconnected from the game.");
             }
         }
     }
@@ -336,10 +396,9 @@ public class OnGameEvent implements Listener {
 
     @EventHandler
     public void onGamePlayerJoin(BedwarsGamePlayerJoinEvent event) {
-        // SleepingRoom room = event.getRoom();
-        // for (Player p : room.getAllPlayer()) {
-        //     p.sendMessage(ChatColor.GREEN + event.getPlayer().getName() + " joined the party.");
-        // }
+        SleepingRoom room = event.getRoom();
+        Player player = event.getPlayer();
+        player.sendMessage(ChatColor.AQUA + "This game hosted by " + ChatColor.LIGHT_PURPLE + room.getHost().getName());
     }
 
     @EventHandler
@@ -359,13 +418,21 @@ public class OnGameEvent implements Listener {
     }
 
     @EventHandler
-    public void onGameEnded(BedwarsGameEndedEvent ended) {
-
+    public void onGameEnded(BedwarsGameEndedEvent event) {
+        SleepingRoom room = event.getRoom();
+        TeamGroupMaker team = event.getWinnerTeam();
+        room.roomBroadcast("Bedwars winner team: " + team.getName());
     }
 
     @EventHandler
     public void onRoomTimelineUpdate(BedwarsGameTimelineEvent event) {
-
+        TimelineEventType typeEvent = event.getEventType();
+        SleepingRoom room = event.getRoom();
+        if (typeEvent == TimelineEventType.DIAMOND_UPGRADE) {
+            room.roomBroadcast(ChatColor.AQUA + "Diamond Generator has been upgraded!");
+        } else if (typeEvent == TimelineEventType.EMERALD_UPGRADE) {
+            room.roomBroadcast(ChatColor.GREEN + "Emerald Generator has been upgraded!");
+        }
     }
 
     @EventHandler
@@ -374,44 +441,5 @@ public class OnGameEvent implements Listener {
         SleepingRoom room = victim.getRoom();
         room.roomBroadcast(String.format("Team %s%s's bed got destroyed by %s%s", victim.getName(), 
                 ChatColor.WHITE + "", event.getTeamDestroyer().getColor(), event.byWho().getName()));
-    }
-
-    private boolean isMaterialBed(Material material) {
-        switch (material) {
-            case BLACK_BED:
-                return true;
-            case BLUE_BED:
-                return true;
-            case BROWN_BED:
-                return true;
-            case CYAN_BED:
-                return true;
-            case GREEN_BED:
-                return true;
-            case YELLOW_BED:
-                return true;
-            case RED_BED:
-                return true;
-            case ORANGE_BED:
-                return true;
-            case GRAY_BED:
-                return true;
-            case LIGHT_BLUE_BED:
-                return true;
-            case LIME_BED:
-                return true;
-            case PINK_BED:
-                return true;
-            case MAGENTA_BED:
-                return true;
-            case PURPLE_BED:
-                return true;
-            case WHITE_BED:
-                return true;
-            case LIGHT_GRAY_BED:
-                return true;
-            default:
-                return false;
-        }
     }
 }

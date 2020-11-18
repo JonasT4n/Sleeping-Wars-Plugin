@@ -16,6 +16,7 @@ public class ResourceSpawner {
     private ResourceSpawnTimer looper;
     private Material mat;
     private boolean isActive;
+    private CustomEntityStatus status = CustomEntityStatus.DEFAULT;
 
     public ResourceSpawner(String codename, Location spawnLoc, ResourcesType typeSpawnResource) {
         this.spawnLoc = spawnLoc;
@@ -41,6 +42,34 @@ public class ResourceSpawner {
             default: // Default is IRON
                 mat = Material.IRON_INGOT;
                 looper = new ResourceSpawnTimer(1f, this);
+                break;
+        }
+    }
+
+    public ResourceSpawner(String codename, Location spawnLoc, ResourcesType typeSpawnResource, float durationPerSpawn) {
+        this.spawnLoc = spawnLoc;
+        this.typeSpawnResource = typeSpawnResource;
+        this.codename = codename;
+        isActive = false;
+        spawnAmount = 1;
+
+        // Defaults values
+        switch (typeSpawnResource) {
+            case GOLD:
+                mat = Material.GOLD_INGOT;
+                looper = new ResourceSpawnTimer(durationPerSpawn, this);
+                break;
+            case DIAMOND:
+                mat = Material.DIAMOND;
+                looper = new ResourceSpawnTimer(durationPerSpawn, this);
+                break;
+            case EMERALD:
+                mat = Material.EMERALD;
+                looper = new ResourceSpawnTimer(durationPerSpawn, this);
+                break;
+            default: // Default is IRON
+                mat = Material.IRON_INGOT;
+                looper = new ResourceSpawnTimer(durationPerSpawn, this);
                 break;
         }
     }
@@ -96,8 +125,16 @@ public class ResourceSpawner {
         return looper.getDuration();
     }
 
+    public void setStatus(CustomEntityStatus status) {
+        this.status = status;
+    }
+
+    public CustomEntityStatus getStatus() {
+        return status;
+    }
+
     private void setRunning(boolean run) {
-        if (run) {
+        if (run && status == CustomEntityStatus.DEFAULT) {
             //System.out.println("[DEBUG] Resource Spawner " + codename + " is now running");
             looper.start();
         } else {
