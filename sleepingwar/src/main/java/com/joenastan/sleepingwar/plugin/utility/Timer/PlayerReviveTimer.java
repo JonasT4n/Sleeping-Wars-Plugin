@@ -29,7 +29,6 @@ public class PlayerReviveTimer extends StopwatchTimer {
                     reset();
                     return;
                 }
-
                 counter -= 0.1f;
                 player.sendTitle("Reviving...", String.format("In %.1f...", counter), 0, 3, 0);
             }
@@ -41,6 +40,10 @@ public class PlayerReviveTimer extends StopwatchTimer {
         player.teleport(teamSpawner);
         player.setGameMode(GameMode.SURVIVAL);
         team.setStarterPack(player);
+    }
+
+    public void changePlayer(Player player) {
+        this.player = player;
     }
 
 }

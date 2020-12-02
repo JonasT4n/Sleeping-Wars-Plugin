@@ -1,5 +1,9 @@
 package com.joenastan.sleepingwar.plugin.utility.Timer;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 
 import org.bukkit.Bukkit;
@@ -9,15 +13,43 @@ import org.bukkit.potion.PotionEffect;
 
 public class AreaEffectTimer extends StopwatchTimer {
 
-    private Location midPoint;
-    private int radius;
+    private Location minimalPoint;
+    private Location maximalPoint;
     private TeamGroupMaker teamEligible;
     private PotionEffect effect;
+    private boolean singleShot = false;
+    private boolean opposition = false;
 
-    public AreaEffectTimer(float duration, Location midPoint, int radius, TeamGroupMaker teamEligible, PotionEffect effect) {
+    /**
+     * Area effect routine whenever the team enters the area. The area is already auto calculation with minimum and maximum so don't worry.
+     * @param duration Duration 
+     * @param minimalPoint Minimum area X Y Z
+     * @param maximalPoint Maximum area X Y Z
+     * @param teamEligible The team only eligible to get this effect
+     * @param effect Potion effect which will be gift for eligible team
+     */
+    public AreaEffectTimer(float duration, Location minPoint, Location maxPoint, PotionEffect effect, @Nullable TeamGroupMaker teamEligible) {
         super(duration);
-        this.midPoint = midPoint;
-        this.radius = radius;
+        // Auto calculate minimum and maximum point
+        double temp;
+        if (minPoint.getX() > maxPoint.getX()) {
+            temp = minPoint.getX();
+            minPoint.setX(maxPoint.getX());
+            maxPoint.setX(temp);
+        }
+        if (minPoint.getY() > maxPoint.getY()) {
+            temp = minPoint.getY();
+            minPoint.setY(maxPoint.getY());
+            maxPoint.setY(temp);
+        }
+        if (minPoint.getZ() > maxPoint.getZ()) {
+            temp = minPoint.getZ();
+            minPoint.setZ(maxPoint.getZ());
+            maxPoint.setZ(temp);
+        }
+        // Assign everything
+        minimalPoint = minPoint;
+        maximalPoint = maxPoint;
         this.teamEligible = teamEligible;
         this.effect = effect;
     }
@@ -39,24 +71,25 @@ public class AreaEffectTimer extends StopwatchTimer {
 
     @Override
     protected void runEvent() {
-        for (Player p : teamEligible.getPlayersInTeam()) {
-            p.addPotionEffect(effect);
+        boolean hitPlayer = false;
+        List<Player> playersInWorld = minimalPoint.getWorld().getPlayers();
+        for (Player p : playersInWorld) {
+            Location playerCurrentLocation = p.getLocation();
+            if (playerCurrentLocation.getX() <= maximalPoint.getX() && playerCurrentLocation.getX() >= minimalPoint.getX())
+                if (playerCurrentLocation.getY() <= maximalPoint.getY() && playerCurrentLocation.getY() >= minimalPoint.getY())
+                    if (playerCurrentLocation.getZ() <= maximalPoint.getZ() && playerCurrentLocation.getZ() >= minimalPoint.getZ()) {
+                        if (teamEligible != null)
+                            if ((teamEligible.getPlayers().contains(p) && !opposition) || (!teamEligible.getPlayers().contains(p) && opposition))
+                                hitPlayer = p.addPotionEffect(effect);
+                        else
+                            hitPlayer = p.addPotionEffect(effect);
+                        if (singleShot)
+                            break;
+                    }
         }
-
         reset();
-        start();
-    }
-
-    public Location getMidPoint() {
-        return midPoint;
-    }
-
-    public void setRadius(int radius) {
-        this.radius = radius;
-    }
-
-    public int getRadius() {
-        return radius;
+        if (!singleShot || (!hitPlayer && singleShot))
+            start();
     }
 
     public TeamGroupMaker getEligibleTeam() {
@@ -66,5 +99,28 @@ public class AreaEffectTimer extends StopwatchTimer {
     public PotionEffect getEffect() {
         return effect;
     }
-    
+
+    /**
+     * Set the effect which is not for team mate.
+     * @param e set true if the effect area is for opposition.
+     */
+    public void setForOpposition(boolean e) {
+        opposition = e;
+    }
+
+    /**
+     * Check if it is only single time effect gift
+     */
+    public boolean isSingleEffect() {
+        return singleShot;
+    }
+
+    /**
+     * Check while set if it is only single time effect gift
+     */
+    public boolean isSingleEffect(boolean e) {
+        if (e != singleShot)
+            singleShot = e;
+        return singleShot;
+    }
 }

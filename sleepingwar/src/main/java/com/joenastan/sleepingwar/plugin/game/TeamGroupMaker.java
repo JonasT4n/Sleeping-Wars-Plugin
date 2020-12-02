@@ -3,7 +3,9 @@ package com.joenastan.sleepingwar.plugin.game;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.game.InventoryMenus.BedwarsShopMenus;
 import com.joenastan.sleepingwar.plugin.game.InventoryMenus.BedwarsUpgradeMenus;
+import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
+import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 import com.joenastan.sleepingwar.plugin.utility.Timer.PlayerReviveTimer;
 import net.md_5.bungee.api.ChatColor;
 
@@ -13,6 +15,8 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -23,86 +27,61 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class TeamGroupMaker {
 
+    private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
+
     // Attributes
     private String teamName;
-    private String worldOriginalName;
     private Location teamSpawnPoint;
     private Location teamBedLocation;
     private float respawnTime;
     private int eliminetedCount = 0;
     // private Location baseLocationMin;
     // private Location baseLocationMax;
-    private String teamPrefix;
+    private String teamColorPrefix;
     private SleepingRoom inRoom;
     private BedwarsUpgradeMenus upgradeMenu;
+    private BedwarsShopMenus shopMenu;
 
     // Maps and Lists
-    private Map<Player, PlayerReviveTimer> playersNTimer = new HashMap<Player, PlayerReviveTimer>();
-    private Map<String, ResourceSpawner> resourceSpawners = new HashMap<String, ResourceSpawner>();
-    private Map<String, Integer> permanentLevels = new HashMap<String, Integer>();
+    private Map<PlayerBedwarsEntity, PlayerReviveTimer> playersNTimer = new HashMap<PlayerBedwarsEntity, PlayerReviveTimer>();
+    private Map<String, Integer> permaLevelData = new HashMap<String, Integer>();
+    private List<ResourceSpawner> resourceSpawners = new ArrayList<ResourceSpawner>();
 
-    public TeamGroupMaker(SleepingRoom inRoom, String teamName, String worldOriginalName, List<Player> players, Location spawnPoint, Location bedLocation, String teamPrefix) {
-        Location spawnLoc = new Location(inRoom.getWorldQueueSpawn().getWorld(), spawnPoint.getX(), spawnPoint.getY(), spawnPoint.getZ());
-        Location bedLoc = new Location(inRoom.getWorldQueueSpawn().getWorld(), bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
+    /**
+     * Create team group, you need players to be able to create a team
+     * @param inRoom Currently in room
+     * @param teamName Name of team
+     * @param players List of selected players
+     */
+    public TeamGroupMaker(SleepingRoom inRoom, String teamName, List<PlayerBedwarsEntity> players) {
+        // Assign attributes
         this.teamName = teamName;
-        this.teamSpawnPoint = spawnLoc;
-        this.teamPrefix = teamPrefix;
-        this.worldOriginalName = worldOriginalName;
-        this.teamBedLocation = bedLoc;
         this.inRoom = inRoom;
-
-        // Initialize team upgrade menu
-        upgradeMenu = new BedwarsUpgradeMenus(this);
-
+        teamSpawnPoint = systemConfig.getTeamSpawnLoc(inRoom.getWorld(), inRoom.getMapName(), teamName);
+        teamBedLocation = systemConfig.getTeamBedLocation(inRoom.getWorld(), inRoom.getMapName(), teamName);
         respawnTime = 5f;
-        for (Player p : players) {
-            p.sendMessage("You are in team [" + getColor() + teamName + ChatColor.WHITE + "]");
-            playersNTimer.put(p, new PlayerReviveTimer(respawnTime, p, this, spawnLoc));
-            p.teleport(teamSpawnPoint);
-            p.setGameMode(GameMode.SURVIVAL);
-            setStarterPack(p);
+        // Initialize team upgrade menu and shop menu
+        upgradeMenu = new BedwarsUpgradeMenus(this);
+        shopMenu = new BedwarsShopMenus(this);
+        // Initialize players in team
+        for (PlayerBedwarsEntity pbent : players) {
+            pbent.getPlayer().sendMessage("You are in team [" + UsefulStaticFunctions.getColorString(teamColorPrefix) + teamName + ChatColor.WHITE + "]");
+            playersNTimer.put(pbent, new PlayerReviveTimer(respawnTime, pbent.getPlayer(), this, teamSpawnPoint));
+            pbent.getPlayer().teleport(teamSpawnPoint);
+            pbent.getPlayer().setGameMode(GameMode.SURVIVAL);
+            setStarterPack(pbent.getPlayer());
         }
-
-        for (Map.Entry<String, ResourceSpawner> rsp : SleepingWarsPlugin.getGameSystemConfig().getResourceSpawnersPack(worldOriginalName, teamName).entrySet()) {
-            Location resSpawnerLoc = new Location(inRoom.getWorldQueueSpawn().getWorld(), rsp.getValue().getSpawnLocation().getX(),  
-                    rsp.getValue().getSpawnLocation().getY(), rsp.getValue().getSpawnLocation().getZ());
-            resourceSpawners.put(rsp.getKey(), new ResourceSpawner(rsp.getValue().getCodename(), resSpawnerLoc, rsp.getValue().getTypeResourceSpawner()));
-        }
+        // Get all owned by team resource spawners
+        resourceSpawners = systemConfig.getWorldResourceSpawners(inRoom.getWorld(), inRoom.getMapName(), teamName);
     }
 
-    public boolean checkPlayer(Player player) {
-        if (playersNTimer.keySet().contains(player))
-            return true;
-        return false;
-    }
-
-    public void playerDisconnected(Player player) {
-        if (checkPlayer(player))
-            eliminetedCount++;
-    }
-
-    public void playerReconnected(Player player) {
-        if (checkPlayer(player))
-            eliminetedCount--;
-        player.teleport(teamSpawnPoint);
-    }
-
-    public void reviving(Player player) {
-        if (!isBedBroken()) {
-            playersNTimer.get(player).start();
-        } else {
-            eliminetedCount++;
-        }
-
-        player.setHealth(20d);
-        player.teleport(inRoom.getWorldQueueSpawn());
-        player.setGameMode(GameMode.SPECTATOR);
-    }
-
+    /**
+     * When player revive or the game started, then setup the starter items and equipments to player
+     * @param player Selected player
+     */
     public void setStarterPack(Player player) {
         // Setting up leather armor
         ItemStack[] leatherArmorPack = {
@@ -111,192 +90,277 @@ public class TeamGroupMaker {
             new ItemStack(Material.LEATHER_CHESTPLATE, 1),
             new ItemStack(Material.LEATHER_HELMET, 1)
         };
-
         // Set Colors and upgrades of armor
         for (ItemStack leatherArmorItemStack : leatherArmorPack) {
             ItemMeta leatherArmorMeta = leatherArmorItemStack.getItemMeta();
             ((LeatherArmorMeta)leatherArmorMeta).setColor(getPureColor());
-            BedwarsShopMenus.checkUpgrade(this, leatherArmorItemStack);
+            shopMenu.checkUpgrade(leatherArmorItemStack);
             leatherArmorItemStack.setItemMeta(leatherArmorMeta);
         }
-
         // Empty player inventory and set to starter pack
         PlayerInventory playerInv = player.getInventory();
         playerInv.clear();
         playerInv.setArmorContents(leatherArmorPack);
-
         // Create wooden sword
         ItemStack woodenSword = new ItemStack(Material.WOODEN_SWORD);
-        if (permanentLevels.get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
+        if (permaLevelData.get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
             ItemMeta wsMeta = woodenSword.getItemMeta();
-            wsMeta.addEnchant(Enchantment.DAMAGE_ALL, permanentLevels.get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1, true);
+            wsMeta.addEnchant(Enchantment.DAMAGE_ALL, permaLevelData.get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1, true);
             woodenSword.setItemMeta(wsMeta);
         }
         playerInv.setItem(0, woodenSword);
     }
 
+    /**
+     * Upgrade team something by 1
+     * @param upgradeName The name of an upgrade from BedwarsUpgradeMenus constants
+     */
     public void teamUpgrade(String upgradeName) {
         // Upgrade
-        int currentLvl = permanentLevels.get(upgradeName);
-        permanentLevels.put(upgradeName, currentLvl + 1);
-
+        int currentLvl = permaLevelData.get(upgradeName);
+        permaLevelData.put(upgradeName, currentLvl + 1);
         // Effect all player in team
         if (upgradeName.equals(BedwarsUpgradeMenus.SHARPER_BLADE)) {
-            for (Player p : playersNTimer.keySet()) {
-                PlayerInventory pInv = p.getInventory();
+            for (PlayerBedwarsEntity pbent : playersNTimer.keySet()) {
+                PlayerInventory pInv = pbent.getPlayer().getInventory();
                 for (int i = 0; i < pInv.getSize(); i++) {
                     ItemStack pItem = pInv.getItem(i);
                     if (pItem == null)
                         continue;
                     if (UsefulStaticFunctions.isSword(pItem.getType()))
-                        BedwarsShopMenus.checkUpgrade(this, pItem);
+                        shopMenu.checkUpgrade(pItem);
                 }
             }
         } else if (upgradeName.equals(BedwarsUpgradeMenus.MINE_A_HOLIC)) {
-            for (Player p : playersNTimer.keySet()) {
-                PlayerInventory pInv = p.getInventory();
+            for (PlayerBedwarsEntity pbent : playersNTimer.keySet()) {
+                PlayerInventory pInv = pbent.getPlayer().getInventory();
                 for (int i = 0; i < pInv.getSize(); i++) {
                     ItemStack pItem = pInv.getItem(i);
                     if (pItem == null)
                         continue;
                     Material itemType = pItem.getType();
                     if (UsefulStaticFunctions.isAxe(itemType) || itemType == Material.SHEARS || UsefulStaticFunctions.isPickaxe(itemType))
-                        BedwarsShopMenus.checkUpgrade(this, pItem);
+                        shopMenu.checkUpgrade(pItem);
                 }
             }
         } else if (upgradeName.equals(BedwarsUpgradeMenus.MAKE_IT_RAIN)) {
-            for (ResourceSpawner rspEntry : resourceSpawners.values()) {
-                // TODO: Create Generic upgrades, custom persentage upgrade
+            for (ResourceSpawner rspEntry : resourceSpawners) {
+                // TODO: Create Generic upgrades, custom percentage upgrade
                 // 25% duration reduction
                 rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25/100));
             }
         } else if (upgradeName.equals(BedwarsUpgradeMenus.HOLY_LIGHT)) {
             // TODO: Area Regeneration
         } else if (upgradeName.equals(BedwarsUpgradeMenus.TOUGH_SKIN) || upgradeName.equals(BedwarsUpgradeMenus.EYE_FOR_AN_EYE)) {
-            for (Player p : playersNTimer.keySet()) {
-                ItemStack[] armorPack = p.getInventory().getArmorContents();
-                for (ItemStack armorStack : armorPack) {
-                    BedwarsShopMenus.checkUpgrade(this, armorStack);
-                }
+            for (PlayerBedwarsEntity pbent : playersNTimer.keySet()) {
+                ItemStack[] armorPack = pbent.getPlayer().getInventory().getArmorContents();
+                for (ItemStack armorStack : armorPack)
+                    shopMenu.checkUpgrade(armorStack);
             }
         } else if (upgradeName.equals(BedwarsUpgradeMenus.GIFT_FOR_THE_POOR)) {
             // TODO: Easter Egg
         }
     }
 
-    public boolean isAllMemberElimineted() {
-        return eliminetedCount == playersNTimer.size();
+    /**
+     * Reviving player from any death, this function is extremely useful
+     * @param player Death body
+     */
+    public void reviving(Player player) {
+        // Check if bed is already broken, then the person has been eliminated
+        if (!isBedBroken()) {
+            for (PlayerBedwarsEntity pbent : playersNTimer.keySet()) {
+                if (pbent.getPlayer().equals(player))
+                    playersNTimer.get(pbent).start();
+            }
+        } else {
+            eliminetedCount++;
+        }
+        // Immediately set player to normal fresh from spawn form
+        player.setHealth(20d);
+        player.teleport(inRoom.getQueueLocation());
+        player.setGameMode(GameMode.SPECTATOR);
     }
 
-    public int getRemainingPlayers() {
-        return playersNTimer.size() - eliminetedCount;
+    /**
+     * Open an upgrade menu, team progress only.
+     * @param player Player who gonna open upgrade menu
+     */
+    public void openUpgradeMenu(Player player) {
+        upgradeMenu.openMenu(player, "Upgrade Menu");
     }
 
-    public boolean isBedBroken() {
-        Block block = teamBedLocation.getBlock();
-        return !UsefulStaticFunctions.isMaterialBed(block.getType());
+    /**
+     * Open a shop menu, owned by team only.
+     * @param player
+     */
+    public void openShopMenu(Player player, String shopName) {
+        shopMenu.openMenu(player, shopName);
     }
 
-    public void sendTeamMessage(String msg) {
-        for (Player p : playersNTimer.keySet()) {
-            p.sendMessage(teamPrefix + "[" + teamName + "]" + ChatColor.WHITE + msg);
+    /**
+     * When player is buying an item in any bedwars menu.
+     * @param player Player who selected it
+     * @param menu Inventory as a menu
+     * @param menuView The view inventory menu
+     * @param selectedItem Item which selected by player
+     * @param slotIndex Slot index selected
+     */
+    public void selectInventoryMenu(Player player, Inventory menu, InventoryView menuView, ItemStack selectedItem, int slotIndex) {
+        String menuTitle = menuView.getTitle();
+        if (menuTitle == "Upgrade Menu") {
+            upgradeMenu.selectedSlot(player, menu, slotIndex);
+        } else {
+            ItemMeta itemMeta = selectedItem.getItemMeta();
+            if (shopMenu.openMenu(player, itemMeta.getDisplayName()))
+                return;
+            shopMenu.selectedSlot(player, menu, slotIndex);
         }
     }
 
-    public Map<String, Integer> getTeamLevels() {
-        return permanentLevels;
+    /**
+     * Usage of this function only if the game is in progress. Handle a player which trying to reconnect into the game.
+     * @param player Who just reconnected
+     * @return True if player reconnected and join back to player's team, else then false
+     */
+    public boolean playerReconnectedHandler(Player player) {
+        // Search the entity
+        PlayerBedwarsEntity pent = null;
+        for (PlayerBedwarsEntity pbent : playersNTimer.keySet())
+            if (pbent.getPlayer().equals(player) || pbent.getPlayerName().equals(player.getName())) {
+                pent = pbent;
+                break;
+            }
+        // Assign entity
+        if (pent != null) {
+            pent.setPlayer(player);
+            playersNTimer.get(pent).changePlayer(player);
+            return true;
+        } 
+        return false;
     }
 
-    public String getName() {
-        return getColor() + teamName;
+    /**
+     * Activate resource spawners in team.
+     * @param active
+     */
+    public void activateRS(boolean active) {
+        for (ResourceSpawner rs : resourceSpawners) {
+            if (rs.isRunning() == active)
+                continue;
+            rs.isRunning(active);
+        }
     }
 
-    public Set<Player> getPlayersInTeam() {
-        return playersNTimer.keySet();
+    /**
+     * Send a message locally in team only
+     * @param msg The message that will be send
+     */
+    public void sendTeamMessage(String msg) {
+        for (PlayerBedwarsEntity pbent : playersNTimer.keySet())
+            pbent.getPlayer().sendMessage(UsefulStaticFunctions.getColorString(teamColorPrefix) + "[" + teamName + "]" + ChatColor.WHITE + msg);
     }
 
+    /**
+     * @return Map of permanent levels
+     */
+    public Map<String, Integer> getPermaLevels() {
+        return permaLevelData;
+    }
+
+    /**
+     * Raw color prefix in string.
+     */
+    public String getTeamColorPrefix() {
+        return teamColorPrefix;
+    }
+
+    /**
+     * Every team created by room itself. This refer to the current room the team playing
+     */
     public SleepingRoom getRoom() {
         return inRoom;
     }
 
-    public String getMapName() {
-        return worldOriginalName;
+    /**
+     * Get remaining player which still alive.
+     */
+    public int getRemainingPlayers() {
+        return playersNTimer.size() - eliminetedCount;
     }
 
+    /**
+     * All players in team, this list of player not associated with team's data, only a copy of it.
+     */
+    public List<Player> getPlayers() {
+        List<Player> listPlayer = new ArrayList<Player>();
+        for (PlayerBedwarsEntity pbent : playersNTimer.keySet())
+            listPlayer.add(pbent.getPlayer());
+        return listPlayer;
+    }
+
+    /**
+     * All derived player entities.
+     */
+    public List<PlayerBedwarsEntity> getPlayerEntities() {
+        List<PlayerBedwarsEntity> listEntity = new ArrayList<PlayerBedwarsEntity>();
+        listEntity.addAll(playersNTimer.keySet());
+        return listEntity;
+    }
+
+    /**
+     * @return Team name in string
+     */
+    public String getName() {
+        return teamName;
+    }
+
+    /**
+     * @return Bed Location
+     */
     public Location getTeamBedLocation() {
         return teamBedLocation;
     }
 
-    public String getRawColor() {
-        return teamPrefix;
-    }
-
-    public ResourceSpawner getResourceSpawner(String resName) {
-        if (resourceSpawners.containsKey(resName))
-            return resourceSpawners.get(resName);
-        return null;
-    }
-
-    public List<ResourceSpawner> getAllResourceSpawners() {
-        List<ResourceSpawner> spr = new ArrayList<ResourceSpawner>();
-        spr.addAll(resourceSpawners.values());
-        return spr;
-    }
-
-    public int getTeamLevel(String upgradeName) {
-        return permanentLevels.get(upgradeName);
-    }
-
-    public Map<String, Integer> getLevelsMap() {
-        return permanentLevels;
-    }
-
-    public BedwarsUpgradeMenus getUpgradeMenus() {
-        return upgradeMenu;
-    }
-
-    public String getColor() {
-        if (teamPrefix.equalsIgnoreCase("blue")) {
-            return ChatColor.BLUE + "";
-        } else if (teamPrefix.equalsIgnoreCase("green")) {
-            return ChatColor.GREEN + "";
-        } else if (teamPrefix.equalsIgnoreCase("yellow")) {
-            return ChatColor.YELLOW + "";
-        } else if (teamPrefix.equalsIgnoreCase("aqua")) {
-            return ChatColor.AQUA + "";
-        } else if (teamPrefix.equalsIgnoreCase("red")) {
-            return ChatColor.RED + "";
-        } else if (teamPrefix.equalsIgnoreCase("purple")) {
-            return ChatColor.LIGHT_PURPLE + "";
-        } else if (teamPrefix.equalsIgnoreCase("gold")) {
-            return ChatColor.GOLD + "";
-        } else if (teamPrefix.equalsIgnoreCase("gray")) {
-            return ChatColor.GRAY + "";
-        } else { // Default is White
-            return ChatColor.WHITE + "";
-        }
-    }
-
+    /**
+     * Get raw color data.
+     */
     private Color getPureColor() {
-        if (teamPrefix.equalsIgnoreCase("blue")) {
+        if (teamColorPrefix.equalsIgnoreCase("blue")) {
             return Color.fromBGR(255, 0, 0);
-        } else if (teamPrefix.equalsIgnoreCase("green")) {
+        } else if (teamColorPrefix.equalsIgnoreCase("green")) {
             return Color.fromRGB(0, 255, 0);
-        } else if (teamPrefix.equalsIgnoreCase("yellow")) {
+        } else if (teamColorPrefix.equalsIgnoreCase("yellow")) {
             return Color.YELLOW;
-        } else if (teamPrefix.equalsIgnoreCase("aqua")) {
+        } else if (teamColorPrefix.equalsIgnoreCase("aqua")) {
             return Color.AQUA;
-        } else if (teamPrefix.equalsIgnoreCase("red")) {
+        } else if (teamColorPrefix.equalsIgnoreCase("red")) {
             return Color.fromRGB(255, 0, 0);
-        } else if (teamPrefix.equalsIgnoreCase("light-purple")) {
+        } else if (teamColorPrefix.equalsIgnoreCase("light-purple")) {
             return Color.PURPLE;
-        } else if (teamPrefix.equalsIgnoreCase("gold")) {
+        } else if (teamColorPrefix.equalsIgnoreCase("gold")) {
             return Color.fromRGB(255,223,0);
-        } else if (teamPrefix.equalsIgnoreCase("gray")) {
+        } else if (teamColorPrefix.equalsIgnoreCase("gray")) {
             return Color.GRAY;
         } else { // Default is White
             return Color.WHITE;
         }
     }
-    
+
+    /**
+     * Check if team is already has been eliminated
+     * @return true if yes, else then false
+     */
+    public boolean isTeamEliminated() {
+        return eliminetedCount == playersNTimer.size();
+    }
+
+    /**
+     * Check bed broken on team's bed location.
+     * @return true if already broken
+     */
+    public boolean isBedBroken() {
+        Block block = teamBedLocation.getBlock();
+        return !UsefulStaticFunctions.isMaterialBed(block.getType());
+    }
 }

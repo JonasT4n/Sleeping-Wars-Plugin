@@ -1,5 +1,6 @@
 package com.joenastan.sleepingwar.plugin.events.CustomEvents;
 
+import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
 
 import org.bukkit.event.Event;
@@ -13,11 +14,15 @@ public class BedwarsGameTimelineEvent extends Event {
     private TimelineEventType type;
     private float secondsToTrigger;
     private SleepingRoom room;
+    private int order;
+    private String eventmsg;
 
-    public BedwarsGameTimelineEvent(TimelineEventType type, float secondsToTrigger, String eventName) {
+    public BedwarsGameTimelineEvent(TimelineEventType type, float secondsToTrigger, String eventName, int order, String eventmsg) {
         this.type = type;
         this.secondsToTrigger = secondsToTrigger;
         this.eventName = eventName;
+        this.order = order;
+        this.eventmsg = eventmsg;
     }
 
     public static HandlerList getHandlerList() {
@@ -37,6 +42,9 @@ public class BedwarsGameTimelineEvent extends Event {
         return secondsToTrigger;
     }
 
+    /**
+     * Event name.
+     */
     public String getName() {
         return eventName;
     }
@@ -47,6 +55,14 @@ public class BedwarsGameTimelineEvent extends Event {
 
     public SleepingRoom getRoom() {
         return room;
+    }
+
+    public int getTimelineOrder() {
+        return order;
+    }
+
+    public String getEventMessage() {
+        return eventmsg;
     }
     
 }

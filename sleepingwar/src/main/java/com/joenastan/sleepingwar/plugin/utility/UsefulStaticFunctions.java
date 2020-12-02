@@ -1,8 +1,56 @@
 package com.joenastan.sleepingwar.plugin.utility;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class UsefulStaticFunctions {
+
+    /**
+     * Remove items in any inventory by specific item type.
+     * @param inv Inventory referenced
+     * @param itemType Material type
+     * @param amount amount to be remove
+     */
+    public static void removeItemInventory(Inventory inv, Material itemType, int amount) {
+        for (ItemStack itm : inv.getContents()) {
+            if (itm == null) 
+                continue;
+
+            if (itm.getType() == itemType) {
+                if (itm.getAmount() < amount) {
+                    amount -= itm.getAmount();
+                    itm.setAmount(0);
+                } else {
+                    itm.setAmount(itm.getAmount() - amount);
+                    amount = 0;
+                } 
+            }
+
+            if (amount <= 0)
+                break;
+        }
+    }
+
+    /**
+     * Add items into inventory.
+     * @param inv Inventory referenced
+     * @param itemType Material type
+     * @param amount amount to be remove
+     */
+    public static void addItemInventory(Inventory inv, Material itemType, int amount) {
+        int maxStack = (amount / 64) + 1;
+        for (int i = 0; i < maxStack; i++) {
+            if (i == maxStack - 1) {
+                inv.addItem(new ItemStack(itemType, amount));
+            } else {
+                inv.addItem(new ItemStack(itemType, 64));
+                amount -= 64;
+            }
+        }
+    }
     
     public static boolean isSword(Material mat) {
         switch (mat) {
@@ -172,6 +220,131 @@ public class UsefulStaticFunctions {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    public static boolean isStandardDoor(Material mat) {
+        switch (mat) {
+            case IRON_DOOR:
+                return true;
+
+            case DARK_OAK_DOOR:
+                return true;
+
+            case OAK_DOOR:
+                return true;
+
+            case SPRUCE_DOOR:
+                return true;
+
+            case JUNGLE_DOOR:
+                return true;
+
+            case BIRCH_DOOR:
+                return true;
+
+            case ACACIA_DOOR:
+                return true;
+
+            case CRIMSON_DOOR:
+                return true;
+
+            case WARPED_DOOR:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isTrapDoor(Material mat) {
+        switch (mat) {
+            case IRON_TRAPDOOR:
+                return true;
+
+            case OAK_TRAPDOOR:
+                return true;
+
+            case DARK_OAK_TRAPDOOR:
+                return true;
+
+            case SPRUCE_TRAPDOOR:
+                return true;
+
+            case JUNGLE_TRAPDOOR:
+                return true;
+
+            case BIRCH_TRAPDOOR:
+                return true;
+
+            case ACACIA_TRAPDOOR:
+                return true;
+
+            case CRIMSON_TRAPDOOR:
+                return true;
+
+            case WARPED_TRAPDOOR:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isFenceGate(Material mat) {
+        switch (mat) {
+            case OAK_FENCE_GATE:
+                return true;
+
+            case SPRUCE_FENCE_GATE:
+                return true;
+
+            case BIRCH_FENCE_GATE:
+                return true;
+
+            case JUNGLE_FENCE_GATE:
+                return true;
+
+            case ACACIA_FENCE_GATE:
+                return true;
+
+            case DARK_OAK_FENCE_GATE:
+                return true;
+
+            case CRIMSON_FENCE_GATE:
+                return true;
+
+            case WARPED_FENCE_GATE:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Team color string.
+     * @return returns the color code, if the color not match any, then it returns white
+     */
+    public static String getColorString(String colorString) {
+        if (colorString.equalsIgnoreCase("blue")) {
+            return ChatColor.BLUE + "";
+        } else if (colorString.equalsIgnoreCase("green")) {
+            return ChatColor.GREEN + "";
+        } else if (colorString.equalsIgnoreCase("yellow")) {
+            return ChatColor.YELLOW + "";
+        } else if (colorString.equalsIgnoreCase("aqua")) {
+            return ChatColor.AQUA + "";
+        } else if (colorString.equalsIgnoreCase("red")) {
+            return ChatColor.RED + "";
+        } else if (colorString.equalsIgnoreCase("purple")) {
+            return ChatColor.LIGHT_PURPLE + "";
+        } else if (colorString.equalsIgnoreCase("gold")) {
+            return ChatColor.GOLD + "";
+        } else if (colorString.equalsIgnoreCase("gray")) {
+            return ChatColor.GRAY + "";
+        } else { // Default is White
+            return ChatColor.WHITE + "";
         }
     }
 }

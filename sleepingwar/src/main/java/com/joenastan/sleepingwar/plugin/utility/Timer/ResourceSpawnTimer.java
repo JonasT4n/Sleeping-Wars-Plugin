@@ -36,4 +36,8 @@ public class ResourceSpawnTimer extends StopwatchTimer {
         reset();
         start();
     }
+
+    public String getCodeName() {
+        return spawner.getCodename();
+    }
 }

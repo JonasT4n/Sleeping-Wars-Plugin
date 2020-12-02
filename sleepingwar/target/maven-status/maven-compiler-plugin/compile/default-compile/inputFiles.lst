@@ -1,5 +1,4 @@
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\TimelineEventType.java
-D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\utility\PlayerBedwarsEntity.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\utility\Timer\AreaEffectTimer.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameBedDestroyedEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\commands\SleepingWarsPermissionsCommand.java
@@ -21,8 +20,9 @@ D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingw
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameTimelineEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\GameManager.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameOnUpgradeEvent.java
-D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerJoinEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\utility\Timer\ResourceSpawnTimer.java
+D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\utility\CustomDerivedEntity\PlayerBedwarsBuilderEntity.java
+D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\utility\CustomDerivedEntity\PlayerBedwarsEntity.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\ResourceSpawner.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerDeathEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\SleepingRoom.java
@@ -37,7 +37,6 @@ D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingw
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\commands\TabCompletor\SworldCommands.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\OnGameEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\Tasks\DeleteWorldDelayed.java
-D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerLeaveEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\game\InventoryMenus\BedwarsMenus.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameEndedEvent.java
 D:\GitHub\Sleeping-Wars-Plugin\sleepingwar\src\main\java\com\joenastan\sleepingwar\plugin\commands\WorldMakerCommand.java

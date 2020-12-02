@@ -2,19 +2,19 @@ package com.joenastan.sleepingwar.plugin.utility;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 
 public class AbstractFile {
 
-    protected Plugin main;
+    protected JavaPlugin main;
     protected FileConfiguration filecon;
     private File file;
 
-    public AbstractFile(Plugin main, String filename) {
-        this.main = main;
-        file = new File(main.getDataFolder(), filename);
+    public AbstractFile(JavaPlugin main2, String filename) {
+        this.main = main2;
+        file = new File(main2.getDataFolder(), filename);
         if (!file.exists()) {
             try {
                 file.createNewFile();
@@ -25,7 +25,10 @@ public class AbstractFile {
         filecon = YamlConfiguration.loadConfiguration(file);
     }
 
-    protected void Save() {
+    /**
+     * Save plugin config file.
+     */
+    public void Save() {
         try {
             filecon.save(file);
         } catch (Exception e) {

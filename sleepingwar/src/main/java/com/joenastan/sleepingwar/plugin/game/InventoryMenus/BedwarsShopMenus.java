@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
 import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItems;
 import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItemsArmorWeapon;
@@ -34,8 +32,10 @@ import net.md_5.bungee.api.ChatColor;
 public class BedwarsShopMenus implements BedwarsMenus {
 
     private Map<String, PricetagsItems> priceItems = new HashMap<String, PricetagsItems>();
+    private TeamGroupMaker team;
 
-    public BedwarsShopMenus() {
+    public BedwarsShopMenus(TeamGroupMaker team) {
+        this.team = team;
         // Insert all default shop items
         //#region Weapons and Bows
         // Stone Sword
@@ -444,70 +444,38 @@ public class BedwarsShopMenus implements BedwarsMenus {
     }
 
     @Override
-    public void openMenu(Player player, String menuName) {
+    public boolean openMenu(Player player, String menuName) {
         switch (menuName) {
             case "Main Menu":
                 player.openInventory(MainShopMenu());
-                break;
+                return true;
 
             case "Weapon Menu":
                 player.openInventory(WeaponShopMenu());
-                break;
+                return true;
 
             case "Armor Menu":
                 player.openInventory(ArmorShopMenu());
-                break;
+                return true;
 
             case "Potions Menu":
                 player.openInventory(PotionsShopMenu());
-                break;
+                return true;
 
             case "Blocks Menu":
                 player.openInventory(BlockShopMenu());
-                break;
+                return true;
 
             case "Food Menu":
                 player.openInventory(FoodShopMenu());
-                break;
+                return true;
 
             case "Tools Menu":
                 player.openInventory(ToolsMenu());
-                break;
+                return true;
 
             case "Items Menu":
                 player.openInventory(ItemsShopMenu());
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    public boolean isBedwarsShopMenu(InventoryView inv) {
-        String title = inv.getTitle();
-        switch (title) {
-            case "Main Shop":
-                return true;
-
-            case "Weapon Shop":
-                return true;
-
-            case "Armor Shop":
-                return true;
-
-            case "Potions Shop":
-                return true;
-
-            case "Block Shop":
-                return true;
-
-            case "Food Shop":
-                return true;
-
-            case "Tools Shop":
-                return true;
-
-            case "Items Shop":
                 return true;
 
             default:
@@ -521,7 +489,6 @@ public class BedwarsShopMenus implements BedwarsMenus {
         ItemMeta upgradeMeta = upgradeItem.getItemMeta();
         Material upgradeMaterial = upgradeItem.getType();
         PlayerInventory playerInv = player.getInventory();
-
         for (Map.Entry<String, PricetagsItems> pricedItEntry : priceItems.entrySet()) {
             boolean displayNameIsTrue = ChatColor.stripColor(upgradeMeta.getDisplayName())
                     .equals(pricedItEntry.getKey());
@@ -530,18 +497,15 @@ public class BedwarsShopMenus implements BedwarsMenus {
                 PricetagsItems tag = pricedItEntry.getValue();
                 int countCurrencyAmount = 0;
                 List<Integer> onCurrencySlots = new ArrayList<Integer>();
-
                 // Get Player current currency amount
                 for (int i = 0; i < playerInv.getSize(); i++) {
                     ItemStack playerItem = playerInv.getItem(i);
-                    if (playerItem != null) {
+                    if (playerItem != null)
                         if (playerItem.getType() == tag.getCurrency()) {
                             onCurrencySlots.add(i);
                             countCurrencyAmount += playerItem.getAmount();
                         }
-                    }
                 }
-
                 // Check if it's enough to buy it
                 if (countCurrencyAmount < tag.getPrice()) {
                     player.sendMessage(ChatColor.RED + "Not enough currency, you cannot afford this.");
@@ -550,16 +514,13 @@ public class BedwarsShopMenus implements BedwarsMenus {
                     for (int j : onCurrencySlots) {
                         if (mustPay == 0)
                             break;
-
                         if (playerInv.getItem(j).getAmount() > mustPay) {
                             playerInv.getItem(j).setAmount(playerInv.getItem(j).getAmount() - mustPay);
                             break;
                         }
-
                         mustPay -= playerInv.getItem(j).getAmount();
                         playerInv.setItem(j, null);
                     }
-
                     buyItemByType(player, tag);
                 }
                 break;
@@ -569,8 +530,6 @@ public class BedwarsShopMenus implements BedwarsMenus {
 
     private void buyItemByType(Player player, PricetagsItems tag) {
         PlayerInventory playerInv = player.getInventory();
-        SleepingRoom room = SleepingWarsPlugin.getGameManager().getRoomByName(player.getWorld().getName());
-        TeamGroupMaker team = room == null ? null : room.getTeam(player);
         if (tag instanceof PricetagsItemsArmorWeapon) {
             ItemStack bootSample = playerInv.getBoots();
             switch (tag.getItem()) {
@@ -579,12 +538,10 @@ public class BedwarsShopMenus implements BedwarsMenus {
                         ItemStack onSlot = playerInv.getItem(i);
                         if (onSlot == null) 
                             continue;
-
                         // Replace the current Item
                         if (onSlot.getType() == Material.WOODEN_SWORD) {
                             ItemStack newSword = tag.createItem();
-                            if (team != null)
-                                checkUpgrade(team, newSword);
+                            checkUpgrade(newSword);
                             playerInv.setItem(i, newSword);
                             return;
                         }
@@ -601,12 +558,10 @@ public class BedwarsShopMenus implements BedwarsMenus {
                         ItemStack onSlot = playerInv.getItem(i);
                         if (onSlot == null) 
                             continue;
-
                         // Replace the current Item
                         if (onSlot.getType() == Material.WOODEN_SWORD || onSlot.getType() == Material.STONE_SWORD) {
                             ItemStack newSword = tag.createItem();
-                            if (team != null)
-                                checkUpgrade(team, newSword);
+                            checkUpgrade(newSword);
                             playerInv.setItem(i, newSword);
                             return;
                         }
@@ -623,12 +578,10 @@ public class BedwarsShopMenus implements BedwarsMenus {
                         ItemStack onSlot = playerInv.getItem(i);
                         if (onSlot == null) 
                             continue;
-
                         // Replace the current Item
                         if (onSlot.getType() == Material.WOODEN_SWORD || onSlot.getType() == Material.STONE_SWORD || onSlot.getType() == Material.IRON_SWORD) {
                             ItemStack newSword = tag.createItem();
-                            if (team != null)
-                                checkUpgrade(team, newSword);
+                            checkUpgrade(newSword);
                             playerInv.setItem(i, newSword);
                             return;
                         }
@@ -644,13 +597,10 @@ public class BedwarsShopMenus implements BedwarsMenus {
                     if (bootSample.getType() == Material.LEATHER_BOOTS) {
                         ItemStack chainmailLegging = new ItemStack(Material.CHAINMAIL_LEGGINGS, 1);
                         ItemStack chainmailBoots = new ItemStack(Material.CHAINMAIL_BOOTS, 1);
-                        if (team != null) {
-                            checkUpgrade(team, chainmailBoots);
-                            checkUpgrade(team, chainmailLegging);
-                        }
+                        checkUpgrade(chainmailBoots);
+                        checkUpgrade(chainmailLegging);
                         playerInv.setBoots(chainmailBoots);
                         playerInv.setLeggings(chainmailLegging);
-
                     } else {
                         refundCurrency(player, tag, ChatColor.AQUA + "You already have this or better armor, currency refunded.");
                     }
@@ -660,10 +610,8 @@ public class BedwarsShopMenus implements BedwarsMenus {
                     if (bootSample.getType() == Material.LEATHER_BOOTS || bootSample.getType() == Material.CHAINMAIL_BOOTS) {
                         ItemStack ironLegging = new ItemStack(Material.IRON_LEGGINGS, 1);
                         ItemStack ironBoots = new ItemStack(Material.IRON_BOOTS, 1);
-                        if (team != null) {
-                            checkUpgrade(team, ironBoots);
-                            checkUpgrade(team, ironLegging);
-                        }
+                        checkUpgrade(ironBoots);
+                        checkUpgrade(ironLegging);
                         playerInv.setBoots(ironBoots);
                         playerInv.setLeggings(ironLegging);
                     } else {
@@ -675,10 +623,8 @@ public class BedwarsShopMenus implements BedwarsMenus {
                     if (bootSample.getType() == Material.LEATHER_BOOTS || bootSample.getType() == Material.CHAINMAIL_BOOTS || bootSample.getType() == Material.IRON_BOOTS) {
                         ItemStack diamondLegging = new ItemStack(Material.DIAMOND_LEGGINGS, 1);
                         ItemStack diamondBoots = new ItemStack(Material.DIAMOND_BOOTS, 1);
-                        if (team != null) {
-                            checkUpgrade(team, diamondBoots);
-                            checkUpgrade(team, diamondLegging);
-                        }
+                        checkUpgrade(diamondBoots);
+                        checkUpgrade(diamondLegging);
                         playerInv.setBoots(diamondBoots);
                         playerInv.setLeggings(diamondLegging);
                     } else {
@@ -688,22 +634,19 @@ public class BedwarsShopMenus implements BedwarsMenus {
 
                 case SHEARS:
                     ItemStack shears = new ItemStack(Material.SHEARS, 1);
-                    if (team != null) 
-                        checkUpgrade(team, shears);
+                    checkUpgrade(shears);
                     playerInv.addItem(shears);
                     return;
 
                 case IRON_AXE:
-                    ItemStack ironAxe = new ItemStack(Material.IRON_AXE, 1);
-                    if (team != null) 
-                        checkUpgrade(team, ironAxe);
+                    ItemStack ironAxe = new ItemStack(Material.IRON_AXE, 1); 
+                    checkUpgrade(ironAxe);
                     playerInv.addItem(ironAxe);
                     return;
 
                 case DIAMOND_PICKAXE:
                     ItemStack diamondPick = new ItemStack(Material.DIAMOND_PICKAXE, 1);
-                    if (team != null) 
-                        checkUpgrade(team, diamondPick);
+                    checkUpgrade(diamondPick);
                     playerInv.addItem(diamondPick);
                     return;
 
@@ -711,11 +654,9 @@ public class BedwarsShopMenus implements BedwarsMenus {
                     break;
             }
         } else if (tag.getItem() == Material.WHITE_WOOL) {
-            if (room != null && team != null) {
-                ItemStack coloredWool = new ItemStack(woolColor(team.getRawColor()), tag.getDefaultAmount());
-                playerInv.addItem(coloredWool);
-                return;
-            }
+            ItemStack coloredWool = new ItemStack(woolColor(team.getTeamColorPrefix()), tag.getDefaultAmount());
+            playerInv.addItem(coloredWool);
+            return;
         }
 
         // Create a new item without lore
@@ -754,25 +695,56 @@ public class BedwarsShopMenus implements BedwarsMenus {
         player.sendMessage(reason);
     }
 
-    public static void checkUpgrade(TeamGroupMaker team, ItemStack item) {
+    public void checkUpgrade(ItemStack item) {
         ItemMeta metaItem = item.getItemMeta();
         // Sharper Blade
-        if (UsefulStaticFunctions.isSword(item.getType()) && team.getLevelsMap().get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
-            metaItem.addEnchant(Enchantment.DAMAGE_ALL, team.getLevelsMap().get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1, true);
+        if (UsefulStaticFunctions.isSword(item.getType()) && team.getPermaLevels().get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
+            metaItem.addEnchant(Enchantment.DAMAGE_ALL, team.getPermaLevels().get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1, true);
         } 
         // Tough Skin
         else if (UsefulStaticFunctions.isHumanEntityArmor(item.getType())) {
-            if (team.getLevelsMap().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1 != 0) 
-                metaItem.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, team.getLevelsMap().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1, true);
-            if (team.getLevelsMap().get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1 != 0)
-                metaItem.addEnchant(Enchantment.THORNS, team.getLevelsMap().get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1, true);
+            if (team.getPermaLevels().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1 != 0) 
+                metaItem.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, team.getPermaLevels().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1, true);
+            if (team.getPermaLevels().get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1 != 0)
+                metaItem.addEnchant(Enchantment.THORNS, team.getPermaLevels().get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1, true);
         } 
         // Mine A Holic
         else if ((UsefulStaticFunctions.isAxe(item.getType()) || item.getType() == Material.SHEARS || UsefulStaticFunctions.isPickaxe(item.getType())) && 
-                    team.getLevelsMap().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1 != 0) {
-            metaItem.addEnchant(Enchantment.DIG_SPEED, team.getLevelsMap().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1, true);
+                    team.getPermaLevels().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1 != 0) {
+            metaItem.addEnchant(Enchantment.DIG_SPEED, team.getPermaLevels().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1, true);
         }
-
         item.setItemMeta(metaItem);
+    }
+
+    public boolean isBedwarsShopMenu(InventoryView inv) {
+        String title = inv.getTitle();
+        switch (title) {
+            case "Main Shop":
+                return true;
+
+            case "Weapon Shop":
+                return true;
+
+            case "Armor Shop":
+                return true;
+
+            case "Potions Shop":
+                return true;
+
+            case "Block Shop":
+                return true;
+
+            case "Food Shop":
+                return true;
+
+            case "Tools Shop":
+                return true;
+
+            case "Items Shop":
+                return true;
+
+            default:
+                return false;
+        }
     }
 }

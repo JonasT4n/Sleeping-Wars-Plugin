@@ -1,490 +1,991 @@
 package com.joenastan.sleepingwar.plugin.utility;
 
+import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
+import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.TimelineEventType;
-import com.joenastan.sleepingwar.plugin.game.BedwarsShopType;
+import com.joenastan.sleepingwar.plugin.enumtypes.BedwarsShopType;
+import com.joenastan.sleepingwar.plugin.enumtypes.LockedEntityType;
 import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
-import com.joenastan.sleepingwar.plugin.game.ResourcesType;
+import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedEntities;
+import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedResourceSpawner;
+import com.joenastan.sleepingwar.plugin.utility.Timer.ResourceSpawnTimer;
+
 import org.bukkit.Bukkit;
+import org.bukkit.Difficulty;
+import org.bukkit.GameRule;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.WorldCreator;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GameSystemConfig extends AbstractFile {
 
-    private Map<String, Location> queueLocations = new HashMap<String, Location>();
-    private Map<String, Map<String, Location>> inTeamGameSpawners = new HashMap<String, Map<String, Location>>();
-    private Map<String, WorldCreator> worlds = new HashMap<String, WorldCreator>();
-    private Map<String, Map<String, String>> teamPrefix = new HashMap<String, Map<String, String>>();
-    private Map<String, Map<String, Map<String, ResourceSpawner>>> resourceSpawners = new HashMap<String, Map<String, Map<String, ResourceSpawner>>>();
-    private Map<String, List<BedwarsGameTimelineEvent>> timelineEvent = new HashMap<String, List<BedwarsGameTimelineEvent>>();
-    private Map<String, Map<String, Location>> teamBedLocations = new HashMap<String, Map<String, Location>>();
-    private Map<String, Map<BedwarsShopType, List<Location>>> shopsLocation = new HashMap<String, Map<BedwarsShopType, List<Location>>>();
-
-    public GameSystemConfig(Plugin main, String filename) {
+    public GameSystemConfig(JavaPlugin main, String filename) {
         super(main, filename);
         load();
     }
 
-    public Map<String, Location> getTeamSpawner(String worldKey) {
-        if (inTeamGameSpawners.containsKey(worldKey))
-            return inTeamGameSpawners.get(worldKey);
-        return new HashMap<String, Location>();
-    }
-
-    public Location getQueueLocations(String worldName) {
-        if (queueLocations.containsKey(worldName))
-            return queueLocations.get(worldName);
-        return null;
-    }
-
-    public Location getQueueLocations(String worldName, Location loc) {
-        queueLocations.put(worldName, loc);
-        return queueLocations.get(worldName);
-    }
-
-    public List<String> getAllTeamName(String worldName) {
-        if (teamPrefix.containsKey(worldName)) {
-            List<String> tNames = new ArrayList<String>();
-            tNames.addAll(teamPrefix.get(worldName).keySet());
-            return tNames;
-        }
-        return null;
-    }
-
-    public Map<BedwarsShopType, List<Location>> getShopLocations(String world) {
-        if (shopsLocation.containsKey(world)) 
-            return shopsLocation.get(world);
-        return new HashMap<BedwarsShopType, List<Location>>();
-    }
-
-    public boolean deleteResourceSpawner(String world, String team, String codename) {
-        if (resourceSpawners.containsKey(world)) {
-            String resourceSpawnerPath = String.format("worlds.%s.resource-spawners", world);
-            if (resourceSpawners.get(world).containsKey(team)) {
-                resourceSpawnerPath += "." + team;
-                if(resourceSpawners.get(world).get(team).keySet().contains(codename)) {
-                    ResourceSpawner delSpawner = resourceSpawners.get(world).get(team).remove(codename);
-                    if (delSpawner.isRunning())
-                        delSpawner.isRunning(false);
-                    filecon.set(resourceSpawnerPath + "." + codename, null);
-                    Save();
-                    return true;
-                }
-            } else {
-                resourceSpawnerPath += ".PUBLIC";
-                if (resourceSpawners.get(world).get("PUBLIC").keySet().contains(codename)) {
-                    ResourceSpawner delSpawner = resourceSpawners.get(world).get("PUBLIC").remove(codename);
-                    if (delSpawner.isRunning())
-                        delSpawner.isRunning(false);
-                    filecon.set(resourceSpawnerPath + "." + codename, null);
-                    Save();
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean deleteShopLocation(String world, BedwarsShopType type, int index) {
-        if (shopsLocation.containsKey(world)) {
-            if (shopsLocation.get(world).containsKey(type)) {
-                if (index < shopsLocation.get(world).get(type).size()) {
-                    shopsLocation.get(world).get(type).remove(index);
-                    filecon.set("worlds." + world + ".shop-location", new HashMap<>());
-                    saveShopLocation();
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public BedwarsGameTimelineEvent deleteTimelineEvent(String world, String eventName) {
-        if (timelineEvent.containsKey(world)) {
-            for (int i = 0; i < timelineEvent.get(world).size(); i++) {
-                BedwarsGameTimelineEvent ev = timelineEvent.get(world).get(i);
-                if (ev.getName().equalsIgnoreCase(eventName)) {
-                    filecon.set("worlds." + world + ".timeline." + ev.getName(), null);
-                    return timelineEvent.get(world).remove(i);
-                }
-            }
-        }
-        return null;
-    }
-
-    public Location getTeamBedLocation(String world, String teamName) {
-        if (teamBedLocations.containsKey(world))
-            if (teamBedLocations.get(world).containsKey(teamName))
-                return teamBedLocations.get(world).get(teamName);
-        return null;
-    }
-
-    public Map<String, Location> getBedLocationMap(String world) {
-        if (teamBedLocations.containsKey(world))
-            return teamBedLocations.get(world);
-        return new HashMap<String, Location>();
-    }
-
-    public Map<String, ResourceSpawner> getAllResourceSpawnersPack(String world) {
-        Map<String, ResourceSpawner> packs = new HashMap<String, ResourceSpawner>();
-        if (resourceSpawners.containsKey(world)) {
-            for (Map.Entry<String, Map<String, ResourceSpawner>> pack : resourceSpawners.get(world).entrySet()) {
-                packs.putAll(pack.getValue());
-            }
-        }
-        return packs;
-    }
-
-    public Map<String, ResourceSpawner> getResourceSpawnersPack(String world, String teamName) {
-        if (resourceSpawners.containsKey(world))
-            if (resourceSpawners.get(world).containsKey(teamName))
-                return resourceSpawners.get(world).get(teamName);
-        return new HashMap<String, ResourceSpawner>();
-    }
-
-    public void addResourceSpawner(String world, String team, ResourceSpawner spawner) {
-        if (resourceSpawners.containsKey(world)) {
-            if (getTeamPrefix(world).containsKey(team)) {
-                if (!resourceSpawners.get(world).containsKey(team))
-                    resourceSpawners.get(world).put(team, new HashMap<String, ResourceSpawner>());
-                resourceSpawners.get(world).get(team).put(spawner.getCodename(), spawner);
-            } else {
-                if (!resourceSpawners.get(world).containsKey("PUBLIC"))
-                    resourceSpawners.get(world).put(team, new HashMap<String, ResourceSpawner>());
-                resourceSpawners.get(world).get("PUBLIC").put(spawner.getCodename(), spawner);
-            }
-        }
-    }
-
-    public Map<String, String> getTeamPrefix(String world) {
-        if (teamPrefix.containsKey(world))
-            return teamPrefix.get(world);
-        return new HashMap<String, String>();
-    }
-
-    public List<String> getAllWorldName() {
+    /**
+     * All world names or map names that registered as bedwars world or map.
+     * @return List of world names or map names
+     */
+    public List<String> getWorldNames() {
         List<String> wnames = new ArrayList<String>();
-        for (Map.Entry<String, WorldCreator> w : worlds.entrySet()) {
-            wnames.add(w.getKey());
-        }
+        wnames.addAll(filecon.getConfigurationSection("worlds").getKeys(false));
         return wnames;
     }
 
-    public List<BedwarsGameTimelineEvent> getTimelineEvents(String world) {
-        if (timelineEvent.containsKey(world))
-            return timelineEvent.get(world);
-        return new ArrayList<BedwarsGameTimelineEvent>();
+    /**
+     * Get all resource spawners that has been registered. All resource spawners including public and teams.
+     * @param inWorld Current game or builder world
+     * @param mapName Original map name
+     * @return List of resource spawners
+     */
+    public List<ResourceSpawner> getWorldResourceSpawners(World inWorld, String mapName) {
+        String path = String.format("worlds.%s.resource-spawners", mapName);
+        List<ResourceSpawner> rspawner = new ArrayList<ResourceSpawner>();
+        if (!filecon.contains(path)) {
+            filecon.createSection(path, new HashMap<>());
+            return rspawner;
+        }
+        // Get all Resource spawners
+        for (String t : filecon.getConfigurationSection(path).getKeys(false)) {
+            for (String rs : filecon.getConfigurationSection(path + "." + t).getKeys(false)) {
+                // Get all resource spawners real information
+                String rsPath = path + "." + t + "." + rs;
+                if (!filecon.contains(rsPath + ".type"))
+                    filecon.set(rsPath + ".type", 0);
+                if (!filecon.contains(rsPath + ".spawnloc.x"))
+                    filecon.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
+                if (!filecon.contains(rsPath + ".spawnloc.y"))
+                    filecon.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
+                if (!filecon.contains(rsPath + ".spawnloc.z"))
+                    filecon.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
+                if (!filecon.contains(rsPath + ".duration-spawn"))
+                    filecon.set(rsPath + ".duration-spawn", 10f);
+                ResourcesType typeSpawnResource = ResourcesType.values()[filecon.getInt(rsPath + ".type")];
+                Location spawnLoc = new Location(inWorld, filecon.getDouble(rsPath + ".spawnloc.x"), filecon.getDouble(rsPath + ".spawnloc.y"), 
+                        filecon.getDouble(rsPath + ".spawnloc.z"));
+                float spawnDur = (float)filecon.getDouble(rsPath + ".duration-spawn");
+                // Create resource spawner instance
+                ResourceSpawner rsp;
+                if (spawnDur < 0f)
+                    rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource);
+                else
+                    rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource, spawnDur);
+                rspawner.add(rsp);
+            }
+        }
+        return rspawner;
     }
 
-    public void load() {
-        if (!filecon.contains("worlds")) {
-            filecon.set("worlds", worlds);
-        } else {
-            // Loop by World Name
-            for (String key : filecon.getConfigurationSection("worlds").getKeys(false)) {
-                // load world creator
-                WorldCreator creator = new WorldCreator(key).environment(Environment.values()[filecon.getInt("worlds." + key + ".env")])
-                        .hardcore(filecon.getBoolean("worlds." + key + ".hardcore"))
-                        .generateStructures(filecon.getBoolean("worlds." + key + ".structure"));
-                World w = Bukkit.createWorld(creator);
-                worlds.put(key, creator);
+    /**
+     * Get all resource spawners that has been registered by specific class.
+     * @param inWorld Current game or builder world
+     * @param mapName Original map name
+     * @param teamName On team by name
+     * @return List of resource spawners
+     */
+    public List<ResourceSpawner> getWorldResourceSpawners(World inWorld, String mapName, String teamName) {
+        String tPath = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        List<ResourceSpawner> rspawner = new ArrayList<ResourceSpawner>();
+        List<String> team = getTeamNames(mapName);
+        // Check team existence
+        if (!filecon.contains(tPath) && team.contains(teamName)) {
+            filecon.createSection(tPath, new HashMap<>());
+            return rspawner;
+        } else if (!team.contains(teamName)) {
+            tPath = String.format("worlds.%s.resource-spawners.PUBLIC", mapName);
+        }
+        // Get all Resource spawners
+        for (String rs : filecon.getConfigurationSection(tPath).getKeys(false)) {
+            String rsPath = tPath + "." + rs;
+            if (!filecon.contains(rsPath + ".type"))
+                filecon.set(rsPath + ".type", 0);
+            if (!filecon.contains(rsPath + ".spawnloc.x"))
+                filecon.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
+            if (!filecon.contains(rsPath + ".spawnloc.y"))
+                filecon.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
+            if (!filecon.contains(rsPath + ".spawnloc.z"))
+                filecon.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
+            if (!filecon.contains(rsPath + ".duration-spawn"))
+                filecon.set(rsPath + ".duration-spawn", 10f);
+            ResourcesType typeSpawnResource = ResourcesType.values()[filecon.getInt(rsPath + ".type")];
+            Location spawnLoc = new Location(inWorld, filecon.getDouble(rsPath + ".spawnloc.x"), filecon.getDouble(rsPath + ".spawnloc.y"), 
+                    filecon.getDouble(rsPath + ".spawnloc.z"));
+            float spawnDur = (float)filecon.getDouble(rsPath + ".duration-spawn");
+            // Create resource spawner instance
+            ResourceSpawner rsp;
+            if (spawnDur < 0f)
+                rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource);
+            else
+                rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource, spawnDur);
+            rspawner.add(rsp);
+        }
+        return rspawner;
+    }
 
-                // load world queue location
-                Location thisWorldQueueLoc = new Location(w, filecon.getDouble(String.format("worlds.%s.queueloc.x", key)),
-                        filecon.getDouble(String.format("worlds.%s.queueloc.y", key)),
-                        filecon.getDouble(String.format("worlds.%s.queueloc.z", key)));
-                queueLocations.put(key, thisWorldQueueLoc);
+    /**
+     * All teams that registered in curent world or map.
+     * @param world Original map name
+     * @return List of team names in map
+     */
+    public List<String> getTeamNames(String world) {
+        String path = String.format("worlds.%s.teams", world);
+        if (!filecon.contains(path)) {
+            filecon.createSection(path, new HashMap<>());
+            filecon.set(String.format("%s.Yellow", path), new HashMap<>());
+            filecon.set(String.format("%s.Red", path), new HashMap<>());
+            filecon.set(String.format("%s.Blue", path), new HashMap<>());
+            filecon.set(String.format("%s.Green", path), new HashMap<>());
+        }
+        List<String> tnames = new ArrayList<String>();
+        tnames.addAll(filecon.getConfigurationSection(path).getKeys(false));
+        return tnames;
+    }
 
-                // Loop by Team Name
-                teamPrefix.put(key, new HashMap<String, String>());
-                inTeamGameSpawners.put(key, new HashMap<String, Location>());
-                teamBedLocations.put(key, new HashMap<String, Location>());
-                String teamPathName = String.format("worlds.%s.teams", key);
-                if (filecon.getConfigurationSection(teamPathName) == null) {
-                    filecon.createSection(teamPathName, new HashMap<>());
-                    teamPrefix.put(key, new HashMap<String, String>());
-                    teamPrefix.get(key).put("Blue", "blue");
-                    teamPrefix.get(key).put("Yellow", "yellow");
-                    teamPrefix.get(key).put("Red", "red");
-                    teamPrefix.get(key).put("Green", "green");
+    /**
+     * Get team location spawner in game.
+     * @param inWorld Current game or builder world
+     * @param mapName Original map name
+     * @param teamName On team by name
+     * @return Team location spawn
+     */
+    public Location getTeamSpawnLoc(World inWorld, String mapName, String teamName) {
+        String path = String.format("worlds.%s.teams.%s.spawner", mapName, teamName);
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            return null;
+        if (!filecon.contains(path))
+            filecon.createSection(path, new HashMap<>());
+        if (!filecon.contains(path + ".x"))
+            filecon.set(path + ".x", inWorld.getSpawnLocation().getX());
+        if (!filecon.contains(path + ".y"))
+            filecon.set(path + ".y", inWorld.getSpawnLocation().getY());
+        if (!filecon.contains(path + ".z"))
+            filecon.set(path + ".z", inWorld.getSpawnLocation().getZ());
 
-                    // Default Team Spawner
-                    inTeamGameSpawners.put(key, new HashMap<String, Location>());
-                    for (String teamName : teamPrefix.get(key).keySet())
-                        inTeamGameSpawners.get(key).put(teamName, w.getSpawnLocation());
-                } else {
-                    for (String tString : filecon.getConfigurationSection(teamPathName).getKeys(false)) {
-                        String prefixColor;
-                        if (filecon.getString(String.format("%s.%s.color", teamPathName, tString)) == null) {
-                            prefixColor = "white";
-                        } else {
-                            prefixColor = filecon.getString(String.format("%s.%s.color", teamPathName, tString));
-                        }
-                        teamPrefix.get(key).put(tString, prefixColor);
-                        
-                        // get team spawn location specifically
-                        Location thisTeamSpawn;
-                        if (filecon.getConfigurationSection(String.format("%s.%s.spawner", teamPathName, tString)) == null) {
-                            filecon.createSection(String.format("%s.%s.spawner", teamPathName, tString));
-                            thisTeamSpawn = w.getSpawnLocation();
-                        } else {
-                            thisTeamSpawn = new Location(w, filecon.getDouble(String.format("%s.%s.spawner.x", teamPathName, tString)),
-                                    filecon.getDouble(String.format("%s.%s.spawner.y", teamPathName, tString)),
-                                    filecon.getDouble(String.format("%s.%s.spawner.z", teamPathName, tString)));
-                        }
-                        inTeamGameSpawners.get(key).put(tString, thisTeamSpawn);
+        Location teamSpawnerLoc = new Location(inWorld, filecon.getDouble(path + ".x"), filecon.getDouble(path + ".y"), filecon.getDouble(path + ".z"));
+        return teamSpawnerLoc;
+    }
 
-                        // get bed location specifically
-                        Location thisTeamBedLocation;
-                        if (filecon.getConfigurationSection(String.format("%s.%s.bed-location", teamPathName, tString)) == null) {
-                            filecon.createSection(String.format("%s.%s.bed-location", teamPathName, tString));
-                            thisTeamBedLocation = w.getSpawnLocation();
-                        } else {
-                            thisTeamBedLocation= new Location(w, filecon.getDouble(String.format("%s.%s.bed-location.x", teamPathName, tString)), 
-                                    filecon.getDouble(String.format("%s.%s.bed-location.y", teamPathName, tString)), 
-                                    filecon.getDouble(String.format("%s.%s.bed-location.z", teamPathName, tString)));
-                        }
-                        teamBedLocations.get(key).put(tString, thisTeamBedLocation);
-                    }
-                }
-                
-                // Get all resource spawners
-                Map<String, Map<String, ResourceSpawner>> catResSpawner = new HashMap<String, Map<String, ResourceSpawner>>();
-                String resourceSpawnerPath = String.format("worlds.%s.resource-spawners", key);
-                for (String teamName : teamPrefix.get(key).keySet()) {
-                    if (filecon.getConfigurationSection(resourceSpawnerPath + "." + teamName) == null) {
-                        filecon.createSection(resourceSpawnerPath + "." + teamName, new HashMap<>());
-                        resourceSpawners.get(key).put(teamName, new HashMap<String, ResourceSpawner>());
-                    }
-                }
-                resourceSpawners.put(key, catResSpawner);
-                if (filecon.getConfigurationSection(resourceSpawnerPath + ".PUBLIC") == null) {
-                    filecon.createSection(resourceSpawnerPath, new HashMap<>());
-                    resourceSpawners.put(key, new HashMap<String, Map<String, ResourceSpawner>>());
-                    filecon.createSection(resourceSpawnerPath + ".PUBLIC", new HashMap<>());
-                    resourceSpawners.get(key).put("PUBLIC", new HashMap<String, ResourceSpawner>());
-                } else {
-                    for (String rsTeamName : filecon.getConfigurationSection(resourceSpawnerPath).getKeys(false)) {
-                        String teamName = rsTeamName;
-                        if (!teamPrefix.get(key).keySet().contains(rsTeamName))
-                            teamName = "PUBLIC";
+    /**
+     * Get team's bed location. User need to check if a bed on that location has been put.
+     * @param mapName Original map name
+     * @param teamName On team by name
+     * @return Bed location not actual bed, if team is not exists then returns null
+     */
+    public Location getTeamBedLocation(World inWorld, String mapName, String teamName) {
+        // Check if team is exists
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            return null;
+        String path = String.format("worlds.%s.teams.%s.bed-location", mapName, teamName);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        if (!filecon.contains(path + ".x"))
+            filecon.set(path + ".x", inWorld.getSpawnLocation().getBlockX());
+        if (!filecon.contains(path + ".y"))
+            filecon.set(path + ".y", inWorld.getSpawnLocation().getBlockY());
+        if (!filecon.contains(path + ".z"))
+            filecon.set(path + ".z", inWorld.getSpawnLocation().getBlockZ());
+        Location bedLocation = new Location(inWorld, filecon.getInt(path + ".x"), filecon.getInt(path + ".y"), 
+                filecon.getInt(path + ".z"));
+        return bedLocation;
+    }
 
-                        Map<String, ResourceSpawner> localResourceSpawner = new HashMap<String, ResourceSpawner>();
-                        for (String rsName : filecon.getConfigurationSection(String.format("%s.%s", resourceSpawnerPath, teamName)).getKeys(false)) {
-                            Location rspawnerLoc = new Location(w, filecon.getDouble(String.format("%s.%s.%s.spawnloc.x", resourceSpawnerPath, teamName, rsName)),
-                                    filecon.getDouble(String.format("%s.%s.%s.spawnloc.y", resourceSpawnerPath, teamName, rsName)),
-                                    filecon.getDouble(String.format("%s.%s.%s.spawnloc.z", resourceSpawnerPath, teamName, rsName)));
-                            ResourceSpawner rspawner = new ResourceSpawner(rsName, rspawnerLoc,
-                                    ResourcesType.values()[filecon.getInt(String.format("%s.%s.%s.type", resourceSpawnerPath, teamName, rsName))],
-                                    (float)filecon.getDouble(String.format("%s.%s.%s.duration-spawn", resourceSpawnerPath, teamName, rsName)));
-                            rspawner.setOwner(teamName);
-                            localResourceSpawner.put(rsName, rspawner);
-                        }
+    /**
+     * Get team color raw string config.
+     * @param mapName Original map name
+     * @param teamName On team by name
+     * @return Raw string data, if team is not exists then null
+     */
+    public String getTeamColorPrefix(String mapName, String teamName) {
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            return null;
+        String path = String.format("worlds.%s.teams.%s.color", mapName, teamName);
+        if (!filecon.contains(path))
+            filecon.set(path, "white");
+        return filecon.getString(path);
+    }
 
-                        if (teamName.equals("PUBLIC")) {
-                            if (!catResSpawner.containsKey("PUBLIC")) {
-                                catResSpawner.put("PUBLIC", localResourceSpawner);
-                            } else {
-                                for (Map.Entry<String, ResourceSpawner> localResSpawnerEntry : localResourceSpawner.entrySet()) {
-                                    catResSpawner.get("PUBLIC").put(localResSpawnerEntry.getKey(), localResSpawnerEntry.getValue());
-                                }
-                            }
+    /**
+     * Get the minimum value location of team buffer area
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @return Minimum buffer area location
+     */
+    public Location getTeamMinBuffArea(World inWorld, String mapName, String teamName) {
+        // Check team exists
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            teamName = "PUBLIC";
+        // Check path in config exists
+        String path = String.format("worlds.%s.buffer-zone.%s", mapName, teamName);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        if (!filecon.contains(path + ".minx"))
+            filecon.set(path + ".minx", inWorld.getSpawnLocation().getX() - 5d);
+        if (!filecon.contains(path + ".miny"))
+            filecon.set(path + ".miny", inWorld.getSpawnLocation().getY() - 5d);
+        if (!filecon.contains(path + ".minz"))
+            filecon.set(path + ".minz", inWorld.getSpawnLocation().getZ() - 5d);
+        return new Location(inWorld, filecon.getDouble(path + ".minx"), filecon.getDouble(path + ".miny"), filecon.getDouble(path + ".minz"));
+    }
 
-                            // Unset the unknown resource spawner
-                            if (!rsTeamName.equals("PUBLIC"))
-                                filecon.set(resourceSpawnerPath + rsTeamName, null);
-                        } else {
-                            catResSpawner.put(teamName, localResourceSpawner);
-                        }
-                    }
-                }
+    /**
+     * Get the maximum value location of team buffer area
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @return Maximum buffer area location
+     */
+    public Location getTeamMaxBuffArea(World inWorld, String mapName, String teamName) {
+        // Check team exists
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            teamName = "PUBLIC";
+        // Check path in config exists
+        String path = String.format("worlds.%s.buffer-zone.%s", mapName, teamName);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        if (!filecon.contains(path + ".maxx"))
+            filecon.set(path + ".maxx", inWorld.getSpawnLocation().getX() + 5d);
+        if (!filecon.contains(path + ".maxy"))
+            filecon.set(path + ".maxy", inWorld.getSpawnLocation().getY() + 5d);
+        if (!filecon.contains(path + ".maxz"))
+            filecon.set(path + ".maxz", inWorld.getSpawnLocation().getZ() + 5d);
+        return new Location(inWorld, filecon.getDouble(path + ".maxx"), filecon.getDouble(path + ".maxy"), filecon.getDouble(path + ".maxz"));
+    }
 
-                // Get all event list
-                List<BedwarsGameTimelineEvent> configEvents = new ArrayList<BedwarsGameTimelineEvent>();
-                String timelinePathName = String.format("worlds.%s.timeline", key);
-                if (filecon.getConfigurationSection(timelinePathName) == null) {
-                    filecon.createSection(timelinePathName, new HashMap<>());
-                } else {
-                    for (String eventTimelineName : filecon.getConfigurationSection(timelinePathName).getKeys(false)) {
-                        BedwarsGameTimelineEvent thisTimelineEvent = new BedwarsGameTimelineEvent(
-                                TimelineEventType.fromString(filecon.getString(String.format("%s.%s.type", timelinePathName, eventTimelineName))), 
-                                (float)filecon.getInt(String.format("%s.%s.trigger-in-seconds", timelinePathName, eventTimelineName)), eventTimelineName);
-                        configEvents.add(thisTimelineEvent);
-                    }
-                }
-                timelineEvent.put(key, configEvents);
+    /**
+     * Get codenames that owned by a team. if there's no existing team then it consider as public resource spawners.
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @return A list of resource spawner codenames
+     */
+    public List<String> getRSCodenames(String mapName, String teamName) {
+        // Check existing team
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            teamName = "PUBLIC";
+        // Check existence in config file
+        String path = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        List<String> codenames = new ArrayList<String>();
+        if (!filecon.contains(path)) {
+            filecon.createSection(path);
+            return codenames;
+        }
+        // Include all codenames in team
+        codenames.addAll(filecon.getConfigurationSection(path).getKeys(false));
+        return codenames;
+    }
 
-                // Get all shop locations
-                Map<BedwarsShopType, List<Location>> loadShopLocations = new HashMap<BedwarsShopType, List<Location>>();
-                String shopLocPathName = String.format("worlds.%s.shop-location", key);
-                if (filecon.getConfigurationSection(shopLocPathName) == null) {
-                    filecon.createSection(shopLocPathName, new HashMap<>());
-                    filecon.createSection(shopLocPathName + BedwarsShopType.ITEMS_SHOP.toString(), new HashMap<>());
-                    filecon.createSection(shopLocPathName + BedwarsShopType.PERMA_SHOP.toString(), new HashMap<>());
+    /**
+     * Specific map queue location.
+     * @param inWorld Current game or builder world
+     * @param mapName Original map name
+     * @return Queue Location
+     */
+    public Location getQueueLocations(World inWorld, String mapName) {
+        String path = String.format("worlds.%s.queueloc", mapName);
+        if (!filecon.contains(path))
+            filecon.createSection(path, new HashMap<>());
+        if (!filecon.contains(path + ".x"))
+            filecon.set(path + ".x", inWorld.getSpawnLocation().getX());
+        if (!filecon.contains(path + ".y"))
+            filecon.set(path + ".y", inWorld.getSpawnLocation().getY());
+        if (!filecon.contains(path + ".z"))
+            filecon.set(path + ".z", inWorld.getSpawnLocation().getZ());
+        Location queueLoc = new Location(inWorld, filecon.getDouble(path + ".x"), filecon.getDouble(path + ".y"), 
+                filecon.getDouble(path + ".z"));
+        return queueLoc;
+    }
 
-                    loadShopLocations.put(BedwarsShopType.ITEMS_SHOP, new ArrayList<Location>());
-                    loadShopLocations.put(BedwarsShopType.PERMA_SHOP, new ArrayList<Location>());
-                } else {
-                    for (String shopTypeString : filecon.getConfigurationSection(shopLocPathName).getKeys(false)) {
-                        List<Location> listShopLocations = new ArrayList<Location>();
-                        BedwarsShopType st = BedwarsShopType.fromString(shopTypeString);
-                        if (st != null) {
-                            for (String shopLoc : filecon.getConfigurationSection(String.format("%s.%s", shopLocPathName, st.toString())).getKeys(false)) {
-                                Location loc = new Location(w, filecon.getDouble(String.format("%s.%s.%s.x", shopLocPathName, st.toString(), shopLoc)), 
-                                        filecon.getDouble(String.format("%s.%s.%s.y", shopLocPathName, st.toString(), shopLoc)), 
-                                        filecon.getDouble(String.format("%s.%s.%s.z", shopLocPathName, st.toString(), shopLoc)));
-                                listShopLocations.add(loc);
-                            }
-                            loadShopLocations.put(st, listShopLocations);
-                        }
-                    }
-                }
-                shopsLocation.put(key, loadShopLocations);
+    /**
+     * Get bedwars timeline events
+     * @param mapName Original map name
+     * @return List of events in timeline
+     */
+    public List<BedwarsGameTimelineEvent> getTimelineEvents(String mapName) {
+        String path = String.format("worlds.%s.timeline", mapName);
+        List<BedwarsGameTimelineEvent> timelineEvents = new ArrayList<BedwarsGameTimelineEvent>();
+        if (!filecon.contains(path)) {
+            filecon.createSection(path, new HashMap<>());
+            return timelineEvents; // Empty timeline
+        }
+        // Get and create object event
+        for (String eventNameString : filecon.getConfigurationSection(path).getKeys(false)) {
+            // Set Defaults
+            int order = 0;
+            float secondsToTrigger = 100f;
+            String eventmsg = "Event Trigger", eventName = eventNameString;
+            TimelineEventType typevent = TimelineEventType.DIAMOND_UPGRADE;
+            // Get Real event timeline information
+            if (filecon.contains(path + ".order"))
+                order = filecon.getInt(path + ".order");
+            if (filecon.contains(path + ".message"))
+                eventmsg = filecon.getString(path + ".message");
+            if (filecon.contains(path + ".type"))
+                typevent = TimelineEventType.fromString(filecon.getString(path + ".type"));
+            if (filecon.contains(path + ".trigger-in-seconds"))
+                secondsToTrigger = (float)filecon.getDouble(path + ".trigger-in-seconds");
+            BedwarsGameTimelineEvent bevent = new BedwarsGameTimelineEvent(typevent, secondsToTrigger, eventName, order, eventmsg);
+            timelineEvents.add(bevent);
+        }
+        // Selection sort
+        for (int i = 0; i < timelineEvents.size() - 1; i++) {
+            int lowestValueIndex = i;
+            for (int j = i + 1; j < timelineEvents.size(); j++) {
+                if (timelineEvents.get(lowestValueIndex).getTimelineOrder() > timelineEvents.get(j).getTimelineOrder())
+                    lowestValueIndex = j;
             }
+            if (i != lowestValueIndex) {
+                BedwarsGameTimelineEvent temp = timelineEvents.get(i);
+                timelineEvents.set(i, timelineEvents.get(lowestValueIndex));
+                timelineEvents.set(lowestValueIndex, temp);
+            }
+        }
+        return timelineEvents;
+    }
+
+    /**
+     * Get shops information on map or registered world.
+     * @param inWorld Current world standing
+     * @param mapName Original map name
+     * @return Map of type with locations
+     */
+    public Map<BedwarsShopType, List<Location>> getShops(World inWorld, String mapName) {
+        String path = String.format("worlds.%s.shop-location", mapName);
+        Map<BedwarsShopType, List<Location>> shopMapLoc = new HashMap<BedwarsShopType, List<Location>>();
+        for (String shopTypeString : filecon.getConfigurationSection(path).getKeys(false)) {
+            BedwarsShopType shopType = BedwarsShopType.fromString(shopTypeString);
+            Set<String> indexStringSet = filecon.getConfigurationSection(path + "." + shopTypeString).getKeys(false);
+            if (shopType != null && !indexStringSet.isEmpty()) {
+                List<Location> locationList = new ArrayList<Location>();
+                for (String shopLocString : indexStringSet) {
+                    String locPath = path + "." + shopTypeString + "." + shopLocString;
+                    Location loc = new Location(inWorld, filecon.getDouble(locPath + ".x"), 
+                            filecon.getDouble(locPath + ".y"), filecon.getDouble(locPath + ".z"));
+                    locationList.add(loc);
+                }
+                shopMapLoc.put(shopType, locationList);
+            }
+        }
+        return shopMapLoc;
+    }
+
+    /**
+     * Get list of locked entities.
+     * @param inWorld Current world standing
+     * @param mapName Original map name
+     */
+    public List<LockedEntities> getLockedRequestEntity(World inWorld, String mapName) {
+        String path = String.format("worlds.%s.locked-entity", mapName);
+        if (!filecon.contains(path))
+            filecon.createSection(path, new HashMap<>());
+        List<LockedEntities> listOfLocked = new ArrayList<LockedEntities>();
+        for (String cn : filecon.getConfigurationSection(path).getKeys(false)) {
+            LockedEntityType typeLock = LockedEntityType.values()[filecon.getInt(path + ".type-lock")];
+            if (typeLock == LockedEntityType.NORMAL_LOCK) {
+                String tPath = path + "." + cn + ".request";
+                Map<ResourcesType, Integer> requirements = new HashMap<ResourcesType, Integer>();
+                for (String req : filecon.getConfigurationSection(tPath).getKeys(false)) {
+                    ResourcesType typeRequest = ResourcesType.fromString(req);
+                    requirements.put(typeRequest, filecon.getInt(tPath + "." + req));
+                }
+                LockedEntities locked = new LockedEntities(new Location(inWorld, 
+                        filecon.getDouble(path + "." + cn + ".loc.x"), 
+                        filecon.getDouble(path + "." + cn + ".loc.y"), 
+                        filecon.getDouble(path + "." + cn + ".loc.z")), requirements);
+                listOfLocked.add(locked);
+            }
+        }
+        return listOfLocked;
+    }
+
+    /**
+     * Get locked resource spawner entity reference.
+     * @param inWorld Current standing world
+     * @param mapName Original map name
+     * @param rsTimer Resource spawner coroutine reference
+     * @return Locked resource spawner, if it's not exists then it returns null
+     */
+    public LockedResourceSpawner getLockedRSEntity(World inWorld, String mapName, ResourceSpawnTimer rsTimer) {
+        String path = String.format("worlds.%s.locked-entity", mapName);
+        if (!filecon.contains(path))
+            filecon.createSection(path, new HashMap<>());
+        for (String cn : filecon.getConfigurationSection(path).getKeys(false)) {
+            LockedEntityType typeLock = LockedEntityType.values()[filecon.getInt(path + ".type-lock")];
+            if (typeLock == LockedEntityType.RESOURCE_SPAWNER_LOCK && rsTimer.getCodeName().equals(filecon.getString(path + "." + cn + ".rs-lock"))) {
+                String tPath = path + "." + cn + ".request";
+                Map<ResourcesType, Integer> requirements = new HashMap<ResourcesType, Integer>();
+                for (String req : filecon.getConfigurationSection(tPath).getKeys(false)) {
+                    ResourcesType typeRequest = ResourcesType.fromString(req);
+                    requirements.put(typeRequest, filecon.getInt(tPath + "." + req));
+                }
+                return new LockedResourceSpawner(new Location(inWorld, 
+                        filecon.getDouble(path + "." + cn + ".loc.x"), 
+                        filecon.getDouble(path + "." + cn + ".loc.y"), 
+                        filecon.getDouble(path + "." + cn + ".loc.z")), requirements, rsTimer);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get all public resource spawners, codenames only.
+     * @param mapName Original map name
+     * @return List of codenames
+     */
+    public List<String> getPublicRSCodenames(String mapName) {
+        List<String> listRSCodenames = new ArrayList<String>();
+        String path = String.format("worlds.%s.resource-spawners.PUBLIC", mapName);
+        if (getWorldNames().contains(mapName)) {
+            if (!filecon.contains(path))
+                filecon.createSection(path, new HashMap<>());
+            listRSCodenames.addAll(filecon.getConfigurationSection(path).getKeys(false));
+        }
+        return listRSCodenames;
+    }
+
+    /**
+     * Get all locked entities codenames.
+     * @param mapName Original map name
+     * @return List of locked entity codenames
+     */
+    public List<String> getLockedCodenames(String mapName) {
+        String path = String.format("worlds.%s.locked-entity", mapName);
+        if (!filecon.contains(path))
+            filecon.createSection(path, new HashMap<>());
+        List<String> codenames = new ArrayList<String>();
+        codenames.addAll(filecon.getConfigurationSection(path).getKeys(false));
+        return codenames;
+    }
+
+    /**
+     * Insert a new team into bedwars team list.
+     * @param mapName Original map name
+     * @param teamName Name of new team
+     * @param colorPrefix Raw color for team prefix color
+     * @return True if successfully added, if team already exists the it returns false
+     */
+    public boolean addTeam(String mapName, String teamName, String colorPrefix) {
+        // Check existing team
+        List<String> team = getTeamNames(mapName);
+        if (team.contains(teamName))
+            return false;
+        // Proceed Insertion
+        String path = String.format("worlds.%s.teams.%s", mapName, teamName);
+        filecon.createSection(path, new HashMap<>());
+        filecon.set(path + ".color", colorPrefix);
+        String bufferZonePath = String.format("worlds.%s.buffer-zone", mapName);
+        filecon.createSection(bufferZonePath + "." + teamName, new HashMap<>());
+        filecon.createSection(bufferZonePath + "-effects." + teamName, new HashMap<>());
+        String resouceSpawnerPath = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        filecon.createSection(resouceSpawnerPath, new HashMap<>());
+        return true;
+    }
+
+    /**
+     * Add a new resource spawner to the map.
+     * @param mapName Original map name
+     * @param teamName On team by name
+     * @param spawner Already created spawner
+     */
+    public void addResourceSpawner(String mapName, String teamName, ResourceSpawner spawner) {
+        // Check available team
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            teamName = "PUBLIC";
+        String path = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        if (!filecon.contains(path))
+            filecon.createSection(path, new HashMap<>());
+        // Add into config file
+        String rsPath = path + "." + spawner.getCodename();
+        filecon.set(rsPath, new HashMap<>());
+        filecon.set(rsPath + ".type", spawner.getTypeResourceSpawner().ordinal());
+        filecon.set(rsPath + ".spawnloc.x", spawner.getSpawnLocation().getX());
+        filecon.set(rsPath + ".spawnloc.y", spawner.getSpawnLocation().getY());
+        filecon.set(rsPath + ".spawnloc.z", spawner.getSpawnLocation().getZ());
+        filecon.set(rsPath + ".duration-spawn", spawner.getSecondsPerSpawn());
+    }
+
+    /**
+     * Add a new shop spawner to the map.
+     * @param mapName Original map name
+     * @param type Type of shop
+     * @param playerLocation Player current location
+     * @return true if successfuly added, else then false
+     */
+    public boolean addShopLocationSpawn(String mapName, BedwarsShopType type, Location playerLocation) {
+        String path = String.format("worlds.%s.shop-location.%s", mapName, type.toString());
+        if (!getWorldNames().contains(mapName))
+            return false;
+        if (!filecon.contains(path))
+            filecon.createSection(path, new HashMap<>());
+        // Add shop spawn location into config file
+        String newPath = String.format("%s.shop%d", path, filecon.getConfigurationSection(path).getKeys(false).size());
+        filecon.set(newPath + ".x", playerLocation.getX());
+        filecon.set(newPath + ".y", playerLocation.getY());
+        filecon.set(newPath + ".z", playerLocation.getZ());
+        return true;
+    }
+
+    /**
+     * Add a potion effect to buffer zone.
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @param effectType Potion effect included in buffer zone
+     * @return True if successfully added, if the effect is already in list then it returns false
+     */
+    public boolean addTeamAreaPotionEffect(String mapName, String teamName, PotionEffectType effectType) {
+        // Check available team
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            teamName = "PUBLIC";
+        // Add into config file
+        String path = String.format("worlds.%s.buffer-zone-effects.%s", mapName, teamName);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        String tPath = path + "." + effectType.getName();
+        if (!filecon.contains(tPath)) {
+            filecon.createSection(tPath);
+            filecon.set(tPath + ".seconds-hit", 5f);
+            filecon.set(tPath + ".for-opposition", false);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Add requirement on locked entity.
+     * @param mapName Original map name
+     * @param codename Locked entity has their own codename
+     * @param typeRes Resource type which required
+     * @return True if successfully set, if the locked entity not exists then it returns false
+     */
+    public boolean addRequestOnLockedEntity(String mapName, String codename, ResourcesType typeRes, int amount) {
+        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
+        if (!filecon.contains(path))
+            return false;
+        if (!filecon.contains(path + ".request"))
+            filecon.createSection(path + ".request");
+        path = path + ".request." + typeRes.toString();
+        filecon.set(path, amount);
+        return true;
+    }
+
+    /**
+     * Set team color prefix, you can use any of string but the plugin itself will decide if it is a color.
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @param colorPrefix Color choice
+     * @return True if successfully set, if team not exists then it returns false
+     */
+    public boolean setTeamColorPrefix(String mapName, String teamName, String colorPrefix) {
+        // Check available team
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            return false;
+        // Set configuration
+        String path = String.format("worlds.%s.teams.%s.color", mapName, teamName);
+        filecon.set(path, colorPrefix);
+        return true;
+    }
+
+    /**
+     * Set or overwrite queue location, this will also check if the registered world exists.
+     * @param mapName Original map name
+     * @param queueLoc Location set
+     * @return true if successfully set, else then false
+     */
+    public boolean setQueueLocation(String mapName, Location queueLoc) {
+        if (!getWorldNames().contains(mapName))
+            return false;
+        String path = String.format("worlds.%s.queueloc", mapName);
+        filecon.set(path + ".x", queueLoc.getX());
+        filecon.set(path + ".y", queueLoc.getY());
+        filecon.set(path + ".z", queueLoc.getZ());
+        return true;
+    }
+
+    /**
+     * Set or overwrite team spawn location.
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @param setLoc Location set
+     * @return true if successfully set, else then false;
+     */
+    public boolean setTeamSpawnLoc(String mapName, String teamName, Location setLoc) {
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            return false;
+        String path = String.format("worlds.%s.teams.%s.spawner", mapName, teamName);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        filecon.set(path + ".x", setLoc.getX());
+        filecon.set(path + ".y", setLoc.getY());
+        filecon.set(path + ".z", setLoc.getZ());
+        return true;
+    }
+
+    /**
+     * Set team bed location.
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @param bedLoc Bed location that has just placed
+     * @return true if the set is done, if team not exists then false
+     */
+    public boolean setTeamBedLocation(String mapName, String teamName, Location bedLoc) {
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            return false;
+        String path = String.format("worlds.%s.teams.%s.bed-location", mapName, teamName);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        filecon.set(path + ".x", bedLoc.getBlockX());
+        filecon.set(path + ".y", bedLoc.getBlockY());
+        filecon.set(path + ".z", bedLoc.getBlockZ());
+        return true;
+    }
+
+    /**
+     * Set team area buffer zone, this area gives effect of any potion effects. This function automaticaly recalculate minimum and maximum value of location
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @param minLoc Location minimum value
+     * @param maxLoc Location maximum value
+     */
+    public void setTeamBufferArea(String mapName, String teamName, Location minLoc, Location maxLoc) {
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            teamName = "PUBLIC";
+        double temp;
+        // Minimal and Maximal value correction
+        if (minLoc.getX() > maxLoc.getX()) {
+            temp = minLoc.getX();
+            minLoc.setX(maxLoc.getX());
+            maxLoc.setX(temp);
+        }
+        if (minLoc.getY() > maxLoc.getY()) {
+            temp = minLoc.getY();
+            minLoc.setY(maxLoc.getY());
+            maxLoc.setY(temp);
+        }
+        if (minLoc.getZ() > maxLoc.getZ()) {
+            temp = minLoc.getZ();
+            minLoc.setZ(maxLoc.getZ());
+            maxLoc.setZ(temp);
+        }
+        // Check if exists in config file
+        String path = String.format("worlds.%s.buffer-zone.%s", mapName, teamName);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        filecon.set(path + ".minx", minLoc.getX());
+        filecon.set(path + ".miny", minLoc.getY());
+        filecon.set(path + ".minz", minLoc.getZ());
+        filecon.set(path + ".maxx", maxLoc.getX());
+        filecon.set(path + ".maxy", maxLoc.getY());
+        filecon.set(path + ".maxz", maxLoc.getZ());
+    }
+
+    /**
+     * Set locked placeable entity, which player cannot interact with.
+     * @param mapName Original map name
+     * @param codename Codename for this entity, must be unique
+     * @param onLocation Location where did player set
+     * @return True if successfully set, if map not exists then it's
+     */
+    public boolean setLockedRequestEntity(String mapName, String codename, Location onLocation) {
+        if (!getWorldNames().contains(mapName))
+            return false;
+        // Check if locked entity already exists
+        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        filecon.set(path + ".loc.x", onLocation.getX());
+        filecon.set(path + ".loc.y", onLocation.getY());
+        filecon.set(path + ".loc.z", onLocation.getZ());
+        filecon.set(path + ".type-lock", LockedEntityType.NORMAL_LOCK.ordinal());
+        return true;
+    }
+
+    /**
+     * Set locked placeable entity, which player cannot interact with. Public resource spawner only.
+     * @param mapName Original map name
+     * @param codename Codename for this entity, must be unique
+     * @param onLocation Location where did player set
+     * @param codenameRS 
+     * @return True if successfully set, if map not exists then it's
+     */
+    public boolean setLockedRequestEntity(String mapName, String codename, Location onLocation, String codenameRS) {
+        if (!getWorldNames().contains(mapName))
+            return false;
+        // Move resource spawner's classification into Locked section
+        String tPath = String.format("worlds.%s.resource-spawners.PUBLIC.%s", mapName, codenameRS);
+        if (!filecon.contains(tPath))
+            return false;
+        String ttPath = String.format("worlds.%s.resource-spawners.LOCKED.%s", mapName, codenameRS);
+        if (!filecon.contains(ttPath))
+            filecon.createSection(ttPath);
+        filecon.set(ttPath + ".type", filecon.getInt(tPath + ".type"));
+        filecon.set(ttPath + ".spawnloc.x", filecon.getDouble(tPath + ".spawnloc.x"));
+        filecon.set(ttPath + ".spawnloc.y", filecon.getDouble(tPath + ".spawnloc.x"));
+        filecon.set(ttPath + ".spawnloc.z", filecon.getDouble(tPath + ".spawnloc.x"));
+        filecon.set(ttPath + ".duration-spawn", filecon.getDouble(tPath + ".duration-spawn"));
+        filecon.set(tPath, null);
+        // Check if locked entity already exists
+        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        filecon.set(path + ".loc.x", onLocation.getX());
+        filecon.set(path + ".loc.y", onLocation.getY());
+        filecon.set(path + ".loc.z", onLocation.getZ());
+        filecon.set(path + ".type-lock", LockedEntityType.RESOURCE_SPAWNER_LOCK.ordinal());
+        filecon.set(path + ".rs-lock", codenameRS);
+        return true;
+    }
+
+    /**
+     * Set a resource spawner seconds per spawn.
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @param codename Resource spawner has their own unique codename
+     * @param duration Seconds per spawn duration
+     * @return true if successfully changed, else then false
+     */
+    public boolean setRSDuration(String mapName, String teamName, String codename, float duration) {
+        String path = String.format("worlds.%s.resource-spawners.%s.%s", mapName, teamName, codename);
+        if (!filecon.contains(path))
+            return false;
+        filecon.set(path + ".duration-spawn", duration);
+        return true;
+    }
+
+    /**
+     * Delete a team from this map.
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @return true if successfully deleted, if team not exists then false
+     */
+    public boolean deleteTeam(String mapName, String teamName) {
+        // Check if team exists
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            return false;
+        // Proceed Deletion
+        String path = String.format("worlds.%s.teams.%s", mapName, teamName);
+        filecon.set(path, null);
+        String bufferZonePath = String.format("worlds.%s.buffer-zone", mapName);
+        filecon.set(bufferZonePath + "." + teamName, null);
+        filecon.set(bufferZonePath + "-effects." + teamName, null);
+        String resouceSpawnerPath = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        filecon.set(resouceSpawnerPath, null);
+        return true;
+    }
+
+    /**
+     * Delete an existing resource spawner in world or map. After you got the list, you need to sort it by order.
+     * @param mapName Original map name
+     * @param teamName On team by name
+     * @param codeName Every resource spawner has their own unique codename
+     * @return True if successfully deleted, else then false
+     */
+    public boolean deleteResourceSpawner(String mapName, String teamName, String codeName) {
+        String path = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        List<String> teams = getTeamNames(mapName);
+        // Check if team is exists but resource spawner is not
+        if (teams.contains(teamName) && !filecon.contains(path)) {
+            filecon.createSection(path, new HashMap<>());
+            return false;
+        }
+        // Consider a public resource spawner if the team not exists
+        if (!filecon.contains(path)) {
+            path = String.format("worlds.%s.resource-spawners.PUBLIC", mapName); 
+            // Check PUBLIC section exists
+            if (!filecon.contains(path)) {
+                // Consider create a public section if not exists
+                filecon.createSection(path, new HashMap<>()); 
+                return false;
+            }
+        }
+        // Check team resource spawner by codename
+        if (!filecon.contains(path + "." + codeName))
+            return false;
+        filecon.set(path + "." + codeName, null);
+        return true;
+    }
+
+    /**
+     * Delete an existing shop spawn location. User need to include the index to choose a specific shop spawn location.
+     * @param mapName Original map name
+     * @param type Type of shop that will be deleted
+     * @param index List index
+     * @return True if it is successfully deleted, else then false
+     */
+    public boolean deleteShopLocation(String mapName, BedwarsShopType type, int index) {
+        String path = String.format("worlds.%s.shop-location.%s", mapName, type.toString());
+        // Check if type exists, if not then create a section
+        if (!filecon.contains(path)) {
+            filecon.createSection(path);
+            return false;
+        }
+        Map<String, Vector> indexesInConfig = new HashMap<String, Vector>();
+        // Get number in sub-string
+        String pickedIndex = null;
+        for (String ic : filecon.getConfigurationSection(path).getKeys(false)) {
+            String numString = ic.substring(4);
+            if (Integer.toString(index).equals(numString))
+                pickedIndex = ic;
+            Vector vectorLoc = new Vector(filecon.getDouble(path + "." + ic + ".x"), filecon.getDouble(path + "." + ic + ".y"), 
+                    filecon.getDouble(path + "." + ic + ".z"));
+            indexesInConfig.put(ic, vectorLoc);
+        }
+        // Check if pickedIndex is not null
+        if (pickedIndex == null)
+            return false;
+        filecon.set(path + "." + pickedIndex, null);
+        indexesInConfig.remove(pickedIndex);
+        // Overwrite the list in config file
+        List<Vector> listVectors = new ArrayList<Vector>();
+        listVectors.addAll(indexesInConfig.values());
+        overwriteShopList(path, listVectors);
+        return true;
+    }
+
+    /**
+     * Delete an existing event on timeline event in game.
+     * @param mapName Original map name
+     * @param eventName Event display name that will be deleted
+     * @return True if it is successfully deleted, else then false
+     */
+    public boolean deleteTimelineEvent(String mapName, String eventName) {
+        String path = String.format("worlds.%s.timeline.%s", mapName, eventName);
+        if (!filecon.contains(path))
+            return false;
+        filecon.set(path, null);
+        return true;
+    }
+
+    /**
+     * Count overall resource spawners in this map
+     * @param mapName Original map name
+     * @return amount of existing resource spawners
+     */
+    public int countOverallRS(String mapName) {
+        String path = String.format("worlds.%s.resource-spawners", mapName);
+        // Consider a public resource spawner if the team not exists
+        if (!filecon.contains(path)) {
+            filecon.createSection(path, new HashMap<>());
+            return 0;
+        }
+        return filecon.getConfigurationSection(path).getKeys(false).size();
+    }
+
+    /**
+     * Count events in current world timeline.
+     * @param mapName Original map name
+     * @return Amount of events in timeline
+     */
+    public int countEventsInTimeline(String mapName) {
+        String path = String.format("worlds.%s.timeline", mapName);
+        // Consider if the timeline section is not exists
+        if (!filecon.contains(path)) {
+            filecon.createSection(path, new HashMap<>());
+            return 0;
+        }
+        return filecon.getConfigurationSection(path).getKeys(false).size();
+    }
+
+    /**
+     * Load worlds and config 
+     */ 
+    public void load() {
+        if (!filecon.contains("worlds"))
+            filecon.set("worlds", new HashMap<>());
+        // Loop by World Name
+        for (String key : filecon.getConfigurationSection("worlds").getKeys(false)) {
+            // load world creator
+            WorldCreator creator = new WorldCreator(key).environment(Environment.values()[filecon.getInt("worlds." + key + ".env")])
+                    .hardcore(filecon.getBoolean("worlds." + key + ".hardcore"))
+                    .generateStructures(filecon.getBoolean("worlds." + key + ".structure"));
+            Bukkit.createWorld(creator);
         }
     }
 
-    public void defaultSystemConfig(WorldCreator creator, World worldSample) {
+    /**
+     * Only used when the world is going to be created.
+     * @param creator World creator is needed to create a world
+     */
+    public void saveWorldConfig(WorldCreator creator) {
+        World worldSample = Bukkit.createWorld(creator);
+        // Set world config
+        worldSample.setAutoSave(false);
+        worldSample.setKeepSpawnInMemory(false);
+        worldSample.setDifficulty(Difficulty.PEACEFUL);
+        worldSample.setAnimalSpawnLimit(0);
+        worldSample.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        worldSample.setTime(0);
+        // Add initial blocks of bedrocks on mid point
+        for (int x = -3; x < 4; x++) {
+            for (int z = -3; z < 4; z++)
+                worldSample.getBlockAt(new Location(worldSample, x, 45, z)).setType(Material.BEDROCK);
+        }
+        // Get world Attributes
         String worldName = worldSample.getName();
         Location defaultSpawnLoc = worldSample.getSpawnLocation();
-        worlds.put(worldName, creator);
-        queueLocations.put(worldName, defaultSpawnLoc);
-        resourceSpawners.put(worldName, new HashMap<String, Map<String, ResourceSpawner>>());
-
-        // Default Color
-        teamPrefix.put(worldName, new HashMap<String, String>());
-        teamPrefix.get(worldName).put("Blue", "blue");
-        teamPrefix.get(worldName).put("Yellow", "yellow");
-        teamPrefix.get(worldName).put("Red", "red");
-        teamPrefix.get(worldName).put("Green", "green");
-
         // Create Sections
+        // Generic world path
         String worldPathName = String.format("worlds.%s", worldName);
+        // Name of world and World Creator Config
         filecon.createSection(worldPathName, new HashMap<>());
+        filecon.set(worldPathName + ".env", creator.environment().ordinal());
+        filecon.set(worldPathName + ".structure", creator.generateStructures());
+        filecon.set(worldPathName + "hardcore", creator.hardcore());
+        // Initial Teams in game
         filecon.createSection(worldPathName + ".teams", new HashMap<>());
+        filecon.set(String.format("%s.teams.Yellow", worldPathName), new HashMap<>());
+        filecon.set(String.format("%s.teams.Red", worldPathName), new HashMap<>());
+        filecon.set(String.format("%s.teams.Blue", worldPathName), new HashMap<>());
+        filecon.set(String.format("%s.teams.Green", worldPathName), new HashMap<>());
+        // Queue Location of Game
         filecon.createSection(worldPathName + ".queueloc", new HashMap<>());
+        filecon.set(worldPathName + "queueloc.x", defaultSpawnLoc.getX());
+        filecon.set(worldPathName + "queueloc.y", defaultSpawnLoc.getX());
+        filecon.set(worldPathName + "queueloc.z", defaultSpawnLoc.getX());
+        // Empty Resource Spawners
         filecon.createSection(worldPathName + ".resource-spawners", new HashMap<>());
+        filecon.createSection(worldPathName + ".resource-spawners.PUBLIC", new HashMap<>());
+        // Empty Timeline Event
         filecon.createSection(worldPathName + ".timeline", new HashMap<>());
-
+        // Empty Shop Location
         filecon.createSection(worldPathName + ".shop-location", new HashMap<>());
-        filecon.createSection(worldPathName + ".shop-location." + BedwarsShopType.ITEMS_SHOP.toString(), new HashMap<>());
-        filecon.createSection(worldPathName + ".shop-location." + BedwarsShopType.PERMA_SHOP.toString(), new HashMap<>());
+    }
 
-        // Default Team YML Initializer
-        inTeamGameSpawners.put(worldName, new HashMap<String, Location>());
-        for (String teamName : teamPrefix.get(worldName).keySet()) {
-            inTeamGameSpawners.get(worldName).put(teamName, defaultSpawnLoc);
-            resourceSpawners.get(worldName).put(teamName, new HashMap<String, ResourceSpawner>());
-            filecon.createSection(worldPathName + ".teams." + teamName + ".bed-location", new HashMap<>());
+    /**
+     * List of shop only overwrite the new data.
+     * @param path Data path
+     * @param listLoc List of locations
+     */
+    private void overwriteShopList(String path, List<Vector> listLoc) {
+        filecon.set(path, new HashMap<>());
+        for (int i = 0; i < listLoc.size(); i++) {
+            Vector thisLocVector = listLoc.get(i);
+            filecon.createSection(String.format("%s.shop%d", path, i), new HashMap<>());
+            filecon.set(String.format("%s.shop%d.x", path, i), thisLocVector.getX());
+            filecon.set(String.format("%s.shop%d.y", path, i), thisLocVector.getY());
+            filecon.set(String.format("%s.shop%d.z", path, i), thisLocVector.getZ());
         }
     }
-
-    @Override
-    public void Save() {
-        saveWorldCreator();
-        saveWorldQueueSpawn();
-        saveTimelineEvent();
-        saveResourceSpawnersData();
-        savePlayerPrefix();
-        saveBedLocation();
-        saveShopLocation();
-        
-        super.Save();
-    }
-
-    private void saveResourceSpawnersData() {
-        // Save all resource spawners
-        for (Map.Entry<String, Map<String, Map<String, ResourceSpawner>>> entryRS : resourceSpawners.entrySet()) {
-            for (Map.Entry<String, Map<String, ResourceSpawner>> resSp : resourceSpawners.get(entryRS.getKey()).entrySet()) {
-                filecon.createSection(String.format("worlds.%s.resource-spawners.%s", entryRS.getKey(), resSp.getKey()));
-                for (Map.Entry<String, ResourceSpawner> theResSpawnerEntry : resSp.getValue().entrySet()) {
-                    Location spawnLoc = theResSpawnerEntry.getValue().getSpawnLocation();
-                    String rsPathName = String.format("worlds.%s.resource-spawners.%s.%s", entryRS.getKey(), resSp.getKey(), theResSpawnerEntry.getKey());
-                    filecon.set(rsPathName + ".type", theResSpawnerEntry.getValue().getTypeResourceSpawner().ordinal());
-                    filecon.set(rsPathName + ".spawnloc.x", spawnLoc.getX());
-                    filecon.set(rsPathName + ".spawnloc.y", spawnLoc.getY());
-                    filecon.set(rsPathName + ".spawnloc.z", spawnLoc.getZ());
-                    filecon.set(rsPathName + ".duration-spawn", theResSpawnerEntry.getValue().getSecondsPerSpawn());
-                }
-            }
-        }
-    }
-
-    private void saveWorldCreator() {
-        // Save all made worlds
-        for (Map.Entry<String, WorldCreator> entry : worlds.entrySet()) {
-            filecon.set(String.format("worlds.%s.env", entry.getKey()), entry.getValue().environment().ordinal());
-            filecon.set(String.format("worlds.%s.structure", entry.getKey()), entry.getValue().generateStructures());
-            filecon.set(String.format("worlds.%s.hardcore", entry.getKey()), entry.getValue().hardcore());
-        }
-    }
-
-    private void saveWorldQueueSpawn() {
-        // Save All World queue spawn data
-        for (Map.Entry<String, Location> entry : queueLocations.entrySet()) {
-            filecon.set(String.format("worlds.%s.queueloc.x", entry.getKey()), entry.getValue().getX());
-            filecon.set(String.format("worlds.%s.queueloc.y", entry.getKey()), entry.getValue().getY());
-            filecon.set(String.format("worlds.%s.queueloc.z", entry.getKey()), entry.getValue().getZ());
-        }
-    }
-
-    private void savePlayerPrefix() {
-        // Save Player prefix and it's team spawn location
-        for (Map.Entry<String, Map<String, String>> wEntry : teamPrefix.entrySet()) {
-            for (Map.Entry<String, String> prefix : teamPrefix.get(wEntry.getKey()).entrySet()) {
-                String teamPathName = String.format("worlds.%s.teams.%s", wEntry.getKey(), prefix.getKey());
-                filecon.set(String.format("%s.color", teamPathName), prefix.getValue());
-                filecon.set(String.format("%s.spawner.x", teamPathName), inTeamGameSpawners.get(wEntry.getKey()).get(prefix.getKey()).getX());
-                filecon.set(String.format("%s.spawner.y", teamPathName), inTeamGameSpawners.get(wEntry.getKey()).get(prefix.getKey()).getY());
-                filecon.set(String.format("%s.spawner.z", teamPathName), inTeamGameSpawners.get(wEntry.getKey()).get(prefix.getKey()).getZ());
-            }
-        }
-    }
-
-    private void saveTimelineEvent() {
-        // Saving Timeline
-        for (Map.Entry<String, List<BedwarsGameTimelineEvent>> entryEventEntry : timelineEvent.entrySet()) {
-            for (int i = 0; i < entryEventEntry.getValue().size(); i++) {
-                BedwarsGameTimelineEvent ev = entryEventEntry.getValue().get(i);
-                filecon.set("worlds." + entryEventEntry.getKey() + ".timeline." + ev.getName() + ".type", ev.getEventType().toString());
-                filecon.set("worlds." + entryEventEntry.getKey() + ".timeline." + ev.getName() + ".trigger-in-seconds", ev.getTriggerSeconds());
-            }
-        }
-    }
-
-    private void saveBedLocation() {
-        // Save all bed location
-        for (Map.Entry<String, Map<String, Location>> bedLocEntry : teamBedLocations.entrySet()) {
-            for (Map.Entry<String, Location> teamEntry : teamBedLocations.get(bedLocEntry.getKey()).entrySet()) {
-                Location loc = teamEntry.getValue();
-                String bedLocPathName = String.format("worlds.%s.teams.%s", bedLocEntry.getKey(), teamEntry.getKey());
-                filecon.set(bedLocPathName + ".bed-location.x", loc.getX());
-                filecon.set(bedLocPathName + ".bed-location.y", loc.getY());
-                filecon.set(bedLocPathName + ".bed-location.z", loc.getZ());
-            }
-        }
-    }
-
-    private void saveShopLocation() {
-        // Save all shop spawn locations
-        for (Map.Entry<String, Map<BedwarsShopType, List<Location>>> shopEntry : shopsLocation.entrySet()) {
-            for (Map.Entry<BedwarsShopType, List<Location>> shopTypeEntry : shopEntry.getValue().entrySet()) {
-                for (int i = 0; i < shopTypeEntry.getValue().size(); i++) {
-                    String shopPathName = String.format("worlds.%s.shop-location.%s.shop%d", shopEntry.getKey(), shopTypeEntry.getKey().toString(), i);
-                    filecon.set(shopPathName + ".x", shopTypeEntry.getValue().get(i).getX());
-                    filecon.set(shopPathName + ".y", shopTypeEntry.getValue().get(i).getY());
-                    filecon.set(shopPathName + ".z", shopTypeEntry.getValue().get(i).getZ());
-                }
-            }
-        }
-    }
-
 }

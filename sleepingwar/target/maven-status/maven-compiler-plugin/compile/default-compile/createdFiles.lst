@@ -3,7 +3,6 @@ com\joenastan\sleepingwar\plugin\game\SleepingRoom$1.class
 com\joenastan\sleepingwar\plugin\utility\Timer\StopwatchTimer$1.class
 com\joenastan\sleepingwar\plugin\utility\UsefulStaticFunctions$1.class
 com\joenastan\sleepingwar\plugin\game\ItemPrice\PricetagsItemsPotion.class
-com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerLeaveEvent.class
 com\joenastan\sleepingwar\plugin\SleepingWarsPlugin.class
 com\joenastan\sleepingwar\plugin\game\BuilderTestRoom.class
 com\joenastan\sleepingwar\plugin\game\TeamGroupMaker.class
@@ -22,7 +21,6 @@ com\joenastan\sleepingwar\plugin\game\BedwarsShopType.class
 com\joenastan\sleepingwar\plugin\game\ItemPrice\PricetagsItemsArmorWeapon.class
 com\joenastan\sleepingwar\plugin\commands\WorldMakerCommand.class
 com\joenastan\sleepingwar\plugin\game\InventoryMenus\BedwarsMenus.class
-com\joenastan\sleepingwar\plugin\utility\PlayerBedwarsEntity.class
 com\joenastan\sleepingwar\plugin\utility\Timer\PlayerReviveTimer.class
 com\joenastan\sleepingwar\plugin\utility\Timer\ResourceSpawnTimer.class
 com\joenastan\sleepingwar\plugin\utility\GameSystemConfig.class
@@ -34,13 +32,11 @@ com\joenastan\sleepingwar\plugin\utility\Timer\ResourceSpawnTimer$1.class
 com\joenastan\sleepingwar\plugin\events\Tasks\DeleteWorldDelayed.class
 com\joenastan\sleepingwar\plugin\game\InventoryMenus\BedwarsShopMenus.class
 com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameOnUpgradeEvent.class
-com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerJoinEvent.class
 com\joenastan\sleepingwar\plugin\game\SleepingRoom$RoomUpdater.class
 com\joenastan\sleepingwar\plugin\commands\TabCompletor\HostingCommands.class
 com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameShopBuyEvent.class
 com\joenastan\sleepingwar\plugin\game\ResourceSpawner.class
 com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameEndedEvent.class
-com\joenastan\sleepingwar\plugin\events\OnBuilderModeEvents$1.class
 com\joenastan\sleepingwar\plugin\utility\Timer\PlayerReviveTimer$1.class
 com\joenastan\sleepingwar\plugin\commands\TabCompletor\SworldCommands.class
 com\joenastan\sleepingwar\plugin\game\ItemPrice\PricetagsItems.class

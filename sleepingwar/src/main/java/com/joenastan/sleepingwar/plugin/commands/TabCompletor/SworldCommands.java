@@ -1,10 +1,10 @@
 package com.joenastan.sleepingwar.plugin.commands.TabCompletor;
 
-import com.joenastan.sleepingwar.plugin.game.BedwarsShopType;
-import com.joenastan.sleepingwar.plugin.game.ResourcesType;
+import com.joenastan.sleepingwar.plugin.enumtypes.BedwarsShopType;
+import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.TimelineEventType;
+import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -16,8 +16,14 @@ import java.util.List;
 public class SworldCommands implements TabCompleter {
 
     private static final GameSystemConfig systemConf = SleepingWarsPlugin.getGameSystemConfig();
+
     private String addEventCMD = "addevent"; // Add event timeline
+    private String setTeamAreaCMD = "areabuff"; // set team area potion effect
+    private String setAreaOppositionCMD = "areaopp"; // set whether the area is for team or the opposition
+    private String setAreaSingleShotCMD = "areasin"; // set whether the area only one time effect run
+    private String addAreaBufferEffectCMD = "areapot"; // Add potion effects into buffer zone
     private String addTeamCMD = "addteam"; // Add another team
+    private String addRequestCMD = "addlockreq"; // Add a request to unlock the locked entity
     private String createCMD = "create"; // command to create the world
     private String removeEventCMD = "delevent"; // delete event timeline
     private String deleteResSpawnCMD = "delrspawn"; // delete resource spawner by name
@@ -26,13 +32,17 @@ public class SworldCommands implements TabCompleter {
     private String editWorldCMD = "edit"; // command to go teleport into bedwars and set to builder mode
     private String sworldHelpCMD = "help"; // Help menu for world builder
     private String leaveWorldCMD = "leave"; // leave world back to where you were
-    //private String openBuilderCMD = "openb"; // exclusive kit for bedwars
-    private String resSpawnerInfo = "rsinfo"; // Look up resource spawner info
+    private String resSpawnerInfoCMD = "rsinfo"; // Look up resource spawner info
+    private String saveCMD = "save"; // Save configuration
+    private String setLockedEntityCMD = "setlock"; // Set requirement by entity to be unlock
+    private String setEventMessageCMD = "setmevent"; // set event message when it will be trigger
+    private String setEventOrderCMD = "setoevent"; // set event order, when will it be in order every event in timeline
     private String setBedLocCMD = "setbed"; // set bed location
     private String setBlockCMD = "setblock"; // set block on, for default bedrock will be spawned on location
     private String setShopLocationCMD = "setshop"; // set villager shop location
     private String queueSpawnCMD = "setqspawn"; // set queue spawn for hosting a bedwars
     private String setSpawnCMD = "setspawn"; // set world default spawn, this can be use in all kinds of world
+    private String setTeamColorCMD = "setcolor"; // set team color prefix
     private String spawnShopCMD = "spawnshop"; // Spawn the shops safely in world
     private String setResSpawnerDurCMD = "setrdur"; // Set resource spawner duration per spawn specifically
     private String setResourceSpawnerCMD = "setrspawn"; // Set Resource Spawner with it's type
@@ -49,7 +59,12 @@ public class SworldCommands implements TabCompleter {
             if (args.length == 1) {
                 List<String> sworldSubs = new ArrayList<String>();
                 sworldSubs.add(addEventCMD);
+                sworldSubs.add(setTeamAreaCMD);
+                sworldSubs.add(setAreaOppositionCMD);
+                sworldSubs.add(setAreaSingleShotCMD);
+                sworldSubs.add(addAreaBufferEffectCMD);
                 sworldSubs.add(addTeamCMD);
+                sworldSubs.add(addRequestCMD);
                 sworldSubs.add(removeEventCMD);
                 sworldSubs.add(createCMD);
                 sworldSubs.add(editWorldCMD);
@@ -58,11 +73,15 @@ public class SworldCommands implements TabCompleter {
                 sworldSubs.add(deleteTeamCMD);
                 sworldSubs.add(sworldHelpCMD);
                 sworldSubs.add(leaveWorldCMD);
-                //sworldSubs.add(openBuilderCMD);
-                sworldSubs.add(resSpawnerInfo);
+                sworldSubs.add(resSpawnerInfoCMD);
+                sworldSubs.add(saveCMD);
+                sworldSubs.add(setLockedEntityCMD);
+                sworldSubs.add(setEventMessageCMD);
+                sworldSubs.add(setEventOrderCMD);
                 sworldSubs.add(setBedLocCMD);
                 sworldSubs.add(setShopLocationCMD);
                 sworldSubs.add(queueSpawnCMD);
+                sworldSubs.add(setTeamColorCMD);
                 sworldSubs.add(setSpawnCMD);
                 sworldSubs.add(setBlockCMD);
                 sworldSubs.add(spawnShopCMD);
@@ -77,7 +96,7 @@ public class SworldCommands implements TabCompleter {
             } else if (args.length == 2) {
                 // Gives world name hint
                 if (args[0].equalsIgnoreCase("edit")) {
-                    return systemConf.getAllWorldName();
+                    return systemConf.getWorldNames();
                 }
                 // Gives coordinate X hint
                 else if (args[0].equalsIgnoreCase(setBlockCMD)) {
@@ -94,16 +113,17 @@ public class SworldCommands implements TabCompleter {
                 // Gives team names hint for setTeamSpawnCMD, teamInfoCMD, and setBedLocCMD
                 else if (args[0].equalsIgnoreCase(setTeamSpawnCMD) || args[0].equalsIgnoreCase(teamInfoCMD) || args[0].equalsIgnoreCase(setBedLocCMD)) {
                     String worldName = player.getWorld().getName();
-                    if (systemConf.getAllWorldName().contains(worldName)) {
-                        return systemConf.getAllTeamName(worldName);
+                    if (systemConf.getWorldNames().contains(worldName)) {
+                        return systemConf.getTeamNames(worldName);
                     }
                 }
                 // Gives team names hint and public
-                else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD) || args[0].equalsIgnoreCase(deleteResSpawnCMD) || args[0].equalsIgnoreCase(setResSpawnerDurCMD)) {
+                else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD) || args[0].equalsIgnoreCase(deleteResSpawnCMD) || 
+                        args[0].equalsIgnoreCase(setResSpawnerDurCMD) || args[0].equalsIgnoreCase(setTeamAreaCMD)) {
                     String worldName = player.getWorld().getName();
-                    if (systemConf.getAllWorldName().contains(worldName)) {
+                    if (systemConf.getWorldNames().contains(worldName)) {
                         List<String> teamNameshint = new ArrayList<String>();
-                        teamNameshint.addAll(systemConf.getAllTeamName(worldName));
+                        teamNameshint.addAll(systemConf.getTeamNames(worldName));
                         teamNameshint.add("PUBLIC");
                         return teamNameshint;
                     }
@@ -118,7 +138,7 @@ public class SworldCommands implements TabCompleter {
                 // Gives delete event hint
                 else if (args[0].equalsIgnoreCase(addEventCMD)) {
                     String worldName = player.getWorld().getName();
-                    if (systemConf.getAllWorldName().contains(worldName)) {
+                    if (systemConf.getWorldNames().contains(worldName)) {
                         List<String> names = new ArrayList<String>();
                         for (BedwarsGameTimelineEvent ev : systemConf.getTimelineEvents(worldName)) {
                             names.add(ev.getName());
@@ -147,7 +167,7 @@ public class SworldCommands implements TabCompleter {
                     return eventType;
                 }
                 // Gives resource type hint
-                else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD)) {
+                else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD) || args[0].equalsIgnoreCase(addRequestCMD)) {
                     List<String> resourceType = new ArrayList<String>();
                     resourceType.add(ResourcesType.IRON.toString());
                     resourceType.add(ResourcesType.GOLD.toString());
@@ -158,15 +178,16 @@ public class SworldCommands implements TabCompleter {
                 // Gives resource spawner codename hint
                 else if (args[0].equalsIgnoreCase(deleteResSpawnCMD) || args[0].equalsIgnoreCase(setResSpawnerDurCMD)) {
                     String worldName = player.getWorld().getName();
-                    if (systemConf.getAllWorldName().contains(worldName)) {
-                        List<String> names = new ArrayList<String>();
+                    if (systemConf.getWorldNames().contains(worldName)) {
                         // Give hint by teamname or else other public resource spawners
-                        if (systemConf.getAllTeamName(worldName).contains(args[1]))
-                            names.addAll(systemConf.getResourceSpawnersPack(worldName, args[1]).keySet());
-                        else
-                            names.addAll(systemConf.getResourceSpawnersPack(worldName, "PUBLIC").keySet());
-                        return names;
+                        return systemConf.getRSCodenames(worldName, args[1]);
                     }
+                }
+                // Gives hint all public resource spawners
+                else if (args[0].equalsIgnoreCase(setLockedEntityCMD)) {
+                    String inWorldName = player.getWorld().getName();
+                    if (systemConf.getWorldNames().contains(inWorldName))
+                        return systemConf.getPublicRSCodenames(inWorldName);
                 }
             } else if (args.length == 4) {
                 // Gives coordinate Z hint

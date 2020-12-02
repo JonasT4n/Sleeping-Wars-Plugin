@@ -1,4 +1,4 @@
-package com.joenastan.sleepingwar.plugin.game;
+package com.joenastan.sleepingwar.plugin.enumtypes;
 
 public enum BedwarsShopType {
     ITEMS_SHOP("ItemShop"),
@@ -15,6 +15,11 @@ public enum BedwarsShopType {
         return shopName;
     }
 
+    /**
+     * Get shop type by name or string. Name must be specific to get the type.
+     * @param shopType Name of shop type
+     * @return Shop Type, if not exists then it returns null
+     */
     public static BedwarsShopType fromString(String shopType) {
         if (shopType.equalsIgnoreCase(PERMA_SHOP.toString())) {
             return PERMA_SHOP;

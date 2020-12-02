@@ -1,13 +1,8 @@
 package com.joenastan.sleepingwar.plugin.game;
 
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGamePlayerJoinEvent;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGamePlayerLeaveEvent;
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
@@ -25,158 +20,98 @@ public class GameManager {
 
     private static final int IDRange = 4;
     private static final String alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-
-    private static final GameSystemConfig gameConfig = SleepingWarsPlugin.getGameSystemConfig();
-    private Map<String, SleepingRoom> rooms = new HashMap<String, SleepingRoom>();
-    private Map<Player, String> playerList = new HashMap<Player, String>();
+    private Map<String, SleepingRoom> createdRooms = new HashMap<String, SleepingRoom>();
 
     public GameManager() {
         // TODO: Manager performance
     }
 
-    // Player create a room
-    public void hostingBedwars(Player player, World useMap) {
-        if (!checkAlreadyHosted(player)) {
-            String createdID = bedwarsWorldID();
+    /**
+     * Create a newly room, which the use who use the command will be the game host
+     * @param player Player who used command
+     * @param useMap Map that will be used
+     */
+    public void createRoom(Player player, World useMap) {
+        // Check if player is a host
+        if (playerIsHost(player)) {
+            player.sendMessage(ChatColor.BLUE + "You have already created a game, you are the host.");
+        } else {
+            String createdRoomID = bedwarsWorldID();
+
             // Copy World
             File folderLoc = new File(useMap.getWorldFolder().getAbsolutePath());
-            File newCopy = new File(Bukkit.getWorldContainer().getAbsolutePath() + "/" + createdID);
+            File newCopy = new File(Bukkit.getWorldContainer().getAbsolutePath() + "/" + createdRoomID);
             copyWorld(folderLoc, newCopy);
-            WorldCreator newCreatedWorld = new WorldCreator(createdID);
-            World copied = Bukkit.createWorld(newCreatedWorld);
+            WorldCreator newCreatedWorld = new WorldCreator(createdRoomID);
+            World copiedWorld = Bukkit.createWorld(newCreatedWorld);
 
             // Create Room
-            Location queueSpawn = gameConfig.getQueueLocations(useMap.getName());
-            SleepingRoom newRoom = new SleepingRoom(useMap.getName(), player, copied, queueSpawn, 720000L);
-            rooms.put(createdID, newRoom);
-            playerList.put(player, createdID);
-
-            BedwarsGamePlayerJoinEvent event = new BedwarsGamePlayerJoinEvent(player, newRoom);
-            Bukkit.getServer().getPluginManager().callEvent(event);
-        } else {
-            player.sendMessage(ChatColor.BLUE + "You have already hosted the game.");
+            SleepingRoom newRoom = new SleepingRoom(useMap.getName(), player, copiedWorld);
+            createdRooms.put(createdRoomID, newRoom);
         }
     }
 
-    // Player join the room
-    public void joinBedwars(Player player, String worldpw) {
-        String inWorldName = player.getWorld().getName();
-        SleepingRoom currentRoom = rooms.get(inWorldName);
+    /**
+     * Get created room by id
+     * @param id Room ID
+     * @return Selected room, if not exists then null
+     */
+    public SleepingRoom getRoom(String id) {
+        return createdRooms.get(id);
+    }
 
-        // Check if player already in room
-        if (currentRoom != null && rooms.containsKey(worldpw)) {
-            if (inWorldName.equals(worldpw)) {
-                player.sendMessage(ChatColor.YELLOW + "You are already in this room.");
-            } else {
-                // Leave previous room
-                currentRoom.playerLeave(player);
+    /**
+     * Get list of created rooms.
+     */
+    public Map<String, SleepingRoom> getRoomMap() {
+        return createdRooms;
+    }
 
-                // Join new room
-                player.sendMessage(ChatColor.GREEN + "Joining...");
-                SleepingRoom room = rooms.get(worldpw);
-                room.playerEnter(player, null);
-                playerList.put(player, worldpw);
-                
-                // Call player joined bedwars event
-                BedwarsGamePlayerJoinEvent event = new BedwarsGamePlayerJoinEvent(player, room);
-                Bukkit.getServer().getPluginManager().callEvent(event);
-            }
-        } else if (currentRoom == null && rooms.containsKey(worldpw)) {
-            player.sendMessage(ChatColor.GREEN + "Joining...");
-            SleepingRoom room = rooms.get(worldpw);
-            room.playerEnter(player, null);
-            playerList.put(player, worldpw);
-
-            // Call player joined bedwars event
-            BedwarsGamePlayerJoinEvent event = new BedwarsGamePlayerJoinEvent(player, room);
-            Bukkit.getServer().getPluginManager().callEvent(event);
-        } else {
-            player.sendMessage(ChatColor.RED + "Game not available.");
+    /**
+     * Check if player is already a host in one game.
+     * @param player
+     * @return true if player is a host, else then false
+     */
+    private boolean playerIsHost(Player player) {
+        for (SleepingRoom room : createdRooms.values()) {
+            if (room.getHost().equals(player))
+                return true;
         }
+        return false;
     }
 
-    // Player leave the room
-    public void leaveBedwars(Player player) {
-        if (playerList.containsKey(player)) {
-            String worldKey = playerList.get(player);
-            // Check world
-            if (rooms.containsKey(worldKey)) {
-                SleepingRoom room = rooms.get(worldKey);
-
-                // Leave Room
-                room.playerLeave(player);
-                playerList.remove(player);
-
-                BedwarsGamePlayerLeaveEvent event = new BedwarsGamePlayerLeaveEvent(player, room);
-                Bukkit.getServer().getPluginManager().callEvent(event);
-                return;
-            }
-            playerList.remove(player);
-        }
-        player.sendMessage(ChatColor.YELLOW + "You are not in game.");
-    }
-
-    public SleepingRoom getRoomByPlayer(Player player) {
-        for (SleepingRoom room : rooms.values()) {
-            if (room.isPlayerInRoom(player))
-                return room;
-        }
-        return null;
-    }
-
-    public SleepingRoom getRoomByName(String roomName) {
-        for (Map.Entry<String, SleepingRoom> roomEntry : rooms.entrySet()) {
-            if (roomEntry.getKey().equals(roomName))
-                return roomEntry.getValue();
-        }
-        return null;
-    }
-
-    public Map<String, SleepingRoom> getAllRoom() {
-        return rooms;
-    }
-
-    public Map<Player, String> getAllPlayerInGame() {
-        return playerList;
-    }
-
-    public Map<Player, String> getPlayerInGameList() {
-        return playerList;
-    }
-
+    /**
+     * Create a unique room with unique id.
+     * @return Unique string id
+     */
     private String bedwarsWorldID() {
         String result = "";
         Random rand = new Random();
         while (result.length() < IDRange) {
             int indexAlpha = rand.ints(0, alphabets.length()).findFirst().getAsInt();
             result = result + alphabets.charAt(indexAlpha);
-
-            if (rooms.containsKey(result))
+            if (createdRooms.containsKey(result))
                 result = "";
         }
         return result;
     }
 
-    private boolean checkAlreadyHosted(Player player) {
-        Collection<SleepingRoom> allRooms = rooms.values();
-        for (SleepingRoom s : allRooms) {
-            if (s.getHost().equals(player))
-                return true;
-        }
-        return false;
-    }
-
+    /**
+     * Clean garbage and statics, used one time when the plugin will be disabled
+     */
     public void cleanManager() {
-        for (Map.Entry<String, SleepingRoom> sp : rooms.entrySet()) {
-            sp.getValue().destroyRoom();
+        for (SleepingRoom sp : createdRooms.values()) {
+            sp.destroyRoom();
         }
-        rooms.clear();
-        rooms = null;
-
-        playerList.clear();
-        playerList = null;
+        createdRooms.clear();
+        createdRooms = null;
     }
 
+    /**
+     * Copy a world to a new one.
+     * @param source Original map file location
+     * @param target Target file location
+     */
     private void copyWorld(File source, File target){
         try {
             ArrayList<String> ignore = new ArrayList<String>(Arrays.asList("uid.dat", "session.dat"));

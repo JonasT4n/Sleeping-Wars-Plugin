@@ -1,5 +1,6 @@
 package com.joenastan.sleepingwar.plugin.game;
 
+import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
 import com.joenastan.sleepingwar.plugin.utility.Timer.ResourceSpawnTimer;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,7 +17,6 @@ public class ResourceSpawner {
     private ResourceSpawnTimer looper;
     private Material mat;
     private boolean isActive;
-    private CustomEntityStatus status = CustomEntityStatus.DEFAULT;
 
     public ResourceSpawner(String codename, Location spawnLoc, ResourcesType typeSpawnResource) {
         this.spawnLoc = spawnLoc;
@@ -125,16 +125,8 @@ public class ResourceSpawner {
         return looper.getDuration();
     }
 
-    public void setStatus(CustomEntityStatus status) {
-        this.status = status;
-    }
-
-    public CustomEntityStatus getStatus() {
-        return status;
-    }
-
     private void setRunning(boolean run) {
-        if (run && status == CustomEntityStatus.DEFAULT) {
+        if (run) {
             //System.out.println("[DEBUG] Resource Spawner " + codename + " is now running");
             looper.start();
         } else {

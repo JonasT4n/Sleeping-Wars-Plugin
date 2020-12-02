@@ -61,6 +61,7 @@ public class SleepingWarsPlugin extends JavaPlugin {
         systemConfig.Save();
         systemConfig = null;
         gameManager.cleanManager();
+        gameManager = null;
         OnBuilderModeEvents.clearStatic();
         HandlerList.unregisterAll(this);
 

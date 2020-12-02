@@ -24,6 +24,7 @@ public class DeleteWorldDelayed implements Runnable {
         }
 
         f.delete();
+        System.out.println("[Sleeping Wars] World \"" + worldFolder.getName() + "\" has been destroyed.");
     }
 
 }

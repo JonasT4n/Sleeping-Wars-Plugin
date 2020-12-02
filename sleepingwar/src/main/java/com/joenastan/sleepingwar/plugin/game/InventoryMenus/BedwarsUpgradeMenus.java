@@ -83,20 +83,20 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
 
         // Initialize perma-level upgrades, set all to level 1
         for (Map.Entry<String, PricetagsItems> listUpgradeEntry : pricedItems.entrySet()) {
-            team.getLevelsMap().put(listUpgradeEntry.getKey(), 1);
+            team.getPermaLevels().put(listUpgradeEntry.getKey(), 1);
         }
     }
 
     private Inventory UpgradeMenu() {
         Inventory upgradeMenuTemplate = Bukkit.getServer().createInventory(null, InventoryType.BARREL, "Upgrade Menu");
 
-        ItemStack sharperBlade = pricedItems.get(SHARPER_BLADE).createItem(team.getTeamLevel(SHARPER_BLADE));
-        ItemStack mineAHolic = pricedItems.get(MINE_A_HOLIC).createItem(team.getTeamLevel(MINE_A_HOLIC));
-        ItemStack makeItRain = pricedItems.get(MAKE_IT_RAIN).createItem(team.getTeamLevel(MAKE_IT_RAIN));
-        ItemStack holyLight = pricedItems.get(HOLY_LIGHT).createItem(team.getTeamLevel(HOLY_LIGHT));
-        ItemStack toughSkin = pricedItems.get(TOUGH_SKIN).createItem(team.getTeamLevel(TOUGH_SKIN));
-        ItemStack eyeForEye = pricedItems.get(EYE_FOR_AN_EYE).createItem(team.getTeamLevel(EYE_FOR_AN_EYE));
-        ItemStack giftPoor = pricedItems.get(GIFT_FOR_THE_POOR).createItem(team.getTeamLevel(GIFT_FOR_THE_POOR));
+        ItemStack sharperBlade = pricedItems.get(SHARPER_BLADE).createItem(team.getPermaLevels().get(SHARPER_BLADE));
+        ItemStack mineAHolic = pricedItems.get(MINE_A_HOLIC).createItem(team.getPermaLevels().get(MINE_A_HOLIC));
+        ItemStack makeItRain = pricedItems.get(MAKE_IT_RAIN).createItem(team.getPermaLevels().get(MAKE_IT_RAIN));
+        ItemStack holyLight = pricedItems.get(HOLY_LIGHT).createItem(team.getPermaLevels().get(HOLY_LIGHT));
+        ItemStack toughSkin = pricedItems.get(TOUGH_SKIN).createItem(team.getPermaLevels().get(TOUGH_SKIN));
+        ItemStack eyeForEye = pricedItems.get(EYE_FOR_AN_EYE).createItem(team.getPermaLevels().get(EYE_FOR_AN_EYE));
+        ItemStack giftPoor = pricedItems.get(GIFT_FOR_THE_POOR).createItem(team.getPermaLevels().get(GIFT_FOR_THE_POOR));
 
         upgradeMenuTemplate.setItem(10, sharperBlade);
         upgradeMenuTemplate.setItem(11, mineAHolic);
@@ -110,8 +110,9 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
     }
 
     @Override
-    public void openMenu(Player player, String menuName) {
+    public boolean openMenu(Player player, String menuName) {
         player.openInventory(UpgradeMenu());
+        return true;
     }
 
     @Override
@@ -127,7 +128,7 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
             boolean materialIsTheSame = pricedItEntry.getValue().getItem() == upgradeMaterial;
             int maxLevel = getUpgradeMaxLevel(pricedItEntry.getKey());
             if (displayNameIsTrue && materialIsTheSame) {
-                if (maxLevel <= team.getTeamLevel(pricedItEntry.getKey())) {
+                if (maxLevel <= team.getPermaLevels().get(pricedItEntry.getKey())) {
                     player.sendMessage(ChatColor.LIGHT_PURPLE + "You have already reach its max level");
                     return;
                 }
@@ -169,7 +170,7 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
                     int currentPrice = tag.getPrice();
                     tag.setPrice(currentPrice + (int)(currentPrice * 50/100));
                     team.teamUpgrade(pricedItEntry.getKey());
-                    inv.getItem(slot).setAmount(team.getTeamLevel(pricedItEntry.getKey()));
+                    inv.getItem(slot).setAmount(team.getPermaLevels().get(pricedItEntry.getKey()));
                     BedwarsGameOnUpgradeEvent event = new BedwarsGameOnUpgradeEvent(team, player, upgradeItem);
                     Bukkit.getPluginManager().callEvent(event);
                 }

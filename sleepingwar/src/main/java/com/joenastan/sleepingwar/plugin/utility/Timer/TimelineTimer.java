@@ -2,8 +2,8 @@ package com.joenastan.sleepingwar.plugin.utility.Timer;
 
 import java.util.List;
 
+import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.TimelineEventType;
 import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
 import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
 
@@ -27,19 +27,19 @@ public class TimelineTimer extends StopwatchTimer {
     
     @Override
     public void runEvent() {
-        // TODO: Make it Generic
         if (event.getEventType() == TimelineEventType.DIAMOND_UPGRADE || event.getEventType() == TimelineEventType.EMERALD_UPGRADE) {
             for (ResourceSpawner rspEntry : publicSpawners) {
                 // Reduce about 25% amount of time
+                // TODO: Make it Generic
                 if (event.getEventType() == TimelineEventType.DIAMOND_UPGRADE && rspEntry.getMaterialSpawn() == Material.DIAMOND)
                     rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25/100));
                 if (event.getEventType() == TimelineEventType.EMERALD_UPGRADE && rspEntry.getMaterialSpawn() == Material.EMERALD)
                     rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25/100));
             }
         }
-
         // Update timeline
-        room.timelineUpdate();
+        room.gotoNextTimelineEvent();
+        room.getScoreboard().resetScores(String.format("%s     Next Event in [0:00] ", ChatColor.ITALIC + ""));
         room.getScoreboard().resetScores(ChatColor.GRAY + event.getName());
         Bukkit.getPluginManager().callEvent(event);
     }

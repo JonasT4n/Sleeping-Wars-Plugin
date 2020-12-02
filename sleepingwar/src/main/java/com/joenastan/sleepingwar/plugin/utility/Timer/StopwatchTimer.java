@@ -25,7 +25,6 @@ public class StopwatchTimer {
                     reset();
                     return;
                 }
-
                 counter -= 0.5f;
             }
         }, 0L, 10L);
@@ -36,10 +35,8 @@ public class StopwatchTimer {
     }
 
     public void reset() {
-        if (taskID != -1) {
+        if (taskID != -1)
             stop();
-        }
-
         counter = duration;
     }
 
@@ -58,5 +55,4 @@ public class StopwatchTimer {
     protected void runEvent() {
         // Do Nothing
     }
-
 }

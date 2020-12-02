@@ -1,4 +1,4 @@
-package com.joenastan.sleepingwar.plugin.game;
+package com.joenastan.sleepingwar.plugin.enumtypes;
 
 public enum ResourcesType {
     IRON("iron"),

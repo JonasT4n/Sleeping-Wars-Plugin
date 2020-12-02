@@ -1,8 +1,11 @@
-package com.joenastan.sleepingwar.plugin.events.CustomEvents;
+package com.joenastan.sleepingwar.plugin.enumtypes;
 
 public enum TimelineEventType {
     DIAMOND_UPGRADE("diamond-up"),
-    EMERALD_UPGRADE("emerald-up");
+    EMERALD_UPGRADE("emerald-up"),
+    DESTROY_ALL_BED("all-bed-destroy"),
+    WORLD_SHRINKING("world-shrink"),
+    BUFFER_ZONE_ACTIVE("buffer-zone-active");
 
     private String eventName;
 
@@ -20,6 +23,12 @@ public enum TimelineEventType {
             return EMERALD_UPGRADE;
         } else if (e.equalsIgnoreCase(DIAMOND_UPGRADE.toString())) {
             return DIAMOND_UPGRADE;
+        } else if (e.equalsIgnoreCase(DESTROY_ALL_BED.toString())) {
+            return DESTROY_ALL_BED;
+        } else if (e.equalsIgnoreCase(WORLD_SHRINKING.toString())) {
+            return WORLD_SHRINKING;
+        } else if (e.equalsIgnoreCase(BUFFER_ZONE_ACTIVE.toString())) {
+            return BUFFER_ZONE_ACTIVE;
         } else {
             return null;
         }
