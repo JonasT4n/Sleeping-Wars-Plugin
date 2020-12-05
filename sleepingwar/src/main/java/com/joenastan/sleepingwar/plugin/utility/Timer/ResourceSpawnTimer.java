@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 public class ResourceSpawnTimer extends StopwatchTimer {
 
     private ResourceSpawner spawner;
+    private boolean isLocked = false;
 
     public ResourceSpawnTimer(float duration, ResourceSpawner spawner) {
         super(duration);
@@ -15,6 +16,9 @@ public class ResourceSpawnTimer extends StopwatchTimer {
 
     @Override
     public void start() {
+        if (isLocked) 
+            return;
+
         taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(SleepingWarsPlugin.getPlugin(), 
                 new Runnable() {
                     @Override
@@ -35,6 +39,10 @@ public class ResourceSpawnTimer extends StopwatchTimer {
         //System.out.println("[DEBUG] Repeating spawn " + spawner.getCodename());
         reset();
         start();
+    }
+
+    public void setLocked(boolean isLocked) {
+        this.isLocked = isLocked;
     }
 
     public String getCodeName() {

@@ -3,6 +3,7 @@ package com.joenastan.sleepingwar.plugin.utility.Timer;
 import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -20,13 +21,14 @@ public class StartCountdownTimer extends StopwatchTimer {
         taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
             @Override
             public void run() {
+                room.getWorld().playSound(room.getQueueLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 2f);
                 if (counter <= 0f) {
                     runEvent();
                     reset();
                     return;
                 }
                 counter -= 1f;
-                room.roomBroadcastTitle(ChatColor.RED + "Starting...", "In " + ChatColor.LIGHT_PURPLE + "", 0, 21, 0);
+                room.roomBroadcastTitle(ChatColor.RED + "Starting...", String.format("In: %d", (int)counter), 0, 21, 0);
             }
         }, 0L, 20L);
     }

@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
+import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,22 +35,34 @@ public class GameManager {
      */
     public void createRoom(Player player, World useMap) {
         // Check if player is a host
-        if (playerIsHost(player)) {
-            player.sendMessage(ChatColor.BLUE + "You have already created a game, you are the host.");
-        } else {
-            String createdRoomID = bedwarsWorldID();
-
-            // Copy World
-            File folderLoc = new File(useMap.getWorldFolder().getAbsolutePath());
-            File newCopy = new File(Bukkit.getWorldContainer().getAbsolutePath() + "/" + createdRoomID);
-            copyWorld(folderLoc, newCopy);
-            WorldCreator newCreatedWorld = new WorldCreator(createdRoomID);
-            World copiedWorld = Bukkit.createWorld(newCreatedWorld);
-
-            // Create Room
-            SleepingRoom newRoom = new SleepingRoom(useMap.getName(), player, copiedWorld);
-            createdRooms.put(createdRoomID, newRoom);
+        String inWorldCurrentName = player.getWorld().getName();
+        SleepingRoom currentRoom = createdRooms.get(inWorldCurrentName);
+        if (currentRoom != null) {
+            // Check player is a Host
+            if (playerIsHost(player)) {
+                player.sendMessage(ChatColor.BLUE + "You have already created a game.");
+                return;
+            }
+            // Check player in room currently the game is ongoing
+            else if (currentRoom.isGameProcessing()) {
+                player.sendMessage(ChatColor.BLUE + "You are currently in game now, can't create new game.");
+                return;
+            }
         }
+        String createdRoomID = bedwarsWorldID();
+
+        // Copy World
+        File folderLoc = new File(useMap.getWorldFolder().getAbsolutePath());
+        File newCopy = new File(Bukkit.getWorldContainer().getAbsolutePath() + "/" + createdRoomID);
+        copyWorld(folderLoc, newCopy);
+        WorldCreator newCreatedWorld = new WorldCreator(createdRoomID);
+        World copiedWorld = Bukkit.createWorld(newCreatedWorld);
+        copiedWorld.setAutoSave(false);
+
+        // Create Room
+        PlayerBedwarsEntity playerEnt = currentRoom == null ? null : currentRoom.playerLeave(player);
+        SleepingRoom newRoom = new SleepingRoom(useMap.getName(), player, copiedWorld, playerEnt);
+        createdRooms.put(createdRoomID, newRoom);
     }
 
     /**
@@ -65,6 +79,23 @@ public class GameManager {
      */
     public Map<String, SleepingRoom> getRoomMap() {
         return createdRooms;
+    }
+
+    /**
+     * Check if the map is currently being played.
+     * @return Map of maps currently being played with room counts each
+     */
+    public Map<String, Integer> getPlayingMaps() {
+        Map<String, Integer> mapMaps = new HashMap<String, Integer>();
+        for (SleepingRoom room : createdRooms.values()) {
+            if (mapMaps.get(room.getMapName()) == null) {
+                mapMaps.put(room.getMapName(), 1);
+            } else {
+                int count = mapMaps.get(room.getMapName());
+                mapMaps.put(room.getMapName(), count + 1);
+            }
+        }
+        return mapMaps;
     }
 
     /**

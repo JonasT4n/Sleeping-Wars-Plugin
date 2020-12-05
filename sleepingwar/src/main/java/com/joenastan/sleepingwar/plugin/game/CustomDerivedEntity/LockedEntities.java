@@ -11,8 +11,11 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Openable;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class LockedEntities {
 
@@ -74,23 +77,36 @@ public class LockedEntities {
      * @return True if successfully unlocked, else then false
      */
     public boolean unlockEntity(PlayerBedwarsEntity keyEntity) {
-        // You don't need to unlock the unlocked entity or Permanent locked
-        if (unlocked || requirements.isEmpty())
+        // is permanent locked
+        if (requirements.isEmpty()) {
+            keyEntity.getPlayer().sendMessage(ChatColor.RED + "This gate is permanently locked.");
+            return false;
+        }
+        // You don't need to unlock the unlocked entity
+        if (unlocked) 
             return true;
         // Check if the requirement has been fulfilled
         for (Map.Entry<ResourcesType, Integer> rEntry : requirements.entrySet()) {
             if (rEntry.getKey() == ResourcesType.IRON) {
-                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.IRON_INGOT, rEntry.getValue()))
+                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.IRON_INGOT, rEntry.getValue())) {
+                    sendRequirements(keyEntity.getPlayer());
                     return false;
+                }
             } else if (rEntry.getKey() == ResourcesType.GOLD) {
-                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.GOLD_INGOT, rEntry.getValue()))
+                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.GOLD_INGOT, rEntry.getValue())) {
+                    sendRequirements(keyEntity.getPlayer());
                     return false;
+                }
             } else if (rEntry.getKey() == ResourcesType.DIAMOND) {
-                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.DIAMOND, rEntry.getValue()))
+                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.DIAMOND, rEntry.getValue())) {
+                    sendRequirements(keyEntity.getPlayer());
                     return false;
+                }
             } else if (rEntry.getKey() == ResourcesType.EMERALD) {
-                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.EMERALD, rEntry.getValue()))
+                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.EMERALD, rEntry.getValue())) {
+                    sendRequirements(keyEntity.getPlayer());
                     return false;
+                }
             }
         }
         // Eat all resources from player's data
@@ -128,5 +144,26 @@ public class LockedEntities {
             }
         }
         return false;
+    }
+
+    /**
+     * Send a description of requirements.
+     * @param player Refered Player
+     */
+    private void sendRequirements(Player player) {
+        player.sendMessage(ChatColor.YELLOW + "You need these requirements to unlock:");
+        String description = "";
+        for (Map.Entry<ResourcesType, Integer> rEntry : requirements.entrySet()) {
+            if (rEntry.getKey() == ResourcesType.IRON) {
+                description += String.format("%s%d Iron; ", ChatColor.GRAY + "", rEntry.getValue());
+            } else if (rEntry.getKey() == ResourcesType.GOLD) {
+                description += String.format("%s%d Gold; ", ChatColor.GOLD + "", rEntry.getValue());
+            } else if (rEntry.getKey() == ResourcesType.DIAMOND) {
+                description += String.format("%s%d Diamond; ", ChatColor.AQUA + "", rEntry.getValue());
+            } else if (rEntry.getKey() == ResourcesType.EMERALD) {
+                description += String.format("%s%d Emerald; ", ChatColor.GREEN + "", rEntry.getValue());
+            }
+        }
+        player.sendMessage(description);
     }
 }

@@ -6,6 +6,7 @@ import com.joenastan.sleepingwar.plugin.game.InventoryMenus.BedwarsUpgradeMenus;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
 import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+import com.joenastan.sleepingwar.plugin.utility.Timer.AreaEffectTimer;
 import com.joenastan.sleepingwar.plugin.utility.Timer.PlayerReviveTimer;
 import net.md_5.bungee.api.ChatColor;
 
@@ -21,6 +22,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
@@ -38,8 +41,7 @@ public class TeamGroupMaker {
     private Location teamBedLocation;
     private float respawnTime;
     private int eliminetedCount = 0;
-    // private Location baseLocationMin;
-    // private Location baseLocationMax;
+    private AreaEffectTimer bufferZone;
     private String teamColorPrefix;
     private SleepingRoom inRoom;
     private BedwarsUpgradeMenus upgradeMenu;
@@ -63,6 +65,7 @@ public class TeamGroupMaker {
         teamSpawnPoint = systemConfig.getTeamSpawnLoc(inRoom.getWorld(), inRoom.getMapName(), teamName);
         teamBedLocation = systemConfig.getTeamBedLocation(inRoom.getWorld(), inRoom.getMapName(), teamName);
         respawnTime = 5f;
+        teamColorPrefix = systemConfig.getTeamColorPrefix(inRoom.getMapName(), teamName);
         // Initialize team upgrade menu and shop menu
         upgradeMenu = new BedwarsUpgradeMenus(this);
         shopMenu = new BedwarsShopMenus(this);
@@ -76,6 +79,7 @@ public class TeamGroupMaker {
         }
         // Get all owned by team resource spawners
         resourceSpawners = systemConfig.getWorldResourceSpawners(inRoom.getWorld(), inRoom.getMapName(), teamName);
+        bufferZone = systemConfig.getBufferZoneCoroutine(inRoom.getWorld(), inRoom.getMapName(), this);
     }
 
     /**
@@ -150,7 +154,7 @@ public class TeamGroupMaker {
                 rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25/100));
             }
         } else if (upgradeName.equals(BedwarsUpgradeMenus.HOLY_LIGHT)) {
-            // TODO: Area Regeneration
+            bufferZone.setEffect(new PotionEffect(PotionEffectType.HEAL, 6, 1));
         } else if (upgradeName.equals(BedwarsUpgradeMenus.TOUGH_SKIN) || upgradeName.equals(BedwarsUpgradeMenus.EYE_FOR_AN_EYE)) {
             for (PlayerBedwarsEntity pbent : playersNTimer.keySet()) {
                 ItemStack[] armorPack = pbent.getPlayer().getInventory().getArmorContents();
@@ -207,12 +211,12 @@ public class TeamGroupMaker {
      * @param slotIndex Slot index selected
      */
     public void selectInventoryMenu(Player player, Inventory menu, InventoryView menuView, ItemStack selectedItem, int slotIndex) {
-        String menuTitle = menuView.getTitle();
-        if (menuTitle == "Upgrade Menu") {
+        String menuTitle = ChatColor.stripColor(menuView.getTitle());
+        if (menuTitle.equals("Upgrade Menu")) {
             upgradeMenu.selectedSlot(player, menu, slotIndex);
-        } else {
+        } else if (shopMenu.isBedwarsShopMenu(menuView)) {
             ItemMeta itemMeta = selectedItem.getItemMeta();
-            if (shopMenu.openMenu(player, itemMeta.getDisplayName()))
+            if (shopMenu.openMenu(player, ChatColor.stripColor(itemMeta.getDisplayName())))
                 return;
             shopMenu.selectedSlot(player, menu, slotIndex);
         }
@@ -224,6 +228,12 @@ public class TeamGroupMaker {
      * @return True if player reconnected and join back to player's team, else then false
      */
     public boolean playerReconnectedHandler(Player player) {
+        if (!isTeamEliminated()) {
+            inRoom.roomBroadcast(UsefulStaticFunctions.getColorString(getTeamColorPrefix()) + player.getName() + ChatColor.WHITE + " reconnected to the game.");
+        } else {
+            player.sendMessage(ChatColor.BLUE + "Your team recently has been eliminated.");
+            return false;
+        }
         // Search the entity
         PlayerBedwarsEntity pent = null;
         for (PlayerBedwarsEntity pbent : playersNTimer.keySet())
@@ -235,9 +245,35 @@ public class TeamGroupMaker {
         if (pent != null) {
             pent.setPlayer(player);
             playersNTimer.get(pent).changePlayer(player);
+            eliminetedCount--;
+            // Delete recent scoreboard score
+            String recentScoreboardScore = String.format("%s%d %s", UsefulStaticFunctions.getColorString(teamColorPrefix),
+                    getRemainingPlayers() - 1, teamName);
+            inRoom.getScoreboard().resetScores(recentScoreboardScore);
             return true;
         } 
         return false;
+    }
+
+    /**
+     * Handle player disconnected from the server.
+     * @param playerEnt Player entity reference
+     */
+    public void playerDisconnectedHandler(PlayerBedwarsEntity playerEnt) {
+        // Check if player disconnected from the game by command
+        if (playerEnt.isLeavingUsingCommand()) {
+            playersNTimer.remove(playerEnt).stop();
+            inRoom.roomBroadcast(String.format("%s leave the game.", UsefulStaticFunctions.getColorString(teamColorPrefix) + 
+                    playerEnt.getPlayer().getName()));
+        } else {
+            inRoom.roomBroadcast(String.format("%s disconnected from the game.", UsefulStaticFunctions.getColorString(teamColorPrefix) + 
+                    playerEnt.getPlayer().getName()));
+        }
+        eliminetedCount++;
+        // Delete recent scoreboard score
+        String recentScoreboardScore = String.format("%s%d %s", UsefulStaticFunctions.getColorString(teamColorPrefix),
+                getRemainingPlayers() + 1, teamName);
+        inRoom.getScoreboard().resetScores(recentScoreboardScore);
     }
 
     /**
@@ -253,12 +289,24 @@ public class TeamGroupMaker {
     }
 
     /**
+     * Set activation on team area effect buffer zone.
+     * @param active Set active
+     */
+    public void setRunningEffectBZ(boolean active) {
+        if (active == true) {
+            bufferZone.start();
+        } else {
+            bufferZone.stop();
+        }
+    }
+
+    /**
      * Send a message locally in team only
      * @param msg The message that will be send
      */
     public void sendTeamMessage(String msg) {
         for (PlayerBedwarsEntity pbent : playersNTimer.keySet())
-            pbent.getPlayer().sendMessage(UsefulStaticFunctions.getColorString(teamColorPrefix) + "[" + teamName + "]" + ChatColor.WHITE + msg);
+            pbent.getPlayer().sendMessage(UsefulStaticFunctions.getColorString(teamColorPrefix) + "[" + teamName + "] " + ChatColor.WHITE + msg);
     }
 
     /**
@@ -300,7 +348,7 @@ public class TeamGroupMaker {
     }
 
     /**
-     * All derived player entities.
+     * List of player entities. This function is not derived from the object data.
      */
     public List<PlayerBedwarsEntity> getPlayerEntities() {
         List<PlayerBedwarsEntity> listEntity = new ArrayList<PlayerBedwarsEntity>();

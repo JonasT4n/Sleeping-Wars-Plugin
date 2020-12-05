@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SworldCommands implements TabCompleter {
@@ -153,6 +154,18 @@ public class SworldCommands implements TabCompleter {
                     shopTypeNames.add(BedwarsShopType.PERMA_SHOP.toString());
                     return shopTypeNames;
                 }
+                // Gives codename hint
+                else if (args[0].equalsIgnoreCase(setLockedEntityCMD)) {
+                    String inWorldName = player.getWorld().getName();
+                    if (systemConf.getWorldNames().contains(inWorldName))
+                        return Arrays.asList("<codename>");
+                }
+                // Gives locked entities codename hint
+                else if (args[0].equalsIgnoreCase(addRequestCMD)) {
+                    String inWorldName = player.getWorld().getName();
+                    if (systemConf.getWorldNames().contains(inWorldName))
+                        return systemConf.getLockedCodenames(inWorldName);
+                }
             } else if (args.length == 3) {
                 // Gives coordinate Y hint
                 if (args[0].equalsIgnoreCase(setBlockCMD)) {
@@ -207,6 +220,12 @@ public class SworldCommands implements TabCompleter {
                     List<String> eventType = new ArrayList<String>();
                     eventType.add("<duration-per-spawn>");
                     return eventType;
+                }
+                // Gives <amount> hint
+                else if (args[0].equalsIgnoreCase(addRequestCMD)) {
+                    String inWorldName = player.getWorld().getName();
+                    if (systemConf.getWorldNames().contains(inWorldName))
+                        return Arrays.asList("<amount>");
                 }
             }
         }

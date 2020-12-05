@@ -12,6 +12,7 @@ import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -132,11 +133,9 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
                     player.sendMessage(ChatColor.LIGHT_PURPLE + "You have already reach its max level");
                     return;
                 }
-                
                 PricetagsItems tag = pricedItEntry.getValue();
                 int countCurrencyAmount = 0;
                 List<Integer> onCurrencySlots = new ArrayList<Integer>();
-
                 // Get Player current currency amount
                 for (int i = 0; i < playerInv.getSize(); i++) {
                     ItemStack playerItem = playerInv.getItem(i);
@@ -147,9 +146,9 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
                         }
                     }
                 }
-
                 // Check if it's enough to buy it
                 if (countCurrencyAmount < tag.getPrice()) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                     player.sendMessage(ChatColor.RED + "Not enough currency, you cannot afford this.");
                 } else {
                     int mustPay = tag.getPrice();
@@ -191,13 +190,13 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
                 return 4;
 
             case HOLY_LIGHT:
-                return 1;
+                return 2;
 
             case TOUGH_SKIN:
                 return 4;
 
             case EYE_FOR_AN_EYE:
-                return 1;
+                return 2;
 
             case GIFT_FOR_THE_POOR:
                 return 5;

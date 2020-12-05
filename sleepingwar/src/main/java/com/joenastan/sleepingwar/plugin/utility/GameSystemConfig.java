@@ -6,8 +6,10 @@ import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineE
 import com.joenastan.sleepingwar.plugin.enumtypes.BedwarsShopType;
 import com.joenastan.sleepingwar.plugin.enumtypes.LockedEntityType;
 import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
+import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedEntities;
 import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedResourceSpawner;
+import com.joenastan.sleepingwar.plugin.utility.Timer.AreaEffectTimer;
 import com.joenastan.sleepingwar.plugin.utility.Timer.ResourceSpawnTimer;
 
 import org.bukkit.Bukkit;
@@ -269,6 +271,47 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
+     * Immediately get the buffer zone coroutine with empty effects.
+     * @param inWorld Current world standing
+     * @param mapName Original map name
+     * @param teamName On team with name
+     * @return Buffer zone coroutine, including the locations
+     */
+    public AreaEffectTimer getBufferZoneCoroutine(World inWorld, String mapName, TeamGroupMaker team) {
+        // Check team exists
+        List<String> teamNames = getTeamNames(mapName);
+        if (!teamNames.contains(team.getName()))
+            return null;
+        AreaEffectTimer bufferZoneCoro = new AreaEffectTimer(5f, getTeamMinBuffArea(inWorld, mapName, team.getName()), 
+                getTeamMaxBuffArea(inWorld, mapName, team.getName()), team);
+        return bufferZoneCoro;
+    }
+
+    /**
+     * Immediately get the buffer zone coroutine with empty effects.
+     * @param inWorld Current world standing
+     * @param mapName Original map name
+     * @return List of public buffer zone coroutine, including the locations
+     */
+    public List<AreaEffectTimer> getPublicBZCoroutines(World inWorld, String mapName) {
+        String path = String.format("worlds.%s.buffer-zone.PUBLIC", mapName);
+        List<AreaEffectTimer> listBufferZonesCoro = new ArrayList<AreaEffectTimer>();
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        for (String bz : filecon.getConfigurationSection(path).getKeys(false)) {
+            Location minLoc = new Location(inWorld, filecon.getDouble(String.format("%s.%s.minx", path, bz)), 
+                    filecon.getDouble(String.format("%s.%s.miny", path, bz)), 
+                    filecon.getDouble(String.format("%s.%s.minz", path, bz)));
+            Location maxLoc = new Location(inWorld, filecon.getDouble(String.format("%s.%s.maxx", path, bz)), 
+                    filecon.getDouble(String.format("%s.%s.maxy", path, bz)), 
+                    filecon.getDouble(String.format("%s.%s.maxz", path, bz)));
+            AreaEffectTimer bufferZoneCoro = new AreaEffectTimer(5f, minLoc, maxLoc, null);
+            listBufferZonesCoro.add(bufferZoneCoro);
+        }
+        return listBufferZonesCoro;
+    }
+
+    /**
      * Get codenames that owned by a team. if there's no existing team then it consider as public resource spawners.
      * @param mapName Original map name
      * @param teamName On team with name
@@ -400,6 +443,8 @@ public class GameSystemConfig extends AbstractFile {
             if (typeLock == LockedEntityType.NORMAL_LOCK) {
                 String tPath = path + "." + cn + ".request";
                 Map<ResourcesType, Integer> requirements = new HashMap<ResourcesType, Integer>();
+                if (!filecon.contains(tPath))
+                    filecon.createSection(tPath);
                 for (String req : filecon.getConfigurationSection(tPath).getKeys(false)) {
                     ResourcesType typeRequest = ResourcesType.fromString(req);
                     requirements.put(typeRequest, filecon.getInt(tPath + "." + req));
@@ -661,7 +706,9 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
-     * Set team area buffer zone, this area gives effect of any potion effects. This function automaticaly recalculate minimum and maximum value of location
+     * Set team area buffer zone, this area gives effect of any potion effects. 
+     * This function automaticaly recalculate minimum and maximum value of location.
+     * Each team can only have 1 buffer area.
      * @param mapName Original map name
      * @param teamName On team with name
      * @param minLoc Location minimum value
@@ -692,12 +739,29 @@ public class GameSystemConfig extends AbstractFile {
         String path = String.format("worlds.%s.buffer-zone.%s", mapName, teamName);
         if (!filecon.contains(path))
             filecon.createSection(path);
-        filecon.set(path + ".minx", minLoc.getX());
-        filecon.set(path + ".miny", minLoc.getY());
-        filecon.set(path + ".minz", minLoc.getZ());
-        filecon.set(path + ".maxx", maxLoc.getX());
-        filecon.set(path + ".maxy", maxLoc.getY());
-        filecon.set(path + ".maxz", maxLoc.getZ());
+        if (teamName.equals("PUBLIC")) {
+            // Overwrite list of buffer area
+            Set<String> setListBuffer = filecon.getConfigurationSection(path).getKeys(false);
+            List<Vector> minVec = new ArrayList<Vector>(), maxVec = new ArrayList<Vector>() ; 
+            for (int i = 0; i < setListBuffer.size(); i++) {
+                minVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.minx", path, i)), 
+                        filecon.getDouble(String.format("%s.bz%d.miny", path, i)),
+                        filecon.getDouble(String.format("%s.bz%d.minz", path, i))));
+                maxVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.maxx", path, i)), 
+                        filecon.getDouble(String.format("%s.bz%d.maxy", path, i)),
+                        filecon.getDouble(String.format("%s.bz%d.maxz", path,i))));
+            }
+            minVec.add(new Vector(minLoc.getX(), minLoc.getY(), minLoc.getZ()));
+            maxVec.add(new Vector(maxLoc.getX(), maxLoc.getY(), maxLoc.getZ()));
+            overwritePublicBZList(path, minVec, maxVec);
+        } else {
+            filecon.set(path + ".minx", minLoc.getX());
+            filecon.set(path + ".miny", minLoc.getY());
+            filecon.set(path + ".minz", minLoc.getZ());
+            filecon.set(path + ".maxx", maxLoc.getX());
+            filecon.set(path + ".maxy", maxLoc.getY());
+            filecon.set(path + ".maxz", maxLoc.getZ());
+        }
     }
 
     /**
@@ -741,8 +805,8 @@ public class GameSystemConfig extends AbstractFile {
             filecon.createSection(ttPath);
         filecon.set(ttPath + ".type", filecon.getInt(tPath + ".type"));
         filecon.set(ttPath + ".spawnloc.x", filecon.getDouble(tPath + ".spawnloc.x"));
-        filecon.set(ttPath + ".spawnloc.y", filecon.getDouble(tPath + ".spawnloc.x"));
-        filecon.set(ttPath + ".spawnloc.z", filecon.getDouble(tPath + ".spawnloc.x"));
+        filecon.set(ttPath + ".spawnloc.y", filecon.getDouble(tPath + ".spawnloc.y"));
+        filecon.set(ttPath + ".spawnloc.z", filecon.getDouble(tPath + ".spawnloc.z"));
         filecon.set(ttPath + ".duration-spawn", filecon.getDouble(tPath + ".duration-spawn"));
         filecon.set(tPath, null);
         // Check if locked entity already exists
@@ -879,6 +943,33 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
+     * Delete by index a public buffer zone.
+     * @param mapName Original map name
+     * @param index List index to be delete
+     * @return True if successfully deleted, if world not exists or index exceeded then it returns false
+     */
+    public boolean deletePublicBufferZone(String mapName, int index) {
+        if (!getWorldNames().contains(mapName))
+            return false;
+        // Overwrite list of buffer area
+        String path = String.format("worlds.%s.buffer-zone.PUBLIC", mapName);
+        Set<String> setListBuffer = filecon.getConfigurationSection(path).getKeys(false);
+        if (index >= setListBuffer.size())
+            return false;
+        List<Vector> minVec = new ArrayList<Vector>(), maxVec = new ArrayList<Vector>() ; 
+        for (int i = 0; i < setListBuffer.size(); i++) {
+            minVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.minx", path, i)), 
+                    filecon.getDouble(String.format("%s.bz%d.miny", path, i)),
+                    filecon.getDouble(String.format("%s.bz%d.minz", path, i))));
+            maxVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.maxx", path, i)), 
+                    filecon.getDouble(String.format("%s.bz%d.maxy", path, i)),
+                    filecon.getDouble(String.format("%s.bz%d.maxz", path,i))));
+        }
+        overwritePublicBZList(path, minVec, maxVec);
+        return true;
+    }
+
+    /**
      * Count overall resource spawners in this map
      * @param mapName Original map name
      * @return amount of existing resource spawners
@@ -975,7 +1066,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * List of shop only overwrite the new data.
-     * @param path Data path
+     * @param path Data path in config file
      * @param listLoc List of locations
      */
     private void overwriteShopList(String path, List<Vector> listLoc) {
@@ -986,6 +1077,29 @@ public class GameSystemConfig extends AbstractFile {
             filecon.set(String.format("%s.shop%d.x", path, i), thisLocVector.getX());
             filecon.set(String.format("%s.shop%d.y", path, i), thisLocVector.getY());
             filecon.set(String.format("%s.shop%d.z", path, i), thisLocVector.getZ());
+        }
+    }
+
+    /**
+     * List public buffer zone only overwrite the new data. 
+     * Note that list of minimum and maximum locations must be the same size, if not it will not be executed.
+     * @param path Data path in config file
+     * @param listMinLoc List of minimum location buffer zones
+     * @param listMaxLoc List of maximum location buffer zones
+     */
+    private void overwritePublicBZList(String path, List<Vector> listMinLoc, List<Vector> listMaxLoc) {
+        if (listMinLoc.size() != listMaxLoc.size())
+            return;
+        filecon.set(path, new HashMap<>());
+        for (int i = 0; i < listMinLoc.size(); i++) {
+            Vector minLoc = listMinLoc.get(i), maxLoc = listMaxLoc.get(i);
+            filecon.createSection(String.format("%s.bz%d", path, i), new HashMap<>());
+            filecon.set(String.format("%s.bz%d.minx", path, i), minLoc.getX());
+            filecon.set(String.format("%s.bz%d.miny", path, i), minLoc.getY());
+            filecon.set(String.format("%s.bz%d.minz", path, i), minLoc.getZ());
+            filecon.set(String.format("%s.bz%d.maxx", path, i), maxLoc.getX());
+            filecon.set(String.format("%s.bz%d.maxy", path, i), maxLoc.getY());
+            filecon.set(String.format("%s.bz%d.maxz", path, i), maxLoc.getZ());
         }
     }
 }

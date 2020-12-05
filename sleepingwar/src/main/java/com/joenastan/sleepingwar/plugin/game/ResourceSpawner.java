@@ -57,21 +57,19 @@ public class ResourceSpawner {
         switch (typeSpawnResource) {
             case GOLD:
                 mat = Material.GOLD_INGOT;
-                looper = new ResourceSpawnTimer(durationPerSpawn, this);
                 break;
             case DIAMOND:
                 mat = Material.DIAMOND;
-                looper = new ResourceSpawnTimer(durationPerSpawn, this);
                 break;
             case EMERALD:
                 mat = Material.EMERALD;
-                looper = new ResourceSpawnTimer(durationPerSpawn, this);
                 break;
             default: // Default is IRON
                 mat = Material.IRON_INGOT;
-                looper = new ResourceSpawnTimer(durationPerSpawn, this);
                 break;
         }
+
+        looper = new ResourceSpawnTimer(durationPerSpawn, this);
     }
 
     // Spawn the resource
@@ -123,6 +121,10 @@ public class ResourceSpawner {
 
     public float getSecondsPerSpawn() {
         return looper.getDuration();
+    }
+
+    public ResourceSpawnTimer getCoroutine() {
+        return looper;
     }
 
     private void setRunning(boolean run) {

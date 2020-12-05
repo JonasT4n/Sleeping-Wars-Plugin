@@ -4,6 +4,7 @@ import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameEndedEven
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
 import com.joenastan.sleepingwar.plugin.events.Tasks.DeleteWorldDelayed;
 import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedEntities;
+import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedResourceSpawner;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
@@ -13,10 +14,13 @@ import com.joenastan.sleepingwar.plugin.utility.Timer.TimelineTimer;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -85,15 +89,14 @@ public class SleepingRoom {
      * @param host Hosted by
      * @param bedwarsWorld Copied world for game
      */
-    public SleepingRoom(String mapName, Player host, World bedwarsWorld) {
+    public SleepingRoom(String mapName, Player host, World bedwarsWorld, @Nullable PlayerBedwarsEntity hostEnt) {
         // Configure host
-        playerEntities.add(new PlayerBedwarsEntity(host, host.getLocation(), host.getGameMode()));
         Location locSpawn = systemConfig.getQueueLocations(bedwarsWorld, mapName);
-        host.teleport(locSpawn);
         host.setGameMode(GameMode.SURVIVAL);
         // Assign Attributes
         hostedBy = host;
         gameWorld = bedwarsWorld;
+        gameWorld.setDifficulty(Difficulty.NORMAL);
         this.worldQueueSpawn = locSpawn;
         this.mapName = mapName;
         // Create scoreboard
@@ -110,6 +113,16 @@ public class SleepingRoom {
             inGameEvents.add(new TimelineTimer(eventEntry.getTriggerSeconds(), this, eventEntry, publicRSpawners));
         }
         eLockedList = systemConfig.getLockedRequestEntity(gameWorld, mapName);
+        publicBufferZone = systemConfig.getPublicBZCoroutines(gameWorld, mapName);
+        for (ResourceSpawner rsp : publicRSpawners) {
+            LockedResourceSpawner lockedRS = systemConfig.getLockedRSEntity(gameWorld, mapName, rsp.getCoroutine());
+            if (lockedRS != null) {
+                eLockedList.add(lockedRS);
+                rsp.getCoroutine().setLocked(true);
+            }
+        }
+        // Host entered the room
+        playerEnter(host, hostEnt);
     }
 
     /**
@@ -133,12 +146,14 @@ public class SleepingRoom {
         currentlyRunningTimer.start();
         isInGameOn = true;
         hostedBy = null;
-
+        // Activate all buffer zones
+        for (AreaEffectTimer bzt : publicBufferZone)
+            bzt.start();
         // Init Scoreboard
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
             @Override
             public void run() {
-                localScoreBoard.resetScores("Player Count: ");
+                localScoreBoard.resetScores(String.format("%sPlayer Count: ", ChatColor.GREEN + ""));
             }
         }, 20L); 
         objectiveLocalSB.setDisplayName(ChatColor.WHITE + "Bedwars");
@@ -153,11 +168,17 @@ public class SleepingRoom {
     public void destroyRoom() {
         // Teleport Players back to where they were
         for (PlayerBedwarsEntity peEntity : playerEntities) {
-            Player ePlayer = peEntity.getPlayer();
-            ePlayer.getInventory().clear();
-            peEntity.returnEntity();
-            ePlayer.sendMessage(ChatColor.YELLOW + "Game Ended, teleporting back to where you were.");
-            ePlayer.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            try {
+                Player ePlayer = peEntity.getPlayer();
+                ePlayer.getInventory().clear();
+                peEntity.returnEntity();
+                ePlayer.sendMessage(ChatColor.YELLOW + "Game Ended, teleporting back to where you were.");
+                ePlayer.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            } catch (Exception exc) {
+                System.out.println("[SleepingWars] Player may not exists when trying to return the player to where it was. " + 
+                        "You can ignore this error message.");
+                System.out.println(exc.getCause());
+            }
         }
         // Clear all resource spawners if the game is still on
         if (isInGameOn)
@@ -172,6 +193,21 @@ public class SleepingRoom {
         // Make sure every timeline event is stopped
         for (TimelineTimer tm : inGameEvents)
             tm.stop();
+        for (TeamGroupMaker tm : createdTeams.values())
+            tm.setRunningEffectBZ(false);
+        // Stop all running effects in all buffer zone
+        for (AreaEffectTimer bzt : publicBufferZone)
+            bzt.stop();
+        for (TeamGroupMaker tMaker : createdTeams.values())
+            tMaker.setRunningEffectBZ(false);
+        // Clear lists and maps
+        publicRSpawners.clear();
+        playerEntities.clear();
+        putedBlock.clear();
+        inGameEvents.clear();
+        publicBufferZone.clear();
+        createdTeams.clear();
+        eLockedList.clear();
         // Unregister room in game manager and delete world file
         gameManager.getRoomMap().remove(gameWorld.getName());
         File worldDir = gameWorld.getWorldFolder();
@@ -200,10 +236,8 @@ public class SleepingRoom {
         } else {
             TeamGroupMaker team = findTeam(player);
             if (team != null) {
-                if (!team.isTeamEliminated() && team.playerReconnectedHandler(player)) {
-                    roomBroadcast(UsefulStaticFunctions.getColorString(team.getTeamColorPrefix()) + player.getName() + ChatColor.WHITE + " reconnected to the game.");
+                if (team.playerReconnectedHandler(player))
                     return;
-                }
             }
             player.teleport(worldQueueSpawn);
             player.setGameMode(GameMode.SPECTATOR);
@@ -233,19 +267,26 @@ public class SleepingRoom {
                 roomBroadcast(String.format("%s left the game. [%d player(s) in room]", ChatColor.YELLOW + player.getName(), 
                         playerEntities.size()));
                 // Change host if the host leave the room
-                if (hostedBy.equals(player)) {
+                if (hostedBy.equals(player) && playerEntities.size() > 0) {
                     hostedBy = playerEntities.get(0).getPlayer();
                     roomBroadcast(ChatColor.LIGHT_PURPLE + hostedBy.getName() + ChatColor.AQUA + " is now the room host.");
                 }
+                pbent.returnEntity();
             } else {
                 TeamGroupMaker team = createdTeams.get(pbent.getTeamChoice());
-                roomBroadcast(String.format("%s disconnected from the game.", UsefulStaticFunctions.getColorString(team.getTeamColorPrefix()) + 
-                        player.getName()));
+                team.playerDisconnectedHandler(pbent);
             }
-            // Check if world or game is empty
-            if (playerEntities.size() == 0 && gameWorld.getPlayerCount() == 0)
-                destroyRoom();
         }
+        // Check if world or game is empty
+        if (playerEntities.size() == 0) {
+            if (gameWorld.getPlayerCount() > 0) {
+                for (Player anonymous : gameWorld.getPlayers())
+                    anonymous.kickPlayer(ChatColor.AQUA + "World is being destroy, please reconnect after a few moment.");
+            }
+            destroyRoom();
+        }
+        if (gameWorld.getPlayerCount() == 0)
+            destroyRoom();
         return pbent;
     }
 
@@ -309,18 +350,19 @@ public class SleepingRoom {
                 Score scevent, eventTitle, emptyLine0, emptyLine1;
                 int scoreLineCount = createdTeams.size() + 4; // Size of team added with 4 lines of score
                 // Add Empty Line
-                emptyLine0 = objectiveLocalSB.getScore(" ");
+                emptyLine0 = objectiveLocalSB.getScore(ChatColor.RESET.toString());
                 emptyLine0.setScore(scoreLineCount);
                 scoreLineCount--;
                 // Add teams on line
                 for (TeamGroupMaker t : createdTeams.values()) {
-                    String teamFormat = UsefulStaticFunctions.getColorString(t.getTeamColorPrefix()) + " " + t.getRemainingPlayers();
+                    String teamFormat = String.format("%s%d %s", UsefulStaticFunctions.getColorString(t.getTeamColorPrefix()),
+                            t.getRemainingPlayers(), t.getName());
                     Score scteam = objectiveLocalSB.getScore(teamFormat);
                     scteam.setScore(scoreLineCount);
                     scoreLineCount--;
                 }
                 // Add another empty line
-                emptyLine1 = objectiveLocalSB.getScore("  ");
+                emptyLine1 = objectiveLocalSB.getScore(ChatColor.RESET.toString() + ChatColor.RESET.toString());
                 emptyLine1.setScore(scoreLineCount);
                 scoreLineCount--;
                 // Events line
@@ -333,14 +375,14 @@ public class SleepingRoom {
                     int prevSec = ((int)rawSeconds + 1)  % 60;
                     String timeString = seconds < 10 ? String.format("%d:0%d", minutes, seconds) : String.format("%d:%d", minutes, seconds);
                     String prevTimeString = prevSec < 10 ? String.format("%d:0%d", prevMin, prevSec) : String.format("%d:%d", prevMin, prevSec);
-                    String formatedTimeString = String.format("%s     Next Event in [%s] ", ChatColor.ITALIC + "", timeString);
-                    String prevFormatedTS = String.format("%s     Next Event in [%s] ", ChatColor.ITALIC + "", prevTimeString);
+                    String formatedTimeString = String.format("%s   Next Event in [%s] ", ChatColor.ITALIC + "", timeString);
+                    String prevFormatedTS = String.format("%s   Next Event in [%s] ", ChatColor.ITALIC + "", prevTimeString);
                     localScoreBoard.resetScores(prevFormatedTS);
                     eventTitle = objectiveLocalSB.getScore(formatedTimeString);
                     // Event name display
                     scevent = objectiveLocalSB.getScore(ChatColor.GRAY + currentlyRunningTimer.getBedwarsEventName());
                 } else {
-                    eventTitle = objectiveLocalSB.getScore(ChatColor.ITALIC + "     Next Event in [0:00] ");
+                    eventTitle = objectiveLocalSB.getScore(ChatColor.ITALIC + "   Next Event in [0:00] ");
                     scevent = objectiveLocalSB.getScore(ChatColor.GRAY + "[No Upcoming Events]");
                 }
                 eventTitle.setScore(scoreLineCount);
@@ -358,15 +400,107 @@ public class SleepingRoom {
     }
 
     /**
+     * Check player interaction with some blocks, this function only checks whether the block is being locked or not.
+     * @param player Player who interact with the block
+     * @param withBlock This block
+     * @return True if player able to interact with it, else then false
+     */
+    public boolean checkInteraction(Player player, Block withBlock) {
+        // Check if player entity is exists here
+        PlayerBedwarsEntity playerEnt = findPlayerEntityInRoom(player);
+        if (playerEnt == null)
+            return false;
+        // Check location, each will check the material
+        Location blockLocation = withBlock.getLocation();
+        Material mat = withBlock.getType();
+        for (int i = 0; i < eLockedList.size(); i++) {
+            LockedEntities entLock = eLockedList.get(i);
+            Location lockedLoc = entLock.getLockedLocation();
+            Material matOnLockedLoc = lockedLoc.getBlock().getType();
+            // Check if it is a normal or iron door, check it's above and below that block
+            if (UsefulStaticFunctions.isStandardDoor(mat) && UsefulStaticFunctions.isStandardDoor(matOnLockedLoc)) {
+                Block doorBlock = lockedLoc.getBlock();
+                // Check immediately same location with same block
+                if (lockedLoc.getBlockX() == blockLocation.getBlockX() && lockedLoc.getBlockY() == blockLocation.getBlockY() && 
+                        lockedLoc.getBlockZ() == blockLocation.getBlockZ()) {
+                    if (!entLock.unlockEntity(playerEnt)) {
+                        player.sendMessage(ChatColor.RED + "You can't open this.");
+                        return false;
+                    } else {
+                        eLockedList.remove(i);
+                        player.sendMessage(ChatColor.GREEN + "Access granted!");
+                        return true;
+                    }
+                }
+                Block upperRelative = doorBlock.getRelative(BlockFace.UP, 1), lowerRelative = doorBlock.getRelative(BlockFace.DOWN, 1);
+                // Check if above or below its location is a part of door
+                if (UsefulStaticFunctions.isStandardDoor(upperRelative.getType())) {
+                    if (upperRelative.getLocation().getBlockX() == blockLocation.getBlockX() && upperRelative.getLocation().getBlockY() == 
+                            blockLocation.getBlockY() && upperRelative.getLocation().getBlockZ() == blockLocation.getBlockZ()) {
+                        if (!entLock.unlockEntity(playerEnt)) {
+                            player.sendMessage(ChatColor.RED + "You can't open this.");
+                            return false;
+                        } else {
+                            eLockedList.remove(i);
+                            player.sendMessage(ChatColor.GREEN + "Access granted!");
+                            return true;
+                        }
+                    }
+                } else {
+                    if (lowerRelative.getLocation().getBlockX() == blockLocation.getBlockX() && lowerRelative.getLocation().getBlockY() == 
+                            blockLocation.getBlockY() && lowerRelative.getLocation().getBlockZ() == blockLocation.getBlockZ()) {
+                        if (!entLock.unlockEntity(playerEnt)) {
+                            player.sendMessage(ChatColor.RED + "You can't open this.");
+                            return false;
+                        } else {
+                            eLockedList.remove(i);
+                            player.sendMessage(ChatColor.GREEN + "Access granted!");
+                            return true;
+                        }
+                    }
+                }
+            } else if (UsefulStaticFunctions.isFenceGate(mat) && UsefulStaticFunctions.isFenceGate(matOnLockedLoc)) {
+                if (lockedLoc.getBlockX() == blockLocation.getBlockX() && lockedLoc.getBlockY() == blockLocation.getBlockY() && 
+                        lockedLoc.getBlockZ() == blockLocation.getBlockZ()) {
+                    if (!entLock.unlockEntity(playerEnt)) {
+                        player.sendMessage(ChatColor.RED + "You can't open this.");
+                        return false;
+                    } else {
+                        eLockedList.remove(i);
+                        player.sendMessage(ChatColor.GREEN + "Access granted!");
+                        return true;
+                    }
+                }
+            } else if (UsefulStaticFunctions.isTrapDoor(mat) && UsefulStaticFunctions.isTrapDoor(matOnLockedLoc)) {
+                if (lockedLoc.getBlockX() == blockLocation.getBlockX() && lockedLoc.getBlockY() == blockLocation.getBlockY() && 
+                        lockedLoc.getBlockZ() == blockLocation.getBlockZ()) {
+                    if (!entLock.unlockEntity(playerEnt)) {
+                        player.sendMessage(ChatColor.RED + "You can't open this.");
+                        return false;
+                    } else {
+                        eLockedList.remove(i);
+                        player.sendMessage(ChatColor.GREEN + "Access granted!");
+                        return true;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
      * Update timeline event to next index.
      */
     public void gotoNextTimelineEvent() {
         // Remove score name from sidebar scoreboard
-        //TODO
+        localScoreBoard.resetScores(ChatColor.ITALIC + "   Next Event in [0:00] ");
+        localScoreBoard.resetScores(ChatColor.GRAY + currentlyRunningTimer.getBedwarsEventName());
         // Go to next update
         int timelineIndex = inGameEvents.indexOf(currentlyRunningTimer);
-        if (timelineIndex < inGameEvents.size())
-            currentlyRunningTimer = inGameEvents.get(timelineIndex);
+        if (timelineIndex + 1 < inGameEvents.size()) {
+            currentlyRunningTimer = inGameEvents.get(timelineIndex + 1);
+            currentlyRunningTimer.start();
+        }
     }
 
     /**
@@ -511,11 +645,16 @@ public class SleepingRoom {
      * @return Team, if not found then it returns null
      */
     public TeamGroupMaker findTeam(Player player) {
+        if (player == null)
+            return null;
+            
         for (TeamGroupMaker team : createdTeams.values()) {
             for (PlayerBedwarsEntity pbent : team.getPlayerEntities()) {
                 // Find player if it is equal or its name are identical
-                if (pbent.getPlayer().equals(player) || pbent.getPlayerName().equals(player.getName()))
-                    return team;
+                if (pbent.getPlayer() != null) {
+                    if (pbent.getPlayer().equals(player) || pbent.getPlayerName().equals(player.getName()))
+                        return team;
+                }
             }
         }
         return null;

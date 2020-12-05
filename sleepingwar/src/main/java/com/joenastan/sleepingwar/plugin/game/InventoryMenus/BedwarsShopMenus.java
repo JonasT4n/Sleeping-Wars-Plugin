@@ -13,6 +13,7 @@ import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -63,7 +64,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         lvl2BowMeta.setDisplayName(ChatColor.YELLOW + "Bow II");
         Map<Enchantment, Integer> lvl2BowEnchancement = new HashMap<Enchantment, Integer>();
         lvl2BowEnchancement.put(Enchantment.ARROW_DAMAGE, 1);
-        priceItems.put("Bow II", new PricetagsItemsArmorWeapon(Material.BOW, Material.GOLD_INGOT, 25, 
+        priceItems.put("Bow II", new PricetagsItemsArmorWeapon(Material.BOW, Material.EMERALD, 6, 
                 lvl2BowMeta, 1, lvl2BowEnchancement));
         // Bow Level 3
         ItemMeta lvl3BowMeta = new ItemStack(Material.BOW, 1).getItemMeta();
@@ -71,7 +72,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         Map<Enchantment, Integer> lvl3BowEnchancement = new HashMap<Enchantment, Integer>();
         lvl3BowEnchancement.put(Enchantment.ARROW_DAMAGE, 2);
         lvl3BowEnchancement.put(Enchantment.ARROW_KNOCKBACK, 2);
-        priceItems.put("Bow III", new PricetagsItemsArmorWeapon(Material.BOW, Material.EMERALD, 8, 
+        priceItems.put("Bow III", new PricetagsItemsArmorWeapon(Material.BOW, Material.EMERALD, 14, 
                 lvl3BowMeta, 1, lvl3BowEnchancement));
         // Arrow
         ItemMeta arrowMeta = new ItemStack(Material.ARROW, 1).getItemMeta();
@@ -107,15 +108,19 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Wool
         ItemMeta woolMeta = new ItemStack(Material.WHITE_WOOL, 1).getItemMeta();
         woolMeta.setDisplayName(ChatColor.WHITE + "Wool");
-        priceItems.put("Wool", new PricetagsItems(Material.WHITE_WOOL, Material.IRON_INGOT, 5, woolMeta, 16));
+        priceItems.put("Wool", new PricetagsItems(Material.WHITE_WOOL, Material.IRON_INGOT, 4, woolMeta, 16));
         // Wood
         ItemMeta woodMeta = new ItemStack(Material.OAK_PLANKS, 1).getItemMeta();
         woodMeta.setDisplayName(ChatColor.GOLD + "Wood");
-        priceItems.put("Wood", new PricetagsItems(Material.OAK_PLANKS, Material.IRON_INGOT, 15, woodMeta, 8));
+        priceItems.put("Wood", new PricetagsItems(Material.OAK_PLANKS, Material.IRON_INGOT, 32, woodMeta, 8));
         // Glass
         ItemMeta glassMeta = new ItemStack(Material.GLASS, 1).getItemMeta();
         glassMeta.setDisplayName(ChatColor.AQUA + "Glass");
         priceItems.put("Glass", new PricetagsItems(Material.GLASS, Material.IRON_INGOT, 1, glassMeta, 8));
+        // End Stone
+        ItemMeta endBlockMeta = new ItemStack(Material.END_STONE, 1).getItemMeta();
+        endBlockMeta.setDisplayName(ChatColor.YELLOW + "End Stone");
+        priceItems.put("End Stone", new PricetagsItems(Material.END_STONE, Material.GOLD_INGOT, 8, endBlockMeta, 12));
         // Obsidian
         ItemMeta obsidianMeta = new ItemStack(Material.OBSIDIAN, 1).getItemMeta();
         obsidianMeta.setDisplayName(ChatColor.DARK_BLUE + "Obsidian");
@@ -126,23 +131,31 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Swiftness
         ItemMeta potionOfSwiftnessMeta = new ItemStack(Material.POTION, 1).getItemMeta();
         potionOfSwiftnessMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Swiftness III");
-        priceItems.put("Swiftness III", new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 2, 
-                potionOfSwiftnessMeta, 1, new PotionEffect(PotionEffectType.SPEED, 30, 3)));
+        PricetagsItemsPotion swift3 = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 2, 
+                potionOfSwiftnessMeta, 1, new PotionData(PotionType.SPEED));
+        swift3.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 15, 3));
+        priceItems.put("Swiftness III", swift3);
         // Leaping
         ItemMeta potionOfLeapingMeta = new ItemStack(Material.POTION, 1).getItemMeta();
         potionOfLeapingMeta.setDisplayName(ChatColor.GREEN + "Leaping IV");
-        priceItems.put("Leaping IV", new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 2, 
-                potionOfLeapingMeta, 1, new PotionEffect(PotionEffectType.JUMP, 30, 4)));
+        PricetagsItemsPotion leap4 =  new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 2, 
+                potionOfLeapingMeta, 1, new PotionData(PotionType.JUMP));
+        leap4.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 15, 4));
+        priceItems.put("Leaping IV", leap4);
         // Strength
         ItemMeta potionOfStrengthMeta = new ItemStack(Material.POTION, 1).getItemMeta();
         potionOfStrengthMeta.setDisplayName(ChatColor.DARK_PURPLE + "Strength II");
-        priceItems.put("Strength II", new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 5, 
-                potionOfStrengthMeta, 1, new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 30, 2)));
+        PricetagsItemsPotion strength2 = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 5, 
+                potionOfStrengthMeta, 1, new PotionData(PotionType.STRENGTH));
+        strength2.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 15, 2));
+        priceItems.put("Strength II", strength2);
         // Invisibility
         ItemMeta potionOfInvisibleMeta = new ItemStack(Material.POTION, 1).getItemMeta();
         potionOfInvisibleMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Invisibility");
-        priceItems.put("Invisibility", new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 8, 
-                potionOfInvisibleMeta, 1, new PotionEffect(PotionEffectType.INVISIBILITY, 30, 1)));
+        PricetagsItemsPotion invis = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 8, 
+                potionOfInvisibleMeta, 1, new PotionData(PotionType.INVISIBILITY));
+        invis.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 15, 1));
+        priceItems.put("Invisibility", invis);
         //#endregion
 
         //#region Foods and Beverages
@@ -165,7 +178,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Golden Apple
         ItemMeta goldenAppleMeta = new ItemStack(Material.GOLDEN_APPLE, 1).getItemMeta();
         goldenAppleMeta.setDisplayName(ChatColor.YELLOW + "Golden Apple");
-        priceItems.put("Golden Apple", new PricetagsItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT, 8, goldenAppleMeta, 1));
+        priceItems.put("Golden Apple", new PricetagsItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT, 6, goldenAppleMeta, 1));
         //#endregion
 
         //#region Tools
@@ -173,6 +186,10 @@ public class BedwarsShopMenus implements BedwarsMenus {
         ItemMeta shearsMeta = new ItemStack(Material.SHEARS, 1).getItemMeta();
         shearsMeta.setDisplayName(ChatColor.WHITE + "Shears");
         priceItems.put("Shears", new PricetagsItemsArmorWeapon(Material.SHEARS, Material.IRON_INGOT, 20, shearsMeta, 1, new HashMap<Enchantment, Integer>()));
+        // Wooden Pickaxe
+        ItemMeta woodPickMeta = new ItemStack(Material.WOODEN_PICKAXE, 1).getItemMeta();
+        woodPickMeta.setDisplayName(ChatColor.WHITE + "Wooden Pickaxe");
+        priceItems.put("Wooden Pickaxe", new PricetagsItemsArmorWeapon(Material.WOODEN_PICKAXE, Material.GOLD_INGOT, 6, woodPickMeta, 1, new HashMap<Enchantment, Integer>()));
         // Iron Axe
         ItemMeta ironAxeMeta = new ItemStack(Material.IRON_AXE, 1).getItemMeta();
         ironAxeMeta.setDisplayName(ChatColor.WHITE + "Iron Axe");
@@ -200,11 +217,11 @@ public class BedwarsShopMenus implements BedwarsMenus {
         ItemMeta harmingArrowMeta = new ItemStack(Material.TIPPED_ARROW, 1).getItemMeta();
         harmingArrowMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arrow of Harming");
         priceItems.put("Arrow of Harming", new PricetagsItemsPotion(Material.TIPPED_ARROW, Material.EMERALD, 2, 
-                harmingArrowMeta, 16, new PotionEffect(PotionEffectType.HARM, 30, 1)));
+                harmingArrowMeta, 16, new PotionData(PotionType.INSTANT_DAMAGE)));
         // Silverfish Egg
         ItemMeta silverfishEggMeta = new ItemStack(Material.SILVERFISH_SPAWN_EGG, 1).getItemMeta();
         silverfishEggMeta.setDisplayName(ChatColor.AQUA + "Silverfish Egg");
-        priceItems.put("Silverfish Egg", new PricetagsItems(Material.SILVERFISH_SPAWN_EGG, Material.GOLD_INGOT, 5, silverfishEggMeta, 1));
+        priceItems.put("Silverfish Egg", new PricetagsItems(Material.SILVERFISH_SPAWN_EGG, Material.GOLD_INGOT, 6, silverfishEggMeta, 1));
         // TNT
         ItemMeta TNTMeta = new ItemStack(Material.TNT, 1).getItemMeta();
         TNTMeta.setDisplayName(ChatColor.RED + "TNT");
@@ -294,12 +311,14 @@ public class BedwarsShopMenus implements BedwarsMenus {
         ItemStack woolio = priceItems.get("Wool").createItem(1);
         ItemStack woodio = priceItems.get("Wood").createItem(1);
         ItemStack glassio = priceItems.get("Glass").createItem(1);
+        ItemStack endio = priceItems.get("End Stone").createItem(1);
         ItemStack obsidiano = priceItems.get("Obsidian").createItem(1);
 
         shopBlockMenuTemplate.setItem(19, woolio);
         shopBlockMenuTemplate.setItem(20, woodio);
         shopBlockMenuTemplate.setItem(21, glassio);
-        shopBlockMenuTemplate.setItem(22, obsidiano);
+        shopBlockMenuTemplate.setItem(22, endio);
+        shopBlockMenuTemplate.setItem(23, obsidiano);
 
         return shopBlockMenuTemplate;
     }
@@ -508,6 +527,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
                 }
                 // Check if it's enough to buy it
                 if (countCurrencyAmount < tag.getPrice()) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                     player.sendMessage(ChatColor.RED + "Not enough currency, you cannot afford this.");
                 } else {
                     int mustPay = tag.getPrice();
@@ -543,11 +563,12 @@ public class BedwarsShopMenus implements BedwarsMenus {
                             ItemStack newSword = tag.createItem();
                             checkUpgrade(newSword);
                             playerInv.setItem(i, newSword);
-                            return;
+                            break;
                         }
                         // Cancel buy when already have this stuff
                         else if (onSlot.getType() == Material.STONE_SWORD || onSlot.getType() == Material.IRON_SWORD || onSlot.getType() == Material.DIAMOND_SWORD) {
                             refundCurrency(player, tag, ChatColor.AQUA + "You already have this or better weapon, currency refunded.");
+                            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                             return;
                         }
                     }
@@ -563,11 +584,12 @@ public class BedwarsShopMenus implements BedwarsMenus {
                             ItemStack newSword = tag.createItem();
                             checkUpgrade(newSword);
                             playerInv.setItem(i, newSword);
-                            return;
+                            break;
                         }
                         // Cancel buy when already have this stuff
                         else if (onSlot.getType() == Material.IRON_SWORD || onSlot.getType() == Material.DIAMOND_SWORD) {
                             refundCurrency(player, tag, ChatColor.AQUA + "You already have this or better weapon, currency refunded.");
+                            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                             return;
                         }
                     }
@@ -583,11 +605,12 @@ public class BedwarsShopMenus implements BedwarsMenus {
                             ItemStack newSword = tag.createItem();
                             checkUpgrade(newSword);
                             playerInv.setItem(i, newSword);
-                            return;
+                            break;
                         }
                         // Cancel buy when already have this stuff
                         else if (onSlot.getType() == Material.DIAMOND_SWORD) {
                             refundCurrency(player, tag, ChatColor.AQUA + "You already have this or better weapon, currency refunded.");
+                            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
                             return;
                         }
                     }
@@ -603,8 +626,10 @@ public class BedwarsShopMenus implements BedwarsMenus {
                         playerInv.setLeggings(chainmailLegging);
                     } else {
                         refundCurrency(player, tag, ChatColor.AQUA + "You already have this or better armor, currency refunded.");
+                        player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+                        return;
                     }
-                    return;
+                    break;
 
                 case IRON_CHESTPLATE:
                     if (bootSample.getType() == Material.LEATHER_BOOTS || bootSample.getType() == Material.CHAINMAIL_BOOTS) {
@@ -616,8 +641,10 @@ public class BedwarsShopMenus implements BedwarsMenus {
                         playerInv.setLeggings(ironLegging);
                     } else {
                         refundCurrency(player, tag, ChatColor.AQUA + "You already have this or better armor, currency refunded.");
+                        player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+                        return;
                     }
-                    return;
+                    break;
 
                 case DIAMOND_CHESTPLATE:
                     if (bootSample.getType() == Material.LEATHER_BOOTS || bootSample.getType() == Material.CHAINMAIL_BOOTS || bootSample.getType() == Material.IRON_BOOTS) {
@@ -629,26 +656,34 @@ public class BedwarsShopMenus implements BedwarsMenus {
                         playerInv.setLeggings(diamondLegging);
                     } else {
                         refundCurrency(player, tag, ChatColor.AQUA + "You already have this or better armor, currency refunded.");
+                        player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+                        return;
                     }
-                    return;
+                    break;
 
                 case SHEARS:
                     ItemStack shears = new ItemStack(Material.SHEARS, 1);
                     checkUpgrade(shears);
                     playerInv.addItem(shears);
-                    return;
+                    break;
+
+                case WOODEN_PICKAXE:
+                    ItemStack woodenPick = new ItemStack(Material.WOODEN_PICKAXE, 1); 
+                    checkUpgrade(woodenPick);
+                    playerInv.addItem(woodenPick);
+                    break;
 
                 case IRON_AXE:
                     ItemStack ironAxe = new ItemStack(Material.IRON_AXE, 1); 
                     checkUpgrade(ironAxe);
                     playerInv.addItem(ironAxe);
-                    return;
+                    break;
 
                 case DIAMOND_PICKAXE:
                     ItemStack diamondPick = new ItemStack(Material.DIAMOND_PICKAXE, 1);
                     checkUpgrade(diamondPick);
                     playerInv.addItem(diamondPick);
-                    return;
+                    break;
 
                 default:
                     break;
@@ -656,15 +691,16 @@ public class BedwarsShopMenus implements BedwarsMenus {
         } else if (tag.getItem() == Material.WHITE_WOOL) {
             ItemStack coloredWool = new ItemStack(woolColor(team.getTeamColorPrefix()), tag.getDefaultAmount());
             playerInv.addItem(coloredWool);
-            return;
+        } else {
+            // Create a new item without lore
+            ItemStack createdItemStack = tag.createItem();
+            ItemMeta createdItemMeta = createdItemStack.getItemMeta();
+            createdItemMeta.setLore(null);
+            createdItemStack.setItemMeta(createdItemMeta);
+            playerInv.addItem(tag.createItem());
         }
 
-        // Create a new item without lore
-        ItemStack createdItemStack = tag.createItem();
-        ItemMeta createdItemMeta = createdItemStack.getItemMeta();
-        createdItemMeta.setLore(null);
-        createdItemStack.setItemMeta(createdItemMeta);
-        playerInv.addItem(tag.createItem());
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1f, 1f);
     }
 
     private Material woolColor(String color) {
@@ -717,7 +753,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
     }
 
     public boolean isBedwarsShopMenu(InventoryView inv) {
-        String title = inv.getTitle();
+        String title = ChatColor.stripColor(inv.getTitle());
         switch (title) {
             case "Main Shop":
                 return true;

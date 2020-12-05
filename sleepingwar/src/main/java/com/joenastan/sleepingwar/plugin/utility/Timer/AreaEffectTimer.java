@@ -28,7 +28,7 @@ public class AreaEffectTimer extends StopwatchTimer {
      * @param teamEligible The team only eligible to get this effect
      * @param effect Potion effect which will be gift for eligible team
      */
-    public AreaEffectTimer(float duration, Location minPoint, Location maxPoint, PotionEffect effect, @Nullable TeamGroupMaker teamEligible) {
+    public AreaEffectTimer(float duration, Location minPoint, Location maxPoint, @Nullable TeamGroupMaker teamEligible) {
         super(duration);
         // Auto calculate minimum and maximum point
         double temp;
@@ -51,11 +51,13 @@ public class AreaEffectTimer extends StopwatchTimer {
         minimalPoint = minPoint;
         maximalPoint = maxPoint;
         this.teamEligible = teamEligible;
-        this.effect = effect;
     }
 
     @Override
     public void start() {
+        if (effect == null)
+            return;
+            
         taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
             @Override
             public void run() {
@@ -98,6 +100,10 @@ public class AreaEffectTimer extends StopwatchTimer {
 
     public PotionEffect getEffect() {
         return effect;
+    }
+
+    public void setEffect(PotionEffect effect) {
+        this.effect = effect;
     }
 
     /**

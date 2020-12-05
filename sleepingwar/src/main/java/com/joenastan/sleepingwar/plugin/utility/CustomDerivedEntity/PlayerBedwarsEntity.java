@@ -11,8 +11,7 @@ public class PlayerBedwarsEntity {
     private Location lastTpFrom;
     private String teamChoice;
     private GameMode lastGameMode;
-    // TODO: Put temporary item inventory
-    //private ItemStack 
+    protected boolean isCommandLeave;
 
     /**
      * Saving a player entity, this object only to prevent player's previous activity went gone.
@@ -46,6 +45,16 @@ public class PlayerBedwarsEntity {
 
     public String getPlayerName() {
         return playerName;
+    }
+
+    public boolean isLeavingUsingCommand() {
+        return isCommandLeave;
+    }
+
+    public boolean isLeavingUsingCommand(boolean e) {
+        if (e != isCommandLeave)
+            isCommandLeave = e;
+        return isCommandLeave;
     }
 
     /**

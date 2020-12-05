@@ -18,13 +18,12 @@ public class DeleteWorldDelayed implements Runnable {
     private void deleteWorld(File f) {
         if (f.isDirectory()) {
             File[] files = f.listFiles();
-            for (File file : files) {
+            for (File file : files)
                 deleteWorld(file);
-            }
         }
-
+        // Delete file or folder
         f.delete();
-        System.out.println("[Sleeping Wars] World \"" + worldFolder.getName() + "\" has been destroyed.");
+        //System.out.println("[Sleeping Wars] Deleted \"" + f.getName() + "\"");
     }
 
 }

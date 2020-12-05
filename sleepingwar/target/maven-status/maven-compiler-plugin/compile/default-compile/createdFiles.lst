@@ -4,7 +4,6 @@ com\joenastan\sleepingwar\plugin\utility\Timer\StopwatchTimer$1.class
 com\joenastan\sleepingwar\plugin\utility\UsefulStaticFunctions$1.class
 com\joenastan\sleepingwar\plugin\game\ItemPrice\PricetagsItemsPotion.class
 com\joenastan\sleepingwar\plugin\SleepingWarsPlugin.class
-com\joenastan\sleepingwar\plugin\game\BuilderTestRoom.class
 com\joenastan\sleepingwar\plugin\game\TeamGroupMaker.class
 com\joenastan\sleepingwar\plugin\events\OnGameEvent.class
 com\joenastan\sleepingwar\plugin\utility\AbstractFile.class
@@ -15,9 +14,7 @@ com\joenastan\sleepingwar\plugin\utility\Timer\TimelineTimer.class
 com\joenastan\sleepingwar\plugin\utility\VoidGenerator.class
 com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGamePlayerDeathEvent.class
 com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameTimelineEvent.class
-com\joenastan\sleepingwar\plugin\events\CustomEvents\TimelineEventType.class
 com\joenastan\sleepingwar\plugin\game\ItemPrice\PricetagsItems$1.class
-com\joenastan\sleepingwar\plugin\game\BedwarsShopType.class
 com\joenastan\sleepingwar\plugin\game\ItemPrice\PricetagsItemsArmorWeapon.class
 com\joenastan\sleepingwar\plugin\commands\WorldMakerCommand.class
 com\joenastan\sleepingwar\plugin\game\InventoryMenus\BedwarsMenus.class
@@ -42,6 +39,5 @@ com\joenastan\sleepingwar\plugin\commands\TabCompletor\SworldCommands.class
 com\joenastan\sleepingwar\plugin\game\ItemPrice\PricetagsItems.class
 com\joenastan\sleepingwar\plugin\game\ResourceSpawner$1.class
 com\joenastan\sleepingwar\plugin\events\CustomEvents\BedwarsGameStartEvent.class
-com\joenastan\sleepingwar\plugin\game\ResourcesType.class
 com\joenastan\sleepingwar\plugin\commands\SleepingWarsPermissionsCommand.class
 com\joenastan\sleepingwar\plugin\utility\Timer\StopwatchTimer.class

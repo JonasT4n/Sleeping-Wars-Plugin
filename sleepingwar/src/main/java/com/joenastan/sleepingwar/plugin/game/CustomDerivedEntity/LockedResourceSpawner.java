@@ -24,6 +24,7 @@ public class LockedResourceSpawner extends LockedEntities {
         if (isUnlocked())
             return true;
         if (super.unlockEntity(keyEntity)) {
+            rsTimer.setLocked(false);
             rsTimer.start();
             return true;
         }

@@ -184,7 +184,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 }
                 // Save configuration, this automatically run when there's nobody in world
                 else if (initialSubCommand.equalsIgnoreCase(saveCMD) && player.hasPermission("sleepywar.builder")) {
-                    systemConfig.Save();
+                    saveWorldAndConfig(player);
                 }
                 // Teleport and Edit to bedwars world
                 else if (initialSubCommand.equalsIgnoreCase(editWorldCMD)) {
@@ -246,6 +246,12 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 "setspawn => Set world default spawn on your position\n");
                 //"openb => Open extra kit for building a bedwars");
         }
+    }
+
+    private void saveWorldAndConfig(Player player) {
+        player.sendMessage(ChatColor.LIGHT_PURPLE + "World and game configuration has been saved.");
+        systemConfig.Save();
+        player.getWorld().save();
     }
 
     private void addEventCommand(Player player, String[] args) {
@@ -403,6 +409,11 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
         if (args.length < 2) {
             player.sendMessage(ChatColor.GREEN + "You need to insert a world name. " + ChatColor.YELLOW + "/sworld edit <worldname>");
         } else {
+            // Check if currently map is being used to play
+            if (gameManager.getPlayingMaps().containsKey(args[1])) {
+                player.sendMessage(ChatColor.BLUE + "Cannot edit while the map is currently being played.");
+                return;
+            }
             World w = Bukkit.getServer().getWorld(args[1]);
             if (w != null) {
                 if (systemConfig.getWorldNames().contains(w.getName())) {
@@ -429,6 +440,8 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                     if (rs.isRunning())
                         rs.isRunning(false);
             }
+        } else if (!customBuilderEntity.containsKey(player) && systemConfig.getWorldNames().contains(bedwarsWorld.getName())) {
+            player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
         } else {
             player.sendMessage(ChatColor.YELLOW + "You are not in builder world.");
         }

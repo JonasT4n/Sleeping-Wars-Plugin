@@ -122,6 +122,9 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
         String inWorldName = player.getWorld().getName();
         SleepingRoom room = gameManager.getRoom(inWorldName);
         if (room != null) {
+            PlayerBedwarsEntity playerEnt = room.getPlayerEntity(player);
+            if (playerEnt != null)
+                playerEnt.isLeavingUsingCommand(true);
             room.playerLeave(player);
         } else {
             player.sendMessage(ChatColor.YELLOW + "You are not in bedwars.");
