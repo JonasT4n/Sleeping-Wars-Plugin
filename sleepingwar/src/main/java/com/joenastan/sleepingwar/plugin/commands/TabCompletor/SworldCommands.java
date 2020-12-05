@@ -30,6 +30,7 @@ public class SworldCommands implements TabCompleter {
     private String deleteResSpawnCMD = "delrspawn"; // delete resource spawner by name
     private String deleteShopLocCMD = "delshop"; // delete shop spawner
     private String deleteTeamCMD = "delteam"; // delete an existing team
+    private String deleteLockedEntityCMD = "dellock"; // delete locked entity
     private String editWorldCMD = "edit"; // command to go teleport into bedwars and set to builder mode
     private String sworldHelpCMD = "help"; // Help menu for world builder
     private String leaveWorldCMD = "leave"; // leave world back to where you were
@@ -72,6 +73,7 @@ public class SworldCommands implements TabCompleter {
                 sworldSubs.add(deleteResSpawnCMD);
                 sworldSubs.add(deleteShopLocCMD);
                 sworldSubs.add(deleteTeamCMD);
+                sworldSubs.add(deleteLockedEntityCMD);
                 sworldSubs.add(sworldHelpCMD);
                 sworldSubs.add(leaveWorldCMD);
                 sworldSubs.add(resSpawnerInfoCMD);
@@ -161,7 +163,7 @@ public class SworldCommands implements TabCompleter {
                         return Arrays.asList("<codename>");
                 }
                 // Gives locked entities codename hint
-                else if (args[0].equalsIgnoreCase(addRequestCMD)) {
+                else if (args[0].equalsIgnoreCase(addRequestCMD) || args[0].equalsIgnoreCase(deleteLockedEntityCMD)){
                     String inWorldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(inWorldName))
                         return systemConf.getLockedCodenames(inWorldName);

@@ -411,6 +411,8 @@ public class GameSystemConfig extends AbstractFile {
     public Map<BedwarsShopType, List<Location>> getShops(World inWorld, String mapName) {
         String path = String.format("worlds.%s.shop-location", mapName);
         Map<BedwarsShopType, List<Location>> shopMapLoc = new HashMap<BedwarsShopType, List<Location>>();
+        if (!filecon.contains(path))
+            filecon.createSection(path, new HashMap<>());
         for (String shopTypeString : filecon.getConfigurationSection(path).getKeys(false)) {
             BedwarsShopType shopType = BedwarsShopType.fromString(shopTypeString);
             Set<String> indexStringSet = filecon.getConfigurationSection(path + "." + shopTypeString).getKeys(false);
@@ -790,7 +792,7 @@ public class GameSystemConfig extends AbstractFile {
      * @param mapName Original map name
      * @param codename Codename for this entity, must be unique
      * @param onLocation Location where did player set
-     * @param codenameRS 
+     * @param codenameRS Resource spawner codename in public
      * @return True if successfully set, if map not exists then it's
      */
     public boolean setLockedRequestEntity(String mapName, String codename, Location onLocation, String codenameRS) {
@@ -970,6 +972,35 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
+     * Delete the locked entity.
+     * @param mapName Original map name
+     * @param codename Locked entity codename
+     * @return True if successfully deleted, if codename does not exists then it returns false
+     */
+    public boolean deleteLockedKey(String mapName, String codename) {
+        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
+        if (!filecon.contains(path))
+            return false;
+        // Move from locked Resource spawner to the public
+        if (filecon.contains(path + ".rs-lock")) {
+            String rsCodename = filecon.getString(path + ".rs-lock");
+            String rsPath = String.format("worlds.%s.resource-spawners.LOCKED.%s", mapName, rsCodename);
+            if (filecon.contains(rsPath)) {
+                String rsPublicPath = String.format("worlds.%s.resource-spawners.PUBLIC.%s", mapName, rsCodename);
+                if (!filecon.contains(rsPublicPath))
+                    filecon.createSection(rsPublicPath);
+                filecon.set(rsPublicPath + ".type", filecon.getInt(rsPath + ".type"));
+                filecon.set(rsPublicPath + ".spawnloc.x", filecon.getDouble(rsPath + ".spawnloc.x"));
+                filecon.set(rsPublicPath + ".spawnloc.y", filecon.getDouble(rsPath + ".spawnloc.y"));
+                filecon.set(rsPublicPath + ".spawnloc.z", filecon.getDouble(rsPath + ".spawnloc.z"));
+                filecon.set(rsPublicPath + ".duration-spawn", filecon.getDouble(rsPath + ".duration-spawn"));
+            }
+        }
+        filecon.set(path, null);
+        return true;
+    }
+
+    /**
      * Count overall resource spawners in this map
      * @param mapName Original map name
      * @return amount of existing resource spawners
@@ -981,7 +1012,12 @@ public class GameSystemConfig extends AbstractFile {
             filecon.createSection(path, new HashMap<>());
             return 0;
         }
-        return filecon.getConfigurationSection(path).getKeys(false).size();
+        // Count all resource spawners
+        int amountSet = 0;
+        for (String rsp : filecon.getConfigurationSection(path).getKeys(false)) {
+            amountSet += filecon.getConfigurationSection(path + "." + rsp).getKeys(false).size();
+        }
+        return amountSet;
     }
 
     /**

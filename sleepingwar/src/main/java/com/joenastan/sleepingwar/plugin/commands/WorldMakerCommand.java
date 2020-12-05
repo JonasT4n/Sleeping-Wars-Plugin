@@ -52,6 +52,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
     private String deleteResSpawnCMD = "delrspawn"; // delete resource spawner by name
     private String deleteShopLocCMD = "delshop"; // delete shop spawner
     private String deleteTeamCMD = "delteam"; // delete an existing team
+    private String deleteLockedEntityCMD = "dellock"; // delete locked entity
     private String editWorldCMD = "edit"; // command to go teleport into bedwars and set to builder mode
     private String sworldHelpCMD = "help"; // Help menu for world builder
     private String leaveWorldCMD = "leave"; // leave world back to where you were
@@ -157,6 +158,10 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 // Add request to unlock an entity
                 else if (initialSubCommand.equalsIgnoreCase(addRequestCMD) && player.hasPermission("sleepywar.builder")) {
                     addRequestLockedEntity(player, args);
+                }
+                // Delete locked entity
+                else if (initialSubCommand.equalsIgnoreCase(deleteLockedEntityCMD) && player.hasPermission("sleepywar.builder")) {
+                    deleteLockedEntity(player, args);
                 }
                 // Set Area Buffer
                 else if (initialSubCommand.equalsIgnoreCase(setTeamAreaCMD) && player.hasPermission("sleepywar.builder")) {
@@ -355,6 +360,25 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                             player.sendMessage(String.format("%sSuccessfully added required to unlock %s in game.", ChatColor.AQUA + "", args[1]));
                             return;
                         }
+                    }
+                }
+                player.sendMessage(ChatColor.RED + "Locked entity codename or type request may not exists.");
+            }
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You are not in Bedwars world building.");
+        }
+    }
+
+    private void deleteLockedEntity(Player player, String[] args) {
+        String inWorldName = player.getWorld().getName();
+        if (systemConfig.getWorldNames().contains(inWorldName)) {
+            if (args.length < 2) {
+                player.sendMessage(ChatColor.YELLOW + "Invalid Input, /sworld " + deleteLockedEntityCMD + " <codename>");
+            } else {
+                if (systemConfig.getLockedCodenames(inWorldName).contains(args[1])) {
+                    if (systemConfig.deleteLockedKey(inWorldName, args[1])) {
+                        player.sendMessage(String.format("%sSuccessfully deleted locked entity with codename %s.", ChatColor.AQUA + "", args[1]));
+                        return;
                     }
                 }
                 player.sendMessage(ChatColor.RED + "Locked entity codename or type request may not exists.");
