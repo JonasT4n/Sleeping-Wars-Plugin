@@ -114,11 +114,11 @@ public class SworldCommands implements TabCompleter {
                     return createWorldHint;
                 }
                 // Gives team names hint for setTeamSpawnCMD, teamInfoCMD, and setBedLocCMD
-                else if (args[0].equalsIgnoreCase(setTeamSpawnCMD) || args[0].equalsIgnoreCase(teamInfoCMD) || args[0].equalsIgnoreCase(setBedLocCMD)) {
+                else if (args[0].equalsIgnoreCase(setTeamSpawnCMD) || args[0].equalsIgnoreCase(teamInfoCMD) || 
+                        args[0].equalsIgnoreCase(setBedLocCMD) || args[0].equalsIgnoreCase(setTeamColorCMD)) {
                     String worldName = player.getWorld().getName();
-                    if (systemConf.getWorldNames().contains(worldName)) {
+                    if (systemConf.getWorldNames().contains(worldName))
                         return systemConf.getTeamNames(worldName);
-                    }
                 }
                 // Gives team names hint and public
                 else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD) || args[0].equalsIgnoreCase(deleteResSpawnCMD) || 

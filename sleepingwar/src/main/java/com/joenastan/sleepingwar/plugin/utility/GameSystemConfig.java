@@ -545,6 +545,23 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
+     * Add event into list
+     * @param mapName Original map name
+     * @return True if successfully added, if world not exists then it returns false
+     */
+    public boolean addEventTimeline(String mapName, BedwarsGameTimelineEvent eventSample) {
+        if (!getWorldNames().contains(mapName))
+            return false;
+        String path = String.format("worlds.%s.timeline", mapName);
+        if (!filecon.contains(path))
+            filecon.createSection(path);
+        filecon.set(path + ".order", eventSample.getTimelineOrder());
+        filecon.set(path + ".type", eventSample.getEventType().toString());
+        filecon.set(path + ".trigger-in-seconds", eventSample.getTriggerSeconds());
+        return true;
+    }
+
+    /**
      * Add a new resource spawner to the map.
      * @param mapName Original map name
      * @param teamName On team by name

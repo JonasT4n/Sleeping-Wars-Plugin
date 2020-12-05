@@ -273,7 +273,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                     if (typeEvent != null && isPositiveNumber(args[2])) {
                         int dur = Integer.parseInt(args[2]);
                         BedwarsGameTimelineEvent nEvent = new BedwarsGameTimelineEvent(typeEvent, (float)dur, args[3], 0, typeEvent.toString() + " Event");
-                        systemConfig.getTimelineEvents(worldName).add(nEvent);
+                        systemConfig.addEventTimeline(worldName, nEvent);
                         player.sendMessage(ChatColor.GREEN + args[3] + " added to world event.");
                         return;
                     }
@@ -326,7 +326,22 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
     }
 
     private void setColorPrefix(Player player, String[] args) {
-        // TODO: Set Team color prefix
+        String inWorldName = player.getWorld().getName();
+        PlayerBedwarsBuilderEntity playerBE = customBuilderEntity.get(player);
+        if (systemConfig.getWorldNames().contains(inWorldName) && playerBE != null) {
+            if (args.length < 3) {
+                player.sendMessage(ChatColor.YELLOW + "Invalid Argument, do /sworld " + setTeamColorCMD + " <color>");
+            } else {
+                if (systemConfig.getTeamNames(inWorldName).contains(args[1])) {
+                    systemConfig.setTeamColorPrefix(inWorldName, args[1], args[2]);
+                    player.sendMessage(ChatColor.GREEN + "Color set on team " + args[1] + " to \'" + args[2] + "\'");
+                    return;
+                }
+                player.sendMessage(ChatColor.YELLOW + "Invalid Input, team may not available.");
+            }
+        } else {
+            player.sendMessage(ChatColor.YELLOW + "You are not in Bedwars world building.");
+        }
     }
 
     private void setLockedEntity(Player player, String[] args) {
