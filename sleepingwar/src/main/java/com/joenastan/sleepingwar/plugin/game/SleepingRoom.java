@@ -703,7 +703,7 @@ public class SleepingRoom {
 
     private class RoomUpdater {
 
-        private int taskID;
+        private final int taskID;
 
         public RoomUpdater() {
             taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {

@@ -87,7 +87,7 @@ public class WorldMakerCommand implements Listener, CommandExecutor {
                 Player player = ((Player) sender);
                 // Check if player currently playing Bedwars
                 if (gameManager.getRoom(player.getWorld().getName()) != null) {
-                    player.sendMessage(ChatColor.RED + "You can't edit world while playing Bedwars");
+                    player.sendMessage(ChatColor.RED + "You can't edit this world while playing Bedwars");
                     return true;
                 }
                 // Sworld Help Command

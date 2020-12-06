@@ -50,6 +50,7 @@ public class GameManager {
         copyWorld(folderLoc, newCopy);
         WorldCreator newCreatedWorld = new WorldCreator(createdRoomID);
         World copiedWorld = Bukkit.createWorld(newCreatedWorld);
+        assert copiedWorld != null;
         copiedWorld.setAutoSave(false);
 
         // Create Room
@@ -148,7 +149,7 @@ public class GameManager {
                 if (source.isDirectory()) {
                     if (!target.exists())
                         target.mkdirs();
-                    String files[] = source.list();
+                    String[] files = source.list();
                     for (String file : files) {
                         File srcFile = new File(source, file);
                         File destFile = new File(target, file);

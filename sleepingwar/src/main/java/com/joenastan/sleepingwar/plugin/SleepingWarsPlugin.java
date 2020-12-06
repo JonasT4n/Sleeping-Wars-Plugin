@@ -71,13 +71,20 @@ public class SleepingWarsPlugin extends JavaPlugin {
     // Initialize plugin before activation
     private void initSW() {
         // Create Directory if not exists
-        if (!(getDataFolder().exists()))
-            getDataFolder().mkdir();
+        if (!(getDataFolder().exists())) {
+            boolean created = getDataFolder().mkdir();
+            if (!created) {
+                System.out.println("Could not create SleepingWars folder!");
+            }
+        }
 
         // Create inner directories inside Data Folder if not exists
         File folderPath = new File("plugins/SleepingWars/WorldList");
         if (!(folderPath.exists())) {
-            folderPath.mkdir();
+            boolean created = folderPath.mkdir();
+            if (!created) {
+                System.out.println("Could not create WorldList folder!");
+            }
         }
 
         // Create Configuration Files

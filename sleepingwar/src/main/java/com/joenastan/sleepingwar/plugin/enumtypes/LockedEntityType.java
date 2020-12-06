@@ -4,7 +4,7 @@ public enum LockedEntityType {
     NORMAL_LOCK("normal-lock"),
     RESOURCE_SPAWNER_LOCK("rs-lock");
 
-    private String lockString;
+    private final String lockString;
 
     private LockedEntityType(String lockString) {
         this.lockString = lockString;
