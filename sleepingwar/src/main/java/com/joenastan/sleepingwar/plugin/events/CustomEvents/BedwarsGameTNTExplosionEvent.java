@@ -2,7 +2,6 @@ package com.joenastan.sleepingwar.plugin.events.CustomEvents;
 
 import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
 import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -21,12 +20,12 @@ public class BedwarsGameTNTExplosionEvent extends Event {
         ownedByTeam = room.findTeam(byPlayer);
     }
 
-    @Override
-    public HandlerList getHandlers() {
+    public static HandlerList getHandlerList() {
         return handlers;
     }
-    
-    public static HandlerList getHandlerList() {
+
+    @Override
+    public HandlerList getHandlers() {
         return handlers;
     }
 

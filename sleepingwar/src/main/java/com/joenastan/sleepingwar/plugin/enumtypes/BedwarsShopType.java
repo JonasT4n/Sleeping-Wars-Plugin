@@ -10,13 +10,9 @@ public enum BedwarsShopType {
         this.shopName = shopName;
     }
 
-    @Override
-    public String toString() {
-        return shopName;
-    }
-
     /**
      * Get shop type by name or string. Name must be specific to get the type.
+     *
      * @param shopType Name of shop type
      * @return Shop Type, if not exists then it returns null
      */
@@ -29,5 +25,10 @@ public enum BedwarsShopType {
             return null;
         }
     }
-    
+
+    @Override
+    public String toString() {
+        return shopName;
+    }
+
 }

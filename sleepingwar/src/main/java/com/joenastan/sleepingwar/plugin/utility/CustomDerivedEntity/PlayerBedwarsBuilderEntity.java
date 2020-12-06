@@ -1,11 +1,11 @@
 package com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class PlayerBedwarsBuilderEntity extends PlayerBedwarsEntity {
 
@@ -16,7 +16,7 @@ public class PlayerBedwarsBuilderEntity extends PlayerBedwarsEntity {
     public PlayerBedwarsBuilderEntity(Player player, Location lastTpfrom, GameMode lastGameMode) {
         super(player, lastTpfrom, lastGameMode);
     }
-    
+
     public void addLocationBuffer(Location location) {
         placedLocation.add(location);
     }
@@ -37,12 +37,12 @@ public class PlayerBedwarsBuilderEntity extends PlayerBedwarsEntity {
         return codenameHolder.size();
     }
 
-    public void setRequiredAmountLoc(int amount) {
-        requiredAmountLocations = amount;
-    }
-
     public int getRequiredAmountLoc() {
         return requiredAmountLocations;
+    }
+
+    public void setRequiredAmountLoc(int amount) {
+        requiredAmountLocations = amount;
     }
 
     public void clearLocationsBuffer() {

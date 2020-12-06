@@ -1,15 +1,9 @@
 package com.joenastan.sleepingwar.plugin.game.InventoryMenus;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItems;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameOnUpgradeEvent;
+import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItems;
 import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -21,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.*;
 
 public class BedwarsUpgradeMenus implements BedwarsMenus {
 
@@ -85,6 +79,34 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
         // Initialize perma-level upgrades, set all to level 1
         for (Map.Entry<String, PricetagsItems> listUpgradeEntry : pricedItems.entrySet()) {
             team.getPermaLevels().put(listUpgradeEntry.getKey(), 1);
+        }
+    }
+
+    public static int getUpgradeMaxLevel(String upgradeName) {
+        switch (upgradeName) {
+            case SHARPER_BLADE:
+                return 5;
+
+            case MINE_A_HOLIC:
+                return 4;
+
+            case MAKE_IT_RAIN:
+                return 4;
+
+            case HOLY_LIGHT:
+                return 2;
+
+            case TOUGH_SKIN:
+                return 4;
+
+            case EYE_FOR_AN_EYE:
+                return 2;
+
+            case GIFT_FOR_THE_POOR:
+                return 5;
+
+            default:
+                return 0;
         }
     }
 
@@ -167,42 +189,14 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
 
                     // Price for next level 150% of current price
                     int currentPrice = tag.getPrice();
-                    tag.setPrice(currentPrice + (int)(currentPrice * 50/100));
+                    tag.setPrice(currentPrice + (int) (currentPrice * 50 / 100));
                     team.teamUpgrade(pricedItEntry.getKey());
                     inv.getItem(slot).setAmount(team.getPermaLevels().get(pricedItEntry.getKey()));
                     BedwarsGameOnUpgradeEvent event = new BedwarsGameOnUpgradeEvent(team, player, upgradeItem);
                     Bukkit.getPluginManager().callEvent(event);
                 }
                 break;
-            }   
-        }
-    }
-
-    public static int getUpgradeMaxLevel(String upgradeName) {
-        switch (upgradeName) {
-            case SHARPER_BLADE:
-                return 5;
-
-            case MINE_A_HOLIC:
-                return 4;
-
-            case MAKE_IT_RAIN:
-                return 4;
-
-            case HOLY_LIGHT:
-                return 2;
-
-            case TOUGH_SKIN:
-                return 4;
-
-            case EYE_FOR_AN_EYE:
-                return 2;
-
-            case GIFT_FOR_THE_POOR:
-                return 5;
-
-            default:
-                return 0;
+            }
         }
     }
 }

@@ -1,14 +1,10 @@
 package com.joenastan.sleepingwar.plugin.events;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsBuilderEntity;
+import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -26,13 +22,27 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class OnBuilderModeEvents implements Listener {
 
-    private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
     private static Map<Player, PlayerBedwarsBuilderEntity> customBuilderEntity = new HashMap<Player, PlayerBedwarsBuilderEntity>();
-    
+    private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
+
+    public static Map<Player, PlayerBedwarsBuilderEntity> getCustomBuilderEntity() {
+        return customBuilderEntity;
+    }
+
+    public static void clearStatic() {
+        for (Map.Entry<Player, PlayerBedwarsBuilderEntity> builderEntry : customBuilderEntity.entrySet()) {
+            builderEntry.getValue().returnEntity();
+        }
+        customBuilderEntity.clear();
+        customBuilderEntity = null;
+    }
+
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerJoin(PlayerJoinEvent event) {
         String inWorldName = event.getPlayer().getWorld().getName();
@@ -89,7 +99,7 @@ public class OnBuilderModeEvents implements Listener {
             // Check if player put TNT explosion in builder world, this is very restricted
             if (block.getType() == Material.TNT) {
                 block.setType(Material.AIR);
-                Location middleBlockLoc = new Location(block.getWorld(), block.getLocation().getX() + 0.5d, 
+                Location middleBlockLoc = new Location(block.getWorld(), block.getLocation().getX() + 0.5d,
                         block.getLocation().getY() + 0.5d, block.getLocation().getZ() + 0.5d);
                 block.getWorld().spawn(middleBlockLoc, TNTPrimed.class);
             }
@@ -104,13 +114,13 @@ public class OnBuilderModeEvents implements Listener {
                             // Check if player put bed in world
                             if (UsefulStaticFunctions.isMaterialBed(block.getType()) && teamName != "PUBLIC") {
                                 Location onPlacedLoc = block.getLocation();
-                                if (systemConfig.setTeamBedLocation(inWorldName, teamName, onPlacedLoc));
-                                    player.sendMessage(String.format("%sBed for team %s has been settled on (X/Y/Z): %d/%d/%d", ChatColor.DARK_AQUA + "", teamName, 
-                                            onPlacedLoc.getBlockX(), onPlacedLoc.getBlockY(), onPlacedLoc.getBlockZ()));
+                                if (systemConfig.setTeamBedLocation(inWorldName, teamName, onPlacedLoc)) ;
+                                player.sendMessage(String.format("%sBed for team %s has been settled on (X/Y/Z): %d/%d/%d", ChatColor.DARK_AQUA + "", teamName,
+                                        onPlacedLoc.getBlockX(), onPlacedLoc.getBlockY(), onPlacedLoc.getBlockZ()));
                                 playerBE.setTeamChoice(null);
-                            } 
+                            }
                             // Check if player put any kind of doors
-                            else if (teamName == "PUBLIC" && playerBE.countCodenameHolder() > 0 && (UsefulStaticFunctions.isFenceGate(block.getType()) || 
+                            else if (teamName == "PUBLIC" && playerBE.countCodenameHolder() > 0 && (UsefulStaticFunctions.isFenceGate(block.getType()) ||
                                     UsefulStaticFunctions.isTrapDoor(block.getType()) || UsefulStaticFunctions.isStandardDoor(block.getType()))) {
                                 Location onPlacedLoc = block.getLocation();
                                 if (playerBE.countCodenameHolder() == 1) {
@@ -163,17 +173,5 @@ public class OnBuilderModeEvents implements Listener {
         // Check if player put TNT explosion in game world or builder world
         if (systemConfig.getWorldNames().contains(inWorldName))
             blockList.clear();
-    }
-
-    public static Map<Player, PlayerBedwarsBuilderEntity> getCustomBuilderEntity() {
-        return customBuilderEntity;
-    }
-
-    public static void clearStatic() {
-        for (Map.Entry<Player, PlayerBedwarsBuilderEntity> builderEntry : customBuilderEntity.entrySet()) {
-            builderEntry.getValue().returnEntity();
-        }
-        customBuilderEntity.clear();
-        customBuilderEntity = null;
     }
 }

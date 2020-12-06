@@ -1,22 +1,21 @@
 package com.joenastan.sleepingwar.plugin.game.ItemPrice;
 
 import net.md_5.bungee.api.ChatColor;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PricetagsItems {
 
     protected Material item;
     protected Material currency;
     protected ItemMeta meta;
+    protected int defaultAmountGetter;
     private int price;
     private int defaultPrice;
-    protected int defaultAmountGetter;
 
     public PricetagsItems(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter) {
         this.item = item;

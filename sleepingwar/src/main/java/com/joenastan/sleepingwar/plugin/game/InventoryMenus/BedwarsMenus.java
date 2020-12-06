@@ -5,5 +5,6 @@ import org.bukkit.inventory.Inventory;
 
 interface BedwarsMenus {
     public boolean openMenu(Player player, String menuName);
+
     public void selectedSlot(Player player, Inventory inv, int slot);
 }

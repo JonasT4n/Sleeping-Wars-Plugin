@@ -1,22 +1,14 @@
 package com.joenastan.sleepingwar.plugin.game;
 
+import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 import net.md_5.bungee.api.ChatColor;
-
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 
+import java.io.*;
 import java.util.*;
-
-import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
 public class GameManager {
 
@@ -30,6 +22,7 @@ public class GameManager {
 
     /**
      * Create a newly room, which the use who use the command will be the game host
+     *
      * @param player Player who used command
      * @param useMap Map that will be used
      */
@@ -67,6 +60,7 @@ public class GameManager {
 
     /**
      * Get created room by id
+     *
      * @param id Room ID
      * @return Selected room, if not exists then null
      */
@@ -83,6 +77,7 @@ public class GameManager {
 
     /**
      * Check if the map is currently being played.
+     *
      * @return Map of maps currently being played with room counts each
      */
     public Map<String, Integer> getPlayingMaps() {
@@ -100,6 +95,7 @@ public class GameManager {
 
     /**
      * Check if player is already a host in one game.
+     *
      * @param player
      * @return true if player is a host, else then false
      */
@@ -113,6 +109,7 @@ public class GameManager {
 
     /**
      * Create a unique room with unique id.
+     *
      * @return Unique string id
      */
     private String bedwarsWorldID() {
@@ -140,16 +137,17 @@ public class GameManager {
 
     /**
      * Copy a world to a new one.
+     *
      * @param source Original map file location
      * @param target Target file location
      */
-    private void copyWorld(File source, File target){
+    private void copyWorld(File source, File target) {
         try {
             ArrayList<String> ignore = new ArrayList<String>(Arrays.asList("uid.dat", "session.dat"));
-            if(!ignore.contains(source.getName())) {
-                if(source.isDirectory()) {
-                    if(!target.exists())
-                    target.mkdirs();
+            if (!ignore.contains(source.getName())) {
+                if (source.isDirectory()) {
+                    if (!target.exists())
+                        target.mkdirs();
                     String files[] = source.list();
                     for (String file : files) {
                         File srcFile = new File(source, file);

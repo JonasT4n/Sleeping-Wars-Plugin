@@ -12,11 +12,6 @@ public enum ResourcesType {
         this.resourceName = resourceName;
     }
 
-    @Override
-    public String toString() {
-        return resourceName;
-    }
-
     public static ResourcesType fromString(String name) {
         if (name.equalsIgnoreCase("iron"))
             return IRON;
@@ -28,5 +23,10 @@ public enum ResourcesType {
             return EMERALD;
         else
             return null;
+    }
+
+    @Override
+    public String toString() {
+        return resourceName;
     }
 }

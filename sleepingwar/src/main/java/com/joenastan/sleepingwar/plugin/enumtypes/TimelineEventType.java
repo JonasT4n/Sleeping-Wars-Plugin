@@ -13,11 +13,6 @@ public enum TimelineEventType {
         this.eventName = eventName;
     }
 
-    @Override
-    public String toString() {
-        return eventName;
-    }
-
     public static TimelineEventType fromString(String e) {
         if (e.equalsIgnoreCase(EMERALD_UPGRADE.toString())) {
             return EMERALD_UPGRADE;
@@ -32,5 +27,10 @@ public enum TimelineEventType {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return eventName;
     }
 }

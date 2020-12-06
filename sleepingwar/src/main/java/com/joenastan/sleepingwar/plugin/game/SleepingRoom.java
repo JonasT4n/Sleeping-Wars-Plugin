@@ -1,64 +1,34 @@
 package com.joenastan.sleepingwar.plugin.game;
 
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameEndedEvent;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
 import com.joenastan.sleepingwar.plugin.events.Tasks.DeleteWorldDelayed;
 import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedEntities;
 import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedResourceSpawner;
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
-import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
 import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.utility.Timer.AreaEffectTimer;
 import com.joenastan.sleepingwar.plugin.utility.Timer.TimelineTimer;
-
+import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.*;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.*;
 
-import javax.annotation.Nullable;
-
 public class SleepingRoom {
-
-    private class RoomUpdater {
-        
-        private int taskID;
-
-        public RoomUpdater() {
-            taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable(){
-                @Override
-                public void run() {
-                    updateScoreBoard();
-                }
-            }, 0L, 10L);
-        }
-
-        public void destroyUpdater() {
-            Bukkit.getScheduler().cancelTask(taskID);
-        }
-    }
 
     // Constants
     private final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
     private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
     private final GameManager gameManager = SleepingWarsPlugin.getGameManager();
-
     // Attributes
     private Player hostedBy;
     private boolean isResSpawn = false;
@@ -67,7 +37,6 @@ public class SleepingRoom {
     private String mapName;
     private boolean isInGameOn = false;
     private TimelineTimer currentlyRunningTimer = null;
-
     // Maps and Lists
     private Map<String, TeamGroupMaker> createdTeams = new HashMap<String, TeamGroupMaker>();
     private List<PlayerBedwarsEntity> playerEntities = new ArrayList<PlayerBedwarsEntity>();
@@ -76,17 +45,16 @@ public class SleepingRoom {
     private List<TimelineTimer> inGameEvents = new ArrayList<TimelineTimer>();
     private List<AreaEffectTimer> publicBufferZone = new ArrayList<AreaEffectTimer>();
     private List<LockedEntities> eLockedList = new ArrayList<LockedEntities>();
-
     // Scoreboard
     private RoomUpdater updater;
     private Scoreboard localScoreBoard;
     private Objective objectiveLocalSB;
     private Objective playerHealthDisplayer;
-
     /**
      * Initialize bedwars room
-     * @param mapName Original map name
-     * @param host Hosted by
+     *
+     * @param mapName      Original map name
+     * @param host         Hosted by
      * @param bedwarsWorld Copied world for game
      */
     public SleepingRoom(String mapName, Player host, World bedwarsWorld, @Nullable PlayerBedwarsEntity hostEnt) {
@@ -150,12 +118,12 @@ public class SleepingRoom {
         for (AreaEffectTimer bzt : publicBufferZone)
             bzt.start();
         // Init Scoreboard
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
             @Override
             public void run() {
                 localScoreBoard.resetScores(String.format("%sPlayer Count: ", ChatColor.GREEN + ""));
             }
-        }, 20L); 
+        }, 20L);
         objectiveLocalSB.setDisplayName(ChatColor.WHITE + "Bedwars");
         objectiveLocalSB.setDisplaySlot(DisplaySlot.SIDEBAR);
         playerHealthDisplayer = localScoreBoard.registerNewObjective("player-health", "health", " HP");
@@ -175,7 +143,7 @@ public class SleepingRoom {
                 ePlayer.sendMessage(ChatColor.YELLOW + "Game Ended, teleporting back to where you were.");
                 ePlayer.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
             } catch (Exception exc) {
-                System.out.println("[SleepingWars] Player may not exists when trying to return the player to where it was. " + 
+                System.out.println("[SleepingWars] Player may not exists when trying to return the player to where it was. " +
                         "You can ignore this error message.");
                 System.out.println(exc.getCause());
             }
@@ -217,6 +185,7 @@ public class SleepingRoom {
 
     /**
      * Player enter the room with this function.
+     *
      * @param player Player who enters
      * @param entity Entity data which player owned
      */
@@ -246,6 +215,7 @@ public class SleepingRoom {
 
     /**
      * Player leave the room
+     *
      * @param player Refered player
      * @return Bedwars entity data of player
      */
@@ -264,7 +234,7 @@ public class SleepingRoom {
             p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
             // Check if game in progress
             if (!isInGameOn) {
-                roomBroadcast(String.format("%s left the game. [%d player(s) in room]", ChatColor.YELLOW + player.getName(), 
+                roomBroadcast(String.format("%s left the game. [%d player(s) in room]", ChatColor.YELLOW + player.getName(),
                         playerEntities.size()));
                 // Change host if the host leave the room
                 if (hostedBy.equals(player) && playerEntities.size() > 0) {
@@ -369,10 +339,10 @@ public class SleepingRoom {
                 if (currentlyRunningTimer != null) {
                     // Time display
                     float rawSeconds = currentlyRunningTimer.getCounter();
-                    int minutes = (int)rawSeconds / 60;
-                    int prevMin = ((int)rawSeconds + 1)  / 60;
-                    int seconds = (int)rawSeconds % 60;
-                    int prevSec = ((int)rawSeconds + 1)  % 60;
+                    int minutes = (int) rawSeconds / 60;
+                    int prevMin = ((int) rawSeconds + 1) / 60;
+                    int seconds = (int) rawSeconds % 60;
+                    int prevSec = ((int) rawSeconds + 1) % 60;
                     String timeString = seconds < 10 ? String.format("%d:0%d", minutes, seconds) : String.format("%d:%d", minutes, seconds);
                     String prevTimeString = prevSec < 10 ? String.format("%d:0%d", prevMin, prevSec) : String.format("%d:%d", prevMin, prevSec);
                     String formatedTimeString = String.format("%s   Next Event in [%s] ", ChatColor.ITALIC + "", timeString);
@@ -401,7 +371,8 @@ public class SleepingRoom {
 
     /**
      * Check player interaction with some blocks, this function only checks whether the block is being locked or not.
-     * @param player Player who interact with the block
+     *
+     * @param player    Player who interact with the block
      * @param withBlock This block
      * @return True if player able to interact with it, else then false
      */
@@ -421,7 +392,7 @@ public class SleepingRoom {
             if (UsefulStaticFunctions.isStandardDoor(mat) && UsefulStaticFunctions.isStandardDoor(matOnLockedLoc)) {
                 Block doorBlock = lockedLoc.getBlock();
                 // Check immediately same location with same block
-                if (lockedLoc.getBlockX() == blockLocation.getBlockX() && lockedLoc.getBlockY() == blockLocation.getBlockY() && 
+                if (lockedLoc.getBlockX() == blockLocation.getBlockX() && lockedLoc.getBlockY() == blockLocation.getBlockY() &&
                         lockedLoc.getBlockZ() == blockLocation.getBlockZ()) {
                     if (!entLock.unlockEntity(playerEnt)) {
                         player.sendMessage(ChatColor.RED + "You can't open this.");
@@ -435,7 +406,7 @@ public class SleepingRoom {
                 Block upperRelative = doorBlock.getRelative(BlockFace.UP, 1), lowerRelative = doorBlock.getRelative(BlockFace.DOWN, 1);
                 // Check if above or below its location is a part of door
                 if (UsefulStaticFunctions.isStandardDoor(upperRelative.getType())) {
-                    if (upperRelative.getLocation().getBlockX() == blockLocation.getBlockX() && upperRelative.getLocation().getBlockY() == 
+                    if (upperRelative.getLocation().getBlockX() == blockLocation.getBlockX() && upperRelative.getLocation().getBlockY() ==
                             blockLocation.getBlockY() && upperRelative.getLocation().getBlockZ() == blockLocation.getBlockZ()) {
                         if (!entLock.unlockEntity(playerEnt)) {
                             player.sendMessage(ChatColor.RED + "You can't open this.");
@@ -447,7 +418,7 @@ public class SleepingRoom {
                         }
                     }
                 } else {
-                    if (lowerRelative.getLocation().getBlockX() == blockLocation.getBlockX() && lowerRelative.getLocation().getBlockY() == 
+                    if (lowerRelative.getLocation().getBlockX() == blockLocation.getBlockX() && lowerRelative.getLocation().getBlockY() ==
                             blockLocation.getBlockY() && lowerRelative.getLocation().getBlockZ() == blockLocation.getBlockZ()) {
                         if (!entLock.unlockEntity(playerEnt)) {
                             player.sendMessage(ChatColor.RED + "You can't open this.");
@@ -460,7 +431,7 @@ public class SleepingRoom {
                     }
                 }
             } else if (UsefulStaticFunctions.isFenceGate(mat) && UsefulStaticFunctions.isFenceGate(matOnLockedLoc)) {
-                if (lockedLoc.getBlockX() == blockLocation.getBlockX() && lockedLoc.getBlockY() == blockLocation.getBlockY() && 
+                if (lockedLoc.getBlockX() == blockLocation.getBlockX() && lockedLoc.getBlockY() == blockLocation.getBlockY() &&
                         lockedLoc.getBlockZ() == blockLocation.getBlockZ()) {
                     if (!entLock.unlockEntity(playerEnt)) {
                         player.sendMessage(ChatColor.RED + "You can't open this.");
@@ -472,7 +443,7 @@ public class SleepingRoom {
                     }
                 }
             } else if (UsefulStaticFunctions.isTrapDoor(mat) && UsefulStaticFunctions.isTrapDoor(matOnLockedLoc)) {
-                if (lockedLoc.getBlockX() == blockLocation.getBlockX() && lockedLoc.getBlockY() == blockLocation.getBlockY() && 
+                if (lockedLoc.getBlockX() == blockLocation.getBlockX() && lockedLoc.getBlockY() == blockLocation.getBlockY() &&
                         lockedLoc.getBlockZ() == blockLocation.getBlockZ()) {
                     if (!entLock.unlockEntity(playerEnt)) {
                         player.sendMessage(ChatColor.RED + "You can't open this.");
@@ -521,7 +492,7 @@ public class SleepingRoom {
         if (remainingCount <= 1 && lastStanding != null) {
             BedwarsGameEndedEvent gameEndedEvent = new BedwarsGameEndedEvent(this, lastStanding);
             Bukkit.getPluginManager().callEvent(gameEndedEvent);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(), new Runnable(){
+            Bukkit.getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(), new Runnable() {
                 @Override
                 public void run() {
                     destroyRoom();
@@ -532,6 +503,7 @@ public class SleepingRoom {
 
     /**
      * When the game is progress, store a block reference which the block has just placed by player.
+     *
      * @param block Block reference
      */
     public void putBlock(Block block) {
@@ -540,6 +512,7 @@ public class SleepingRoom {
 
     /**
      * Find and destroy block that has been placed before.
+     *
      * @param block Block reference
      * @return True if the block was in list and removed, else then false
      */
@@ -571,6 +544,7 @@ public class SleepingRoom {
 
     /**
      * Get a list of players inside this room. This list is not referenced to any attribute.
+     *
      * @return A list of players
      */
     public List<Player> getPlayersInRoom() {
@@ -589,6 +563,7 @@ public class SleepingRoom {
 
     /**
      * Get all teams in current game.
+     *
      * @return List of teams
      */
     public List<TeamGroupMaker> getTeams() {
@@ -606,6 +581,7 @@ public class SleepingRoom {
 
     /**
      * Game is currently hosted by this player.
+     *
      * @return Current host, if the game is ongoing then it is null
      */
     public Player getHost() {
@@ -614,6 +590,7 @@ public class SleepingRoom {
 
     /**
      * Get world queue location in current room.
+     *
      * @return Queue location
      */
     public Location getQueueLocation() {
@@ -622,6 +599,7 @@ public class SleepingRoom {
 
     /**
      * Get player entity in room
+     *
      * @param player Find this player
      * @return Entity, if not exists then returns null
      */
@@ -642,12 +620,13 @@ public class SleepingRoom {
 
     /**
      * Find team by player.
+     *
      * @return Team, if not found then it returns null
      */
     public TeamGroupMaker findTeam(Player player) {
         if (player == null)
             return null;
-            
+
         for (TeamGroupMaker team : createdTeams.values()) {
             for (PlayerBedwarsEntity pbent : team.getPlayerEntities()) {
                 // Find player if it is equal or its name are identical
@@ -662,6 +641,7 @@ public class SleepingRoom {
 
     /**
      * Find team by team name.
+     *
      * @return Team, if not found then it returns null
      */
     public TeamGroupMaker findTeam(String teamName) {
@@ -670,6 +650,7 @@ public class SleepingRoom {
 
     /**
      * Get player entity in room.
+     *
      * @param player Player to find.
      * @return Player entity, if not found then it returns null
      */
@@ -683,6 +664,7 @@ public class SleepingRoom {
 
     /**
      * Check if bedwars currently ongoing.
+     *
      * @return True if it is ongoing, else then false
      */
     public boolean isGameProcessing() {
@@ -691,6 +673,7 @@ public class SleepingRoom {
 
     /**
      * Check if resource spawners in room active.
+     *
      * @return True if resource spawners are active, else then false
      */
     public boolean isResourceSpawning() {
@@ -699,6 +682,7 @@ public class SleepingRoom {
 
     /**
      * Check if resource spawners in room active.
+     *
      * @param active Set active
      * @return True if resource spawners are active, else then false
      */
@@ -715,5 +699,23 @@ public class SleepingRoom {
             }
         }
         return isResSpawn;
+    }
+
+    private class RoomUpdater {
+
+        private int taskID;
+
+        public RoomUpdater() {
+            taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+                @Override
+                public void run() {
+                    updateScoreBoard();
+                }
+            }, 0L, 10L);
+        }
+
+        public void destroyUpdater() {
+            Bukkit.getScheduler().cancelTask(taskID);
+        }
     }
 }

@@ -1,22 +1,22 @@
 package com.joenastan.sleepingwar.plugin.utility;
 
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import net.md_5.bungee.api.ChatColor;
 
 public class UsefulStaticFunctions {
 
     /**
      * Remove items in any inventory by specific item type.
-     * @param inv Inventory referenced
+     *
+     * @param inv      Inventory referenced
      * @param itemType Material type
-     * @param amount amount to be remove
+     * @param amount   amount to be remove
      */
     public static void removeItemInventory(Inventory inv, Material itemType, int amount) {
         for (ItemStack itm : inv.getContents()) {
-            if (itm == null) 
+            if (itm == null)
                 continue;
 
             if (itm.getType() == itemType) {
@@ -26,7 +26,7 @@ public class UsefulStaticFunctions {
                 } else {
                     itm.setAmount(itm.getAmount() - amount);
                     amount = 0;
-                } 
+                }
             }
 
             if (amount <= 0)
@@ -36,9 +36,10 @@ public class UsefulStaticFunctions {
 
     /**
      * Add items into inventory.
-     * @param inv Inventory referenced
+     *
+     * @param inv      Inventory referenced
      * @param itemType Material type
-     * @param amount amount to be remove
+     * @param amount   amount to be remove
      */
     public static void addItemInventory(Inventory inv, Material itemType, int amount) {
         int maxStack = (amount / 64) + 1;
@@ -51,7 +52,7 @@ public class UsefulStaticFunctions {
             }
         }
     }
-    
+
     public static boolean isSword(Material mat) {
         switch (mat) {
             case WOODEN_SWORD:
@@ -76,7 +77,7 @@ public class UsefulStaticFunctions {
                 return false;
         }
     }
-    
+
     public static boolean isPickaxe(Material mat) {
         switch (mat) {
             case WOODEN_PICKAXE:
@@ -324,6 +325,7 @@ public class UsefulStaticFunctions {
 
     /**
      * Team color string.
+     *
      * @return returns the color code, if the color not match any, then it returns white
      */
     public static String getColorString(String colorString) {

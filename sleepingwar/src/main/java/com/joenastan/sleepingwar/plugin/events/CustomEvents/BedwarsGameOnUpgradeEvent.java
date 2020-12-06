@@ -1,14 +1,13 @@
 package com.joenastan.sleepingwar.plugin.events.CustomEvents;
 
 import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
 public class BedwarsGameOnUpgradeEvent extends Event {
-    
+
     private static final HandlerList handlers = new HandlerList();
 
     private ItemStack itemUpgrade;

@@ -8,8 +8,8 @@ public class StopwatchTimer {
 
     protected final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
     protected float counter;
-    private float duration;
     protected int taskID = -1;
+    private float duration;
 
     public StopwatchTimer(float duration) {
         this.duration = duration;
@@ -40,12 +40,12 @@ public class StopwatchTimer {
         counter = duration;
     }
 
-    public void setDuration(float duration) {
-        this.duration = duration;
-    }
-
     public float getDuration() {
         return duration;
+    }
+
+    public void setDuration(float duration) {
+        this.duration = duration;
     }
 
     protected void setTaskID(int taskID) {

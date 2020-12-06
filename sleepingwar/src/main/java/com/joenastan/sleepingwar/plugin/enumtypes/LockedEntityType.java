@@ -10,11 +10,6 @@ public enum LockedEntityType {
         this.lockString = lockString;
     }
 
-    @Override
-    public String toString() {
-        return lockString;
-    }
-
     public static LockedEntityType fromString(String s) {
         if (s.equalsIgnoreCase(NORMAL_LOCK.toString())) {
             return NORMAL_LOCK;
@@ -23,6 +18,11 @@ public enum LockedEntityType {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return lockString;
     }
 
 }

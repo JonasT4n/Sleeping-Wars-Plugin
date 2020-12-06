@@ -1,12 +1,11 @@
 package com.joenastan.sleepingwar.plugin.commands;
 
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameStartEvent;
 import com.joenastan.sleepingwar.plugin.game.GameManager;
 import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
-
+import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -106,7 +105,7 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
         } else {
             if (systemConf.getWorldNames().contains(args[1])) {
                 // Check if world still contains Player
-                if(Bukkit.getWorld(args[1]).getPlayers().size() == 0) {
+                if (Bukkit.getWorld(args[1]).getPlayers().size() == 0) {
                     World useMap = Bukkit.getWorld(args[1]);
                     gameManager.createRoom(player, useMap);
                     return;

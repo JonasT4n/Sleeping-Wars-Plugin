@@ -1,34 +1,23 @@
 package com.joenastan.sleepingwar.plugin.utility;
 
+import com.joenastan.sleepingwar.plugin.enumtypes.BedwarsShopType;
+import com.joenastan.sleepingwar.plugin.enumtypes.LockedEntityType;
 import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
 import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
-import com.joenastan.sleepingwar.plugin.enumtypes.BedwarsShopType;
-import com.joenastan.sleepingwar.plugin.enumtypes.LockedEntityType;
-import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
-import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedEntities;
 import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedResourceSpawner;
+import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
+import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 import com.joenastan.sleepingwar.plugin.utility.Timer.AreaEffectTimer;
 import com.joenastan.sleepingwar.plugin.utility.Timer.ResourceSpawnTimer;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
-import org.bukkit.GameRule;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.World.Environment;
-import org.bukkit.WorldCreator;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GameSystemConfig extends AbstractFile {
 
@@ -39,6 +28,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * All world names or map names that registered as bedwars world or map.
+     *
      * @return List of world names or map names
      */
     public List<String> getWorldNames() {
@@ -49,6 +39,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get all resource spawners that has been registered. All resource spawners including public and teams.
+     *
      * @param inWorld Current game or builder world
      * @param mapName Original map name
      * @return List of resource spawners
@@ -76,9 +67,9 @@ public class GameSystemConfig extends AbstractFile {
                 if (!filecon.contains(rsPath + ".duration-spawn"))
                     filecon.set(rsPath + ".duration-spawn", 10f);
                 ResourcesType typeSpawnResource = ResourcesType.values()[filecon.getInt(rsPath + ".type")];
-                Location spawnLoc = new Location(inWorld, filecon.getDouble(rsPath + ".spawnloc.x"), filecon.getDouble(rsPath + ".spawnloc.y"), 
+                Location spawnLoc = new Location(inWorld, filecon.getDouble(rsPath + ".spawnloc.x"), filecon.getDouble(rsPath + ".spawnloc.y"),
                         filecon.getDouble(rsPath + ".spawnloc.z"));
-                float spawnDur = (float)filecon.getDouble(rsPath + ".duration-spawn");
+                float spawnDur = (float) filecon.getDouble(rsPath + ".duration-spawn");
                 // Create resource spawner instance
                 ResourceSpawner rsp;
                 if (spawnDur < 0f)
@@ -93,8 +84,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get all resource spawners that has been registered by specific class.
-     * @param inWorld Current game or builder world
-     * @param mapName Original map name
+     *
+     * @param inWorld  Current game or builder world
+     * @param mapName  Original map name
      * @param teamName On team by name
      * @return List of resource spawners
      */
@@ -123,9 +115,9 @@ public class GameSystemConfig extends AbstractFile {
             if (!filecon.contains(rsPath + ".duration-spawn"))
                 filecon.set(rsPath + ".duration-spawn", 10f);
             ResourcesType typeSpawnResource = ResourcesType.values()[filecon.getInt(rsPath + ".type")];
-            Location spawnLoc = new Location(inWorld, filecon.getDouble(rsPath + ".spawnloc.x"), filecon.getDouble(rsPath + ".spawnloc.y"), 
+            Location spawnLoc = new Location(inWorld, filecon.getDouble(rsPath + ".spawnloc.x"), filecon.getDouble(rsPath + ".spawnloc.y"),
                     filecon.getDouble(rsPath + ".spawnloc.z"));
-            float spawnDur = (float)filecon.getDouble(rsPath + ".duration-spawn");
+            float spawnDur = (float) filecon.getDouble(rsPath + ".duration-spawn");
             // Create resource spawner instance
             ResourceSpawner rsp;
             if (spawnDur < 0f)
@@ -139,6 +131,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * All teams that registered in curent world or map.
+     *
      * @param world Original map name
      * @return List of team names in map
      */
@@ -158,8 +151,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get team location spawner in game.
-     * @param inWorld Current game or builder world
-     * @param mapName Original map name
+     *
+     * @param inWorld  Current game or builder world
+     * @param mapName  Original map name
      * @param teamName On team by name
      * @return Team location spawn
      */
@@ -183,7 +177,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get team's bed location. User need to check if a bed on that location has been put.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team by name
      * @return Bed location not actual bed, if team is not exists then returns null
      */
@@ -201,14 +196,15 @@ public class GameSystemConfig extends AbstractFile {
             filecon.set(path + ".y", inWorld.getSpawnLocation().getBlockY());
         if (!filecon.contains(path + ".z"))
             filecon.set(path + ".z", inWorld.getSpawnLocation().getBlockZ());
-        Location bedLocation = new Location(inWorld, filecon.getInt(path + ".x"), filecon.getInt(path + ".y"), 
+        Location bedLocation = new Location(inWorld, filecon.getInt(path + ".x"), filecon.getInt(path + ".y"),
                 filecon.getInt(path + ".z"));
         return bedLocation;
     }
 
     /**
      * Get team color raw string config.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team by name
      * @return Raw string data, if team is not exists then null
      */
@@ -224,7 +220,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get the minimum value location of team buffer area
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team with name
      * @return Minimum buffer area location
      */
@@ -248,7 +245,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get the maximum value location of team buffer area
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team with name
      * @return Maximum buffer area location
      */
@@ -272,8 +270,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Immediately get the buffer zone coroutine with empty effects.
-     * @param inWorld Current world standing
-     * @param mapName Original map name
+     *
+     * @param inWorld  Current world standing
+     * @param mapName  Original map name
      * @param teamName On team with name
      * @return Buffer zone coroutine, including the locations
      */
@@ -282,13 +281,14 @@ public class GameSystemConfig extends AbstractFile {
         List<String> teamNames = getTeamNames(mapName);
         if (!teamNames.contains(team.getName()))
             return null;
-        AreaEffectTimer bufferZoneCoro = new AreaEffectTimer(5f, getTeamMinBuffArea(inWorld, mapName, team.getName()), 
+        AreaEffectTimer bufferZoneCoro = new AreaEffectTimer(5f, getTeamMinBuffArea(inWorld, mapName, team.getName()),
                 getTeamMaxBuffArea(inWorld, mapName, team.getName()), team);
         return bufferZoneCoro;
     }
 
     /**
      * Immediately get the buffer zone coroutine with empty effects.
+     *
      * @param inWorld Current world standing
      * @param mapName Original map name
      * @return List of public buffer zone coroutine, including the locations
@@ -299,11 +299,11 @@ public class GameSystemConfig extends AbstractFile {
         if (!filecon.contains(path))
             filecon.createSection(path);
         for (String bz : filecon.getConfigurationSection(path).getKeys(false)) {
-            Location minLoc = new Location(inWorld, filecon.getDouble(String.format("%s.%s.minx", path, bz)), 
-                    filecon.getDouble(String.format("%s.%s.miny", path, bz)), 
+            Location minLoc = new Location(inWorld, filecon.getDouble(String.format("%s.%s.minx", path, bz)),
+                    filecon.getDouble(String.format("%s.%s.miny", path, bz)),
                     filecon.getDouble(String.format("%s.%s.minz", path, bz)));
-            Location maxLoc = new Location(inWorld, filecon.getDouble(String.format("%s.%s.maxx", path, bz)), 
-                    filecon.getDouble(String.format("%s.%s.maxy", path, bz)), 
+            Location maxLoc = new Location(inWorld, filecon.getDouble(String.format("%s.%s.maxx", path, bz)),
+                    filecon.getDouble(String.format("%s.%s.maxy", path, bz)),
                     filecon.getDouble(String.format("%s.%s.maxz", path, bz)));
             AreaEffectTimer bufferZoneCoro = new AreaEffectTimer(5f, minLoc, maxLoc, null);
             listBufferZonesCoro.add(bufferZoneCoro);
@@ -313,7 +313,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get codenames that owned by a team. if there's no existing team then it consider as public resource spawners.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team with name
      * @return A list of resource spawner codenames
      */
@@ -336,6 +337,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Specific map queue location.
+     *
      * @param inWorld Current game or builder world
      * @param mapName Original map name
      * @return Queue Location
@@ -350,13 +352,14 @@ public class GameSystemConfig extends AbstractFile {
             filecon.set(path + ".y", inWorld.getSpawnLocation().getY());
         if (!filecon.contains(path + ".z"))
             filecon.set(path + ".z", inWorld.getSpawnLocation().getZ());
-        Location queueLoc = new Location(inWorld, filecon.getDouble(path + ".x"), filecon.getDouble(path + ".y"), 
+        Location queueLoc = new Location(inWorld, filecon.getDouble(path + ".x"), filecon.getDouble(path + ".y"),
                 filecon.getDouble(path + ".z"));
         return queueLoc;
     }
 
     /**
      * Get bedwars timeline events
+     *
      * @param mapName Original map name
      * @return List of events in timeline
      */
@@ -382,7 +385,7 @@ public class GameSystemConfig extends AbstractFile {
             if (filecon.contains(path + ".type"))
                 typevent = TimelineEventType.fromString(filecon.getString(path + ".type"));
             if (filecon.contains(path + ".trigger-in-seconds"))
-                secondsToTrigger = (float)filecon.getDouble(path + ".trigger-in-seconds");
+                secondsToTrigger = (float) filecon.getDouble(path + ".trigger-in-seconds");
             BedwarsGameTimelineEvent bevent = new BedwarsGameTimelineEvent(typevent, secondsToTrigger, eventName, order, eventmsg);
             timelineEvents.add(bevent);
         }
@@ -404,6 +407,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get shops information on map or registered world.
+     *
      * @param inWorld Current world standing
      * @param mapName Original map name
      * @return Map of type with locations
@@ -420,7 +424,7 @@ public class GameSystemConfig extends AbstractFile {
                 List<Location> locationList = new ArrayList<Location>();
                 for (String shopLocString : indexStringSet) {
                     String locPath = path + "." + shopTypeString + "." + shopLocString;
-                    Location loc = new Location(inWorld, filecon.getDouble(locPath + ".x"), 
+                    Location loc = new Location(inWorld, filecon.getDouble(locPath + ".x"),
                             filecon.getDouble(locPath + ".y"), filecon.getDouble(locPath + ".z"));
                     locationList.add(loc);
                 }
@@ -432,6 +436,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get list of locked entities.
+     *
      * @param inWorld Current world standing
      * @param mapName Original map name
      */
@@ -451,9 +456,9 @@ public class GameSystemConfig extends AbstractFile {
                     ResourcesType typeRequest = ResourcesType.fromString(req);
                     requirements.put(typeRequest, filecon.getInt(tPath + "." + req));
                 }
-                LockedEntities locked = new LockedEntities(new Location(inWorld, 
-                        filecon.getDouble(path + "." + cn + ".loc.x"), 
-                        filecon.getDouble(path + "." + cn + ".loc.y"), 
+                LockedEntities locked = new LockedEntities(new Location(inWorld,
+                        filecon.getDouble(path + "." + cn + ".loc.x"),
+                        filecon.getDouble(path + "." + cn + ".loc.y"),
                         filecon.getDouble(path + "." + cn + ".loc.z")), requirements);
                 listOfLocked.add(locked);
             }
@@ -463,6 +468,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get locked resource spawner entity reference.
+     *
      * @param inWorld Current standing world
      * @param mapName Original map name
      * @param rsTimer Resource spawner coroutine reference
@@ -481,9 +487,9 @@ public class GameSystemConfig extends AbstractFile {
                     ResourcesType typeRequest = ResourcesType.fromString(req);
                     requirements.put(typeRequest, filecon.getInt(tPath + "." + req));
                 }
-                return new LockedResourceSpawner(new Location(inWorld, 
-                        filecon.getDouble(path + "." + cn + ".loc.x"), 
-                        filecon.getDouble(path + "." + cn + ".loc.y"), 
+                return new LockedResourceSpawner(new Location(inWorld,
+                        filecon.getDouble(path + "." + cn + ".loc.x"),
+                        filecon.getDouble(path + "." + cn + ".loc.y"),
                         filecon.getDouble(path + "." + cn + ".loc.z")), requirements, rsTimer);
             }
         }
@@ -492,6 +498,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get all public resource spawners, codenames only.
+     *
      * @param mapName Original map name
      * @return List of codenames
      */
@@ -508,6 +515,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Get all locked entities codenames.
+     *
      * @param mapName Original map name
      * @return List of locked entity codenames
      */
@@ -522,8 +530,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Insert a new team into bedwars team list.
-     * @param mapName Original map name
-     * @param teamName Name of new team
+     *
+     * @param mapName     Original map name
+     * @param teamName    Name of new team
      * @param colorPrefix Raw color for team prefix color
      * @return True if successfully added, if team already exists the it returns false
      */
@@ -546,6 +555,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Add event into list
+     *
      * @param mapName Original map name
      * @return True if successfully added, if world not exists then it returns false
      */
@@ -563,9 +573,10 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Add a new resource spawner to the map.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team by name
-     * @param spawner Already created spawner
+     * @param spawner  Already created spawner
      */
     public void addResourceSpawner(String mapName, String teamName, ResourceSpawner spawner) {
         // Check available team
@@ -587,8 +598,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Add a new shop spawner to the map.
-     * @param mapName Original map name
-     * @param type Type of shop
+     *
+     * @param mapName        Original map name
+     * @param type           Type of shop
      * @param playerLocation Player current location
      * @return true if successfuly added, else then false
      */
@@ -608,8 +620,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Add a potion effect to buffer zone.
-     * @param mapName Original map name
-     * @param teamName On team with name
+     *
+     * @param mapName    Original map name
+     * @param teamName   On team with name
      * @param effectType Potion effect included in buffer zone
      * @return True if successfully added, if the effect is already in list then it returns false
      */
@@ -634,9 +647,10 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Add requirement on locked entity.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param codename Locked entity has their own codename
-     * @param typeRes Resource type which required
+     * @param typeRes  Resource type which required
      * @return True if successfully set, if the locked entity not exists then it returns false
      */
     public boolean addRequestOnLockedEntity(String mapName, String codename, ResourcesType typeRes, int amount) {
@@ -652,8 +666,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Set team color prefix, you can use any of string but the plugin itself will decide if it is a color.
-     * @param mapName Original map name
-     * @param teamName On team with name
+     *
+     * @param mapName     Original map name
+     * @param teamName    On team with name
      * @param colorPrefix Color choice
      * @return True if successfully set, if team not exists then it returns false
      */
@@ -670,7 +685,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Set or overwrite queue location, this will also check if the registered world exists.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param queueLoc Location set
      * @return true if successfully set, else then false
      */
@@ -686,9 +702,10 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Set or overwrite team spawn location.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team with name
-     * @param setLoc Location set
+     * @param setLoc   Location set
      * @return true if successfully set, else then false;
      */
     public boolean setTeamSpawnLoc(String mapName, String teamName, Location setLoc) {
@@ -706,9 +723,10 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Set team bed location.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team with name
-     * @param bedLoc Bed location that has just placed
+     * @param bedLoc   Bed location that has just placed
      * @return true if the set is done, if team not exists then false
      */
     public boolean setTeamBedLocation(String mapName, String teamName, Location bedLoc) {
@@ -725,13 +743,14 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
-     * Set team area buffer zone, this area gives effect of any potion effects. 
+     * Set team area buffer zone, this area gives effect of any potion effects.
      * This function automaticaly recalculate minimum and maximum value of location.
      * Each team can only have 1 buffer area.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team with name
-     * @param minLoc Location minimum value
-     * @param maxLoc Location maximum value
+     * @param minLoc   Location minimum value
+     * @param maxLoc   Location maximum value
      */
     public void setTeamBufferArea(String mapName, String teamName, Location minLoc, Location maxLoc) {
         List<String> team = getTeamNames(mapName);
@@ -761,14 +780,14 @@ public class GameSystemConfig extends AbstractFile {
         if (teamName.equals("PUBLIC")) {
             // Overwrite list of buffer area
             Set<String> setListBuffer = filecon.getConfigurationSection(path).getKeys(false);
-            List<Vector> minVec = new ArrayList<Vector>(), maxVec = new ArrayList<Vector>() ; 
+            List<Vector> minVec = new ArrayList<Vector>(), maxVec = new ArrayList<Vector>();
             for (int i = 0; i < setListBuffer.size(); i++) {
-                minVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.minx", path, i)), 
+                minVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.minx", path, i)),
                         filecon.getDouble(String.format("%s.bz%d.miny", path, i)),
                         filecon.getDouble(String.format("%s.bz%d.minz", path, i))));
-                maxVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.maxx", path, i)), 
+                maxVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.maxx", path, i)),
                         filecon.getDouble(String.format("%s.bz%d.maxy", path, i)),
-                        filecon.getDouble(String.format("%s.bz%d.maxz", path,i))));
+                        filecon.getDouble(String.format("%s.bz%d.maxz", path, i))));
             }
             minVec.add(new Vector(minLoc.getX(), minLoc.getY(), minLoc.getZ()));
             maxVec.add(new Vector(maxLoc.getX(), maxLoc.getY(), maxLoc.getZ()));
@@ -785,8 +804,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Set locked placeable entity, which player cannot interact with.
-     * @param mapName Original map name
-     * @param codename Codename for this entity, must be unique
+     *
+     * @param mapName    Original map name
+     * @param codename   Codename for this entity, must be unique
      * @param onLocation Location where did player set
      * @return True if successfully set, if map not exists then it's
      */
@@ -806,8 +826,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Set locked placeable entity, which player cannot interact with. Public resource spawner only.
-     * @param mapName Original map name
-     * @param codename Codename for this entity, must be unique
+     *
+     * @param mapName    Original map name
+     * @param codename   Codename for this entity, must be unique
      * @param onLocation Location where did player set
      * @param codenameRS Resource spawner codename in public
      * @return True if successfully set, if map not exists then it's
@@ -842,7 +863,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Set a resource spawner seconds per spawn.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team with name
      * @param codename Resource spawner has their own unique codename
      * @param duration Seconds per spawn duration
@@ -858,7 +880,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Delete a team from this map.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team with name
      * @return true if successfully deleted, if team not exists then false
      */
@@ -880,7 +903,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Delete an existing resource spawner in world or map. After you got the list, you need to sort it by order.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param teamName On team by name
      * @param codeName Every resource spawner has their own unique codename
      * @return True if successfully deleted, else then false
@@ -895,11 +919,11 @@ public class GameSystemConfig extends AbstractFile {
         }
         // Consider a public resource spawner if the team not exists
         if (!filecon.contains(path)) {
-            path = String.format("worlds.%s.resource-spawners.PUBLIC", mapName); 
+            path = String.format("worlds.%s.resource-spawners.PUBLIC", mapName);
             // Check PUBLIC section exists
             if (!filecon.contains(path)) {
                 // Consider create a public section if not exists
-                filecon.createSection(path, new HashMap<>()); 
+                filecon.createSection(path, new HashMap<>());
                 return false;
             }
         }
@@ -912,9 +936,10 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Delete an existing shop spawn location. User need to include the index to choose a specific shop spawn location.
+     *
      * @param mapName Original map name
-     * @param type Type of shop that will be deleted
-     * @param index List index
+     * @param type    Type of shop that will be deleted
+     * @param index   List index
      * @return True if it is successfully deleted, else then false
      */
     public boolean deleteShopLocation(String mapName, BedwarsShopType type, int index) {
@@ -931,7 +956,7 @@ public class GameSystemConfig extends AbstractFile {
             String numString = ic.substring(4);
             if (Integer.toString(index).equals(numString))
                 pickedIndex = ic;
-            Vector vectorLoc = new Vector(filecon.getDouble(path + "." + ic + ".x"), filecon.getDouble(path + "." + ic + ".y"), 
+            Vector vectorLoc = new Vector(filecon.getDouble(path + "." + ic + ".x"), filecon.getDouble(path + "." + ic + ".y"),
                     filecon.getDouble(path + "." + ic + ".z"));
             indexesInConfig.put(ic, vectorLoc);
         }
@@ -949,7 +974,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Delete an existing event on timeline event in game.
-     * @param mapName Original map name
+     *
+     * @param mapName   Original map name
      * @param eventName Event display name that will be deleted
      * @return True if it is successfully deleted, else then false
      */
@@ -963,8 +989,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Delete by index a public buffer zone.
+     *
      * @param mapName Original map name
-     * @param index List index to be delete
+     * @param index   List index to be delete
      * @return True if successfully deleted, if world not exists or index exceeded then it returns false
      */
     public boolean deletePublicBufferZone(String mapName, int index) {
@@ -975,14 +1002,14 @@ public class GameSystemConfig extends AbstractFile {
         Set<String> setListBuffer = filecon.getConfigurationSection(path).getKeys(false);
         if (index >= setListBuffer.size())
             return false;
-        List<Vector> minVec = new ArrayList<Vector>(), maxVec = new ArrayList<Vector>() ; 
+        List<Vector> minVec = new ArrayList<Vector>(), maxVec = new ArrayList<Vector>();
         for (int i = 0; i < setListBuffer.size(); i++) {
-            minVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.minx", path, i)), 
+            minVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.minx", path, i)),
                     filecon.getDouble(String.format("%s.bz%d.miny", path, i)),
                     filecon.getDouble(String.format("%s.bz%d.minz", path, i))));
-            maxVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.maxx", path, i)), 
+            maxVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.maxx", path, i)),
                     filecon.getDouble(String.format("%s.bz%d.maxy", path, i)),
-                    filecon.getDouble(String.format("%s.bz%d.maxz", path,i))));
+                    filecon.getDouble(String.format("%s.bz%d.maxz", path, i))));
         }
         overwritePublicBZList(path, minVec, maxVec);
         return true;
@@ -990,7 +1017,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Delete the locked entity.
-     * @param mapName Original map name
+     *
+     * @param mapName  Original map name
      * @param codename Locked entity codename
      * @return True if successfully deleted, if codename does not exists then it returns false
      */
@@ -1019,6 +1047,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Count overall resource spawners in this map
+     *
      * @param mapName Original map name
      * @return amount of existing resource spawners
      */
@@ -1039,6 +1068,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Count events in current world timeline.
+     *
      * @param mapName Original map name
      * @return Amount of events in timeline
      */
@@ -1053,8 +1083,8 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
-     * Load worlds and config 
-     */ 
+     * Load worlds and config
+     */
     public void load() {
         if (!filecon.contains("worlds"))
             filecon.set("worlds", new HashMap<>());
@@ -1070,6 +1100,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Only used when the world is going to be created.
+     *
      * @param creator World creator is needed to create a world
      */
     public void saveWorldConfig(WorldCreator creator) {
@@ -1119,7 +1150,8 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * List of shop only overwrite the new data.
-     * @param path Data path in config file
+     *
+     * @param path    Data path in config file
      * @param listLoc List of locations
      */
     private void overwriteShopList(String path, List<Vector> listLoc) {
@@ -1134,9 +1166,10 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
-     * List public buffer zone only overwrite the new data. 
+     * List public buffer zone only overwrite the new data.
      * Note that list of minimum and maximum locations must be the same size, if not it will not be executed.
-     * @param path Data path in config file
+     *
+     * @param path       Data path in config file
      * @param listMinLoc List of minimum location buffer zones
      * @param listMaxLoc List of maximum location buffer zones
      */

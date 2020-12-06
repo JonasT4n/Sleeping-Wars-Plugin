@@ -1,7 +1,7 @@
 package com.joenastan.sleepingwar.plugin.utility.Timer;
 
-import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
+import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
 import org.bukkit.Bukkit;
 
 public class ResourceSpawnTimer extends StopwatchTimer {
@@ -16,10 +16,10 @@ public class ResourceSpawnTimer extends StopwatchTimer {
 
     @Override
     public void start() {
-        if (isLocked) 
+        if (isLocked)
             return;
 
-        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(SleepingWarsPlugin.getPlugin(), 
+        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(SleepingWarsPlugin.getPlugin(),
                 new Runnable() {
                     @Override
                     public void run() {
