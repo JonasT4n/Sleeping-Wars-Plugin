@@ -1,12 +1,10 @@
 package com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity;
 
-import java.util.Map;
-
 import com.joenastan.sleepingwar.plugin.enumtypes.LockedEntityType;
 import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
-import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
 import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
-
+import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -15,19 +13,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.Map;
 
 public class LockedEntities {
 
+    protected LockedEntityType typeLock = LockedEntityType.NORMAL_LOCK;
+    protected Map<ResourcesType, Integer> requirements;
     private Location locLocked;
     private Block blockReference;
     private Openable openableBlock = null;
     private boolean unlocked = false;
-    protected LockedEntityType typeLock = LockedEntityType.NORMAL_LOCK;
-    protected Map<ResourcesType, Integer> requirements;
 
     /**
      * Automatically get block that will be lock.
+     *
      * @param locLocked Block Location, if there's no entity then it is null
      */
     public LockedEntities(Location locLocked, Map<ResourcesType, Integer> requirements) {
@@ -37,10 +36,10 @@ public class LockedEntities {
         if (block != null) {
             blockReference = block;
             Material blockType = block.getType();
-            if (UsefulStaticFunctions.isStandardDoor(blockType) || UsefulStaticFunctions.isFenceGate(blockType) || 
+            if (UsefulStaticFunctions.isStandardDoor(blockType) || UsefulStaticFunctions.isFenceGate(blockType) ||
                     UsefulStaticFunctions.isTrapDoor(blockType)) {
                 if (block.getBlockData() instanceof Openable) {
-                    openableBlock = (Openable)block.getBlockData();
+                    openableBlock = (Openable) block.getBlockData();
                     if (openableBlock.isOpen())
                         openableBlock.setOpen(false);
                 }
@@ -57,7 +56,8 @@ public class LockedEntities {
 
     /**
      * Block which was refereced when it was constructed.
-     * @return if not exists then it returns null 
+     *
+     * @return if not exists then it returns null
      */
     public Block getBlockReference() {
         return blockReference;
@@ -65,6 +65,7 @@ public class LockedEntities {
 
     /**
      * Check if it is already unlocked.
+     *
      * @return True if it is already, else then false
      */
     public boolean isUnlocked() {
@@ -73,6 +74,7 @@ public class LockedEntities {
 
     /**
      * Unlock the door with player entity in bedwars. If the requirements is empty it will premanently locked.
+     *
      * @param keyEntity Requirement to unlock
      * @return True if successfully unlocked, else then false
      */
@@ -83,7 +85,7 @@ public class LockedEntities {
             return false;
         }
         // You don't need to unlock the unlocked entity
-        if (unlocked) 
+        if (unlocked)
             return true;
         // Check if the requirement has been fulfilled
         for (Map.Entry<ResourcesType, Integer> rEntry : requirements.entrySet()) {
@@ -127,15 +129,16 @@ public class LockedEntities {
 
     /**
      * Whenever it requires items from player's inventory.
+     *
      * @param playerInv Player's refered inventory
-     * @param find Find all items with material type
-     * @param require Required amount
+     * @param find      Find all items with material type
+     * @param require   Required amount
      * @return True if player has amount of required items, else then false
      */
     private boolean fulfillByInventoryItems(PlayerInventory playerInv, Material find, int require) {
         int currentItemHas = 0;
         for (ItemStack itm : playerInv.getContents()) {
-            if (itm == null) 
+            if (itm == null)
                 continue;
             if (itm.getType() == find) {
                 currentItemHas += itm.getAmount();
@@ -148,6 +151,7 @@ public class LockedEntities {
 
     /**
      * Send a description of requirements.
+     *
      * @param player Refered Player
      */
     private void sendRequirements(Player player) {

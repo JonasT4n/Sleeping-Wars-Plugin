@@ -1,26 +1,17 @@
 package com.joenastan.sleepingwar.plugin.game.InventoryMenus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItems;
 import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItemsArmorWeapon;
 import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItemsPotion;
+import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
 import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
@@ -28,7 +19,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BedwarsShopMenus implements BedwarsMenus {
 
@@ -42,29 +36,29 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Stone Sword
         ItemMeta stoneSwordMeta = new ItemStack(Material.STONE_SWORD, 1).getItemMeta();
         stoneSwordMeta.setDisplayName(ChatColor.GRAY + "Stone Sword");
-        priceItems.put("Stone Sword", new PricetagsItemsArmorWeapon(Material.STONE_SWORD, Material.IRON_INGOT, 32, 
+        priceItems.put("Stone Sword", new PricetagsItemsArmorWeapon(Material.STONE_SWORD, Material.IRON_INGOT, 32,
                 stoneSwordMeta, 1, new HashMap<Enchantment, Integer>()));
         // Iron Sword
         ItemMeta ironSwordMeta = new ItemStack(Material.IRON_SWORD, 1).getItemMeta();
         ironSwordMeta.setDisplayName(ChatColor.WHITE + "Iron Sword");
-        priceItems.put("Iron Sword", new PricetagsItemsArmorWeapon(Material.IRON_SWORD, Material.GOLD_INGOT, 16, 
+        priceItems.put("Iron Sword", new PricetagsItemsArmorWeapon(Material.IRON_SWORD, Material.GOLD_INGOT, 16,
                 ironSwordMeta, 1, new HashMap<Enchantment, Integer>()));
         // Diamond Sword
         ItemMeta diamondSwordMeta = new ItemStack(Material.DIAMOND_SWORD, 1).getItemMeta();
         diamondSwordMeta.setDisplayName(ChatColor.AQUA + "Diamond Sword");
-        priceItems.put("Diamond Sword", new PricetagsItemsArmorWeapon(Material.DIAMOND_SWORD, Material.EMERALD, 8, 
+        priceItems.put("Diamond Sword", new PricetagsItemsArmorWeapon(Material.DIAMOND_SWORD, Material.EMERALD, 8,
                 diamondSwordMeta, 1, new HashMap<Enchantment, Integer>()));
         // Bow
         ItemMeta normalBowMeta = new ItemStack(Material.BOW, 1).getItemMeta();
         normalBowMeta.setDisplayName(ChatColor.WHITE + "Bow");
-        priceItems.put("Bow", new PricetagsItemsArmorWeapon(Material.BOW, Material.GOLD_INGOT, 18, 
+        priceItems.put("Bow", new PricetagsItemsArmorWeapon(Material.BOW, Material.GOLD_INGOT, 18,
                 normalBowMeta, 1, new HashMap<Enchantment, Integer>()));
         // Bow Level 2
         ItemMeta lvl2BowMeta = new ItemStack(Material.BOW, 1).getItemMeta();
         lvl2BowMeta.setDisplayName(ChatColor.YELLOW + "Bow II");
         Map<Enchantment, Integer> lvl2BowEnchancement = new HashMap<Enchantment, Integer>();
         lvl2BowEnchancement.put(Enchantment.ARROW_DAMAGE, 1);
-        priceItems.put("Bow II", new PricetagsItemsArmorWeapon(Material.BOW, Material.EMERALD, 6, 
+        priceItems.put("Bow II", new PricetagsItemsArmorWeapon(Material.BOW, Material.EMERALD, 6,
                 lvl2BowMeta, 1, lvl2BowEnchancement));
         // Bow Level 3
         ItemMeta lvl3BowMeta = new ItemStack(Material.BOW, 1).getItemMeta();
@@ -72,12 +66,12 @@ public class BedwarsShopMenus implements BedwarsMenus {
         Map<Enchantment, Integer> lvl3BowEnchancement = new HashMap<Enchantment, Integer>();
         lvl3BowEnchancement.put(Enchantment.ARROW_DAMAGE, 2);
         lvl3BowEnchancement.put(Enchantment.ARROW_KNOCKBACK, 2);
-        priceItems.put("Bow III", new PricetagsItemsArmorWeapon(Material.BOW, Material.EMERALD, 14, 
+        priceItems.put("Bow III", new PricetagsItemsArmorWeapon(Material.BOW, Material.EMERALD, 14,
                 lvl3BowMeta, 1, lvl3BowEnchancement));
         // Arrow
         ItemMeta arrowMeta = new ItemStack(Material.ARROW, 1).getItemMeta();
         arrowMeta.setDisplayName(ChatColor.WHITE + "Arrow");
-        priceItems.put("Arrow", new PricetagsItemsArmorWeapon(Material.ARROW, Material.GOLD_INGOT, 3, 
+        priceItems.put("Arrow", new PricetagsItemsArmorWeapon(Material.ARROW, Material.GOLD_INGOT, 3,
                 arrowMeta, 8, new HashMap<Enchantment, Integer>()));
         //#endregion
 
@@ -85,22 +79,22 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Shield
         ItemMeta shieldMeta = new ItemStack(Material.SHIELD, 1).getItemMeta();
         shieldMeta.setDisplayName(ChatColor.GOLD + "Shield");
-        priceItems.put("Shield", new PricetagsItemsArmorWeapon(Material.SHIELD, Material.GOLD_INGOT, 12, 
+        priceItems.put("Shield", new PricetagsItemsArmorWeapon(Material.SHIELD, Material.GOLD_INGOT, 12,
                 shieldMeta, 1, new HashMap<Enchantment, Integer>()));
         // Chainmail Armor
         ItemMeta chainmailMeta = new ItemStack(Material.CHAINMAIL_CHESTPLATE, 1).getItemMeta();
         chainmailMeta.setDisplayName(ChatColor.GRAY + "Chainmail Armor");
-        priceItems.put("Chainmail Armor", new PricetagsItemsArmorWeapon(Material.CHAINMAIL_CHESTPLATE, Material.IRON_INGOT, 48, 
+        priceItems.put("Chainmail Armor", new PricetagsItemsArmorWeapon(Material.CHAINMAIL_CHESTPLATE, Material.IRON_INGOT, 48,
                 chainmailMeta, 1, new HashMap<Enchantment, Integer>()));
         // Iron Armor
         ItemMeta ironArmorMeta = new ItemStack(Material.IRON_CHESTPLATE, 1).getItemMeta();
         ironArmorMeta.setDisplayName(ChatColor.WHITE + "Iron Armor");
-        priceItems.put("Iron Armor", new PricetagsItemsArmorWeapon(Material.IRON_CHESTPLATE, Material.GOLD_INGOT, 15, 
+        priceItems.put("Iron Armor", new PricetagsItemsArmorWeapon(Material.IRON_CHESTPLATE, Material.GOLD_INGOT, 15,
                 ironArmorMeta, 1, new HashMap<Enchantment, Integer>()));
         // Diamond Armor
         ItemMeta diamondArmorMeta = new ItemStack(Material.DIAMOND_CHESTPLATE, 1).getItemMeta();
         diamondArmorMeta.setDisplayName(ChatColor.AQUA + "Diamond Armor");
-        priceItems.put("Diamond Armor", new PricetagsItemsArmorWeapon(Material.DIAMOND_CHESTPLATE, Material.EMERALD, 8, 
+        priceItems.put("Diamond Armor", new PricetagsItemsArmorWeapon(Material.DIAMOND_CHESTPLATE, Material.EMERALD, 8,
                 diamondArmorMeta, 1, new HashMap<Enchantment, Integer>()));
         //#endregion
 
@@ -131,28 +125,28 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Swiftness
         ItemMeta potionOfSwiftnessMeta = new ItemStack(Material.POTION, 1).getItemMeta();
         potionOfSwiftnessMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Swiftness III");
-        PricetagsItemsPotion swift3 = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 2, 
+        PricetagsItemsPotion swift3 = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 2,
                 potionOfSwiftnessMeta, 1, new PotionData(PotionType.SPEED));
         swift3.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 15, 3));
         priceItems.put("Swiftness III", swift3);
         // Leaping
         ItemMeta potionOfLeapingMeta = new ItemStack(Material.POTION, 1).getItemMeta();
         potionOfLeapingMeta.setDisplayName(ChatColor.GREEN + "Leaping IV");
-        PricetagsItemsPotion leap4 =  new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 2, 
+        PricetagsItemsPotion leap4 = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 2,
                 potionOfLeapingMeta, 1, new PotionData(PotionType.JUMP));
         leap4.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 15, 4));
         priceItems.put("Leaping IV", leap4);
         // Strength
         ItemMeta potionOfStrengthMeta = new ItemStack(Material.POTION, 1).getItemMeta();
         potionOfStrengthMeta.setDisplayName(ChatColor.DARK_PURPLE + "Strength II");
-        PricetagsItemsPotion strength2 = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 5, 
+        PricetagsItemsPotion strength2 = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 5,
                 potionOfStrengthMeta, 1, new PotionData(PotionType.STRENGTH));
         strength2.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 15, 2));
         priceItems.put("Strength II", strength2);
         // Invisibility
         ItemMeta potionOfInvisibleMeta = new ItemStack(Material.POTION, 1).getItemMeta();
         potionOfInvisibleMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Invisibility");
-        PricetagsItemsPotion invis = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 8, 
+        PricetagsItemsPotion invis = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 8,
                 potionOfInvisibleMeta, 1, new PotionData(PotionType.INVISIBILITY));
         invis.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 15, 1));
         priceItems.put("Invisibility", invis);
@@ -216,7 +210,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Arrows of Harming
         ItemMeta harmingArrowMeta = new ItemStack(Material.TIPPED_ARROW, 1).getItemMeta();
         harmingArrowMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arrow of Harming");
-        priceItems.put("Arrow of Harming", new PricetagsItemsPotion(Material.TIPPED_ARROW, Material.EMERALD, 2, 
+        priceItems.put("Arrow of Harming", new PricetagsItemsPotion(Material.TIPPED_ARROW, Material.EMERALD, 2,
                 harmingArrowMeta, 16, new PotionData(PotionType.INSTANT_DAMAGE)));
         // Silverfish Egg
         ItemMeta silverfishEggMeta = new ItemStack(Material.SILVERFISH_SPAWN_EGG, 1).getItemMeta();
@@ -544,7 +538,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
                     buyItemByType(player, tag);
                 }
                 break;
-            }   
+            }
         }
     }
 
@@ -556,7 +550,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
                 case STONE_SWORD:
                     for (int i = 0; i < playerInv.getSize(); i++) {
                         ItemStack onSlot = playerInv.getItem(i);
-                        if (onSlot == null) 
+                        if (onSlot == null)
                             continue;
                         // Replace the current Item
                         if (onSlot.getType() == Material.WOODEN_SWORD) {
@@ -577,7 +571,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
                 case IRON_SWORD:
                     for (int i = 0; i < playerInv.getSize(); i++) {
                         ItemStack onSlot = playerInv.getItem(i);
-                        if (onSlot == null) 
+                        if (onSlot == null)
                             continue;
                         // Replace the current Item
                         if (onSlot.getType() == Material.WOODEN_SWORD || onSlot.getType() == Material.STONE_SWORD) {
@@ -598,7 +592,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
                 case DIAMOND_SWORD:
                     for (int i = 0; i < playerInv.getSize(); i++) {
                         ItemStack onSlot = playerInv.getItem(i);
-                        if (onSlot == null) 
+                        if (onSlot == null)
                             continue;
                         // Replace the current Item
                         if (onSlot.getType() == Material.WOODEN_SWORD || onSlot.getType() == Material.STONE_SWORD || onSlot.getType() == Material.IRON_SWORD) {
@@ -668,13 +662,13 @@ public class BedwarsShopMenus implements BedwarsMenus {
                     break;
 
                 case WOODEN_PICKAXE:
-                    ItemStack woodenPick = new ItemStack(Material.WOODEN_PICKAXE, 1); 
+                    ItemStack woodenPick = new ItemStack(Material.WOODEN_PICKAXE, 1);
                     checkUpgrade(woodenPick);
                     playerInv.addItem(woodenPick);
                     break;
 
                 case IRON_AXE:
-                    ItemStack ironAxe = new ItemStack(Material.IRON_AXE, 1); 
+                    ItemStack ironAxe = new ItemStack(Material.IRON_AXE, 1);
                     checkUpgrade(ironAxe);
                     playerInv.addItem(ironAxe);
                     break;
@@ -736,17 +730,17 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Sharper Blade
         if (UsefulStaticFunctions.isSword(item.getType()) && team.getPermaLevels().get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
             metaItem.addEnchant(Enchantment.DAMAGE_ALL, team.getPermaLevels().get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1, true);
-        } 
+        }
         // Tough Skin
         else if (UsefulStaticFunctions.isHumanEntityArmor(item.getType())) {
-            if (team.getPermaLevels().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1 != 0) 
+            if (team.getPermaLevels().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1 != 0)
                 metaItem.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, team.getPermaLevels().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1, true);
             if (team.getPermaLevels().get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1 != 0)
                 metaItem.addEnchant(Enchantment.THORNS, team.getPermaLevels().get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1, true);
-        } 
+        }
         // Mine A Holic
-        else if ((UsefulStaticFunctions.isAxe(item.getType()) || item.getType() == Material.SHEARS || UsefulStaticFunctions.isPickaxe(item.getType())) && 
-                    team.getPermaLevels().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1 != 0) {
+        else if ((UsefulStaticFunctions.isAxe(item.getType()) || item.getType() == Material.SHEARS || UsefulStaticFunctions.isPickaxe(item.getType())) &&
+                team.getPermaLevels().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1 != 0) {
             metaItem.addEnchant(Enchantment.DIG_SPEED, team.getPermaLevels().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1, true);
         }
         item.setItemMeta(metaItem);

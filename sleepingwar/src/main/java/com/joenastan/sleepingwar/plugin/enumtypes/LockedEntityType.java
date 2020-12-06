@@ -4,15 +4,10 @@ public enum LockedEntityType {
     NORMAL_LOCK("normal-lock"),
     RESOURCE_SPAWNER_LOCK("rs-lock");
 
-    private String lockString;
+    private final String lockString;
 
     private LockedEntityType(String lockString) {
         this.lockString = lockString;
-    }
-
-    @Override
-    public String toString() {
-        return lockString;
     }
 
     public static LockedEntityType fromString(String s) {
@@ -23,6 +18,11 @@ public enum LockedEntityType {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return lockString;
     }
 
 }

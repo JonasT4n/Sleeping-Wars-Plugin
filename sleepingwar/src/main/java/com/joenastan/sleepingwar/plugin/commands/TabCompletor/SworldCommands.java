@@ -1,15 +1,16 @@
 package com.joenastan.sleepingwar.plugin.commands.TabCompletor;
 
+import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.enumtypes.BedwarsShopType;
 import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
 import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
+import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
 import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -114,14 +115,14 @@ public class SworldCommands implements TabCompleter {
                     return createWorldHint;
                 }
                 // Gives team names hint for setTeamSpawnCMD, teamInfoCMD, and setBedLocCMD
-                else if (args[0].equalsIgnoreCase(setTeamSpawnCMD) || args[0].equalsIgnoreCase(teamInfoCMD) || 
+                else if (args[0].equalsIgnoreCase(setTeamSpawnCMD) || args[0].equalsIgnoreCase(teamInfoCMD) ||
                         args[0].equalsIgnoreCase(setBedLocCMD) || args[0].equalsIgnoreCase(setTeamColorCMD)) {
                     String worldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(worldName))
                         return systemConf.getTeamNames(worldName);
                 }
                 // Gives team names hint and public
-                else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD) || args[0].equalsIgnoreCase(deleteResSpawnCMD) || 
+                else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD) || args[0].equalsIgnoreCase(deleteResSpawnCMD) ||
                         args[0].equalsIgnoreCase(setResSpawnerDurCMD) || args[0].equalsIgnoreCase(setTeamAreaCMD)) {
                     String worldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(worldName)) {
@@ -163,7 +164,7 @@ public class SworldCommands implements TabCompleter {
                         return Arrays.asList("<codename>");
                 }
                 // Gives locked entities codename hint
-                else if (args[0].equalsIgnoreCase(addRequestCMD) || args[0].equalsIgnoreCase(deleteLockedEntityCMD)){
+                else if (args[0].equalsIgnoreCase(addRequestCMD) || args[0].equalsIgnoreCase(deleteLockedEntityCMD)) {
                     String inWorldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(inWorldName))
                         return systemConf.getLockedCodenames(inWorldName);

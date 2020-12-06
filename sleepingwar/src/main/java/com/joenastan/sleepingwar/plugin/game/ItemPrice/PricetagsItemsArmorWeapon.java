@@ -1,11 +1,11 @@
 package com.joenastan.sleepingwar.plugin.game.ItemPrice;
 
-import java.util.Map;
-
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.Map;
 
 public class PricetagsItemsArmorWeapon extends PricetagsItems {
 
@@ -22,7 +22,7 @@ public class PricetagsItemsArmorWeapon extends PricetagsItems {
         thisItem.addEnchantments(enchantments);
         return thisItem;
     }
-    
+
     @Override
     public ItemStack createItem(int amount) {
         ItemStack thisItem = super.createItem(amount);
@@ -33,5 +33,5 @@ public class PricetagsItemsArmorWeapon extends PricetagsItems {
     public Map<Enchantment, Integer> getListEnchant() {
         return enchantments;
     }
-    
+
 }

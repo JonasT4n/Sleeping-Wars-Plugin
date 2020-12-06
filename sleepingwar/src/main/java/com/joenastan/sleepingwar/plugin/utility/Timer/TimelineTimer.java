@@ -1,16 +1,14 @@
 package com.joenastan.sleepingwar.plugin.utility.Timer;
 
-import java.util.List;
-
 import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
 import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
 import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.List;
 
 public class TimelineTimer extends StopwatchTimer {
 
@@ -24,7 +22,7 @@ public class TimelineTimer extends StopwatchTimer {
         this.event = event;
         this.publicSpawners = publicSpawners;
     }
-    
+
     @Override
     public void runEvent() {
         if (event.getEventType() == TimelineEventType.DIAMOND_UPGRADE || event.getEventType() == TimelineEventType.EMERALD_UPGRADE) {
@@ -32,9 +30,9 @@ public class TimelineTimer extends StopwatchTimer {
                 // Reduce about 25% amount of time
                 // TODO: Make it Generic
                 if (event.getEventType() == TimelineEventType.DIAMOND_UPGRADE && rspEntry.getMaterialSpawn() == Material.DIAMOND)
-                    rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25/100));
+                    rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25 / 100));
                 if (event.getEventType() == TimelineEventType.EMERALD_UPGRADE && rspEntry.getMaterialSpawn() == Material.EMERALD)
-                    rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25/100));
+                    rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25 / 100));
             }
         }
         // Update timeline

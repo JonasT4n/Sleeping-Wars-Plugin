@@ -3,16 +3,16 @@ package com.joenastan.sleepingwar.plugin.game;
 import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
 import com.joenastan.sleepingwar.plugin.game.InventoryMenus.BedwarsShopMenus;
 import com.joenastan.sleepingwar.plugin.game.InventoryMenus.BedwarsUpgradeMenus;
-import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
-import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
 import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
 import com.joenastan.sleepingwar.plugin.utility.Timer.AreaEffectTimer;
 import com.joenastan.sleepingwar.plugin.utility.Timer.PlayerReviveTimer;
+import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
 import net.md_5.bungee.api.ChatColor;
-
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -24,7 +24,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,9 +53,10 @@ public class TeamGroupMaker {
 
     /**
      * Create team group, you need players to be able to create a team
-     * @param inRoom Currently in room
+     *
+     * @param inRoom   Currently in room
      * @param teamName Name of team
-     * @param players List of selected players
+     * @param players  List of selected players
      */
     public TeamGroupMaker(SleepingRoom inRoom, String teamName, List<PlayerBedwarsEntity> players) {
         // Assign attributes
@@ -84,20 +84,21 @@ public class TeamGroupMaker {
 
     /**
      * When player revive or the game started, then setup the starter items and equipments to player
+     *
      * @param player Selected player
      */
     public void setStarterPack(Player player) {
         // Setting up leather armor
         ItemStack[] leatherArmorPack = {
-            new ItemStack(Material.LEATHER_BOOTS, 1),
-            new ItemStack(Material.LEATHER_LEGGINGS, 1),
-            new ItemStack(Material.LEATHER_CHESTPLATE, 1),
-            new ItemStack(Material.LEATHER_HELMET, 1)
+                new ItemStack(Material.LEATHER_BOOTS, 1),
+                new ItemStack(Material.LEATHER_LEGGINGS, 1),
+                new ItemStack(Material.LEATHER_CHESTPLATE, 1),
+                new ItemStack(Material.LEATHER_HELMET, 1)
         };
         // Set Colors and upgrades of armor
         for (ItemStack leatherArmorItemStack : leatherArmorPack) {
             ItemMeta leatherArmorMeta = leatherArmorItemStack.getItemMeta();
-            ((LeatherArmorMeta)leatherArmorMeta).setColor(getPureColor());
+            ((LeatherArmorMeta) leatherArmorMeta).setColor(getPureColor());
             shopMenu.checkUpgrade(leatherArmorItemStack);
             leatherArmorItemStack.setItemMeta(leatherArmorMeta);
         }
@@ -117,6 +118,7 @@ public class TeamGroupMaker {
 
     /**
      * Upgrade team something by 1
+     *
      * @param upgradeName The name of an upgrade from BedwarsUpgradeMenus constants
      */
     public void teamUpgrade(String upgradeName) {
@@ -151,7 +153,7 @@ public class TeamGroupMaker {
             for (ResourceSpawner rspEntry : resourceSpawners) {
                 // TODO: Create Generic upgrades, custom percentage upgrade
                 // 25% duration reduction
-                rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25/100));
+                rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25 / 100));
             }
         } else if (upgradeName.equals(BedwarsUpgradeMenus.HOLY_LIGHT)) {
             bufferZone.setEffect(new PotionEffect(PotionEffectType.HEAL, 6, 1));
@@ -168,6 +170,7 @@ public class TeamGroupMaker {
 
     /**
      * Reviving player from any death, this function is extremely useful
+     *
      * @param player Death body
      */
     public void reviving(Player player) {
@@ -188,6 +191,7 @@ public class TeamGroupMaker {
 
     /**
      * Open an upgrade menu, team progress only.
+     *
      * @param player Player who gonna open upgrade menu
      */
     public void openUpgradeMenu(Player player) {
@@ -196,6 +200,7 @@ public class TeamGroupMaker {
 
     /**
      * Open a shop menu, owned by team only.
+     *
      * @param player
      */
     public void openShopMenu(Player player, String shopName) {
@@ -204,11 +209,12 @@ public class TeamGroupMaker {
 
     /**
      * When player is buying an item in any bedwars menu.
-     * @param player Player who selected it
-     * @param menu Inventory as a menu
-     * @param menuView The view inventory menu
+     *
+     * @param player       Player who selected it
+     * @param menu         Inventory as a menu
+     * @param menuView     The view inventory menu
      * @param selectedItem Item which selected by player
-     * @param slotIndex Slot index selected
+     * @param slotIndex    Slot index selected
      */
     public void selectInventoryMenu(Player player, Inventory menu, InventoryView menuView, ItemStack selectedItem, int slotIndex) {
         String menuTitle = ChatColor.stripColor(menuView.getTitle());
@@ -224,6 +230,7 @@ public class TeamGroupMaker {
 
     /**
      * Usage of this function only if the game is in progress. Handle a player which trying to reconnect into the game.
+     *
      * @param player Who just reconnected
      * @return True if player reconnected and join back to player's team, else then false
      */
@@ -251,22 +258,23 @@ public class TeamGroupMaker {
                     getRemainingPlayers() - 1, teamName);
             inRoom.getScoreboard().resetScores(recentScoreboardScore);
             return true;
-        } 
+        }
         return false;
     }
 
     /**
      * Handle player disconnected from the server.
+     *
      * @param playerEnt Player entity reference
      */
     public void playerDisconnectedHandler(PlayerBedwarsEntity playerEnt) {
         // Check if player disconnected from the game by command
         if (playerEnt.isLeavingUsingCommand()) {
             playersNTimer.remove(playerEnt).stop();
-            inRoom.roomBroadcast(String.format("%s leave the game.", UsefulStaticFunctions.getColorString(teamColorPrefix) + 
+            inRoom.roomBroadcast(String.format("%s leave the game.", UsefulStaticFunctions.getColorString(teamColorPrefix) +
                     playerEnt.getPlayer().getName()));
         } else {
-            inRoom.roomBroadcast(String.format("%s disconnected from the game.", UsefulStaticFunctions.getColorString(teamColorPrefix) + 
+            inRoom.roomBroadcast(String.format("%s disconnected from the game.", UsefulStaticFunctions.getColorString(teamColorPrefix) +
                     playerEnt.getPlayer().getName()));
         }
         eliminetedCount++;
@@ -278,6 +286,7 @@ public class TeamGroupMaker {
 
     /**
      * Activate resource spawners in team.
+     *
      * @param active
      */
     public void activateRS(boolean active) {
@@ -290,6 +299,7 @@ public class TeamGroupMaker {
 
     /**
      * Set activation on team area effect buffer zone.
+     *
      * @param active Set active
      */
     public void setRunningEffectBZ(boolean active) {
@@ -302,6 +312,7 @@ public class TeamGroupMaker {
 
     /**
      * Send a message locally in team only
+     *
      * @param msg The message that will be send
      */
     public void sendTeamMessage(String msg) {
@@ -387,7 +398,7 @@ public class TeamGroupMaker {
         } else if (teamColorPrefix.equalsIgnoreCase("light-purple")) {
             return Color.PURPLE;
         } else if (teamColorPrefix.equalsIgnoreCase("gold")) {
-            return Color.fromRGB(255,223,0);
+            return Color.fromRGB(255, 223, 0);
         } else if (teamColorPrefix.equalsIgnoreCase("gray")) {
             return Color.GRAY;
         } else { // Default is White
@@ -397,6 +408,7 @@ public class TeamGroupMaker {
 
     /**
      * Check if team is already has been eliminated
+     *
      * @return true if yes, else then false
      */
     public boolean isTeamEliminated() {
@@ -405,6 +417,7 @@ public class TeamGroupMaker {
 
     /**
      * Check bed broken on team's bed location.
+     *
      * @return true if already broken
      */
     public boolean isBedBroken() {

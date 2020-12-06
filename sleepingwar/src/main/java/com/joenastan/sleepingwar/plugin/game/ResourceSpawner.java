@@ -119,14 +119,6 @@ public class ResourceSpawner {
         return isActive;
     }
 
-    public float getSecondsPerSpawn() {
-        return looper.getDuration();
-    }
-
-    public ResourceSpawnTimer getCoroutine() {
-        return looper;
-    }
-
     private void setRunning(boolean run) {
         if (run) {
             //System.out.println("[DEBUG] Resource Spawner " + codename + " is now running");
@@ -135,6 +127,14 @@ public class ResourceSpawner {
             //System.out.println("[DEBUG] Resource Spawner " + codename + " is now stopped");
             looper.stop();
         }
+    }
+
+    public float getSecondsPerSpawn() {
+        return looper.getDuration();
+    }
+
+    public ResourceSpawnTimer getCoroutine() {
+        return looper;
     }
 
     public boolean isRunning(boolean active) {

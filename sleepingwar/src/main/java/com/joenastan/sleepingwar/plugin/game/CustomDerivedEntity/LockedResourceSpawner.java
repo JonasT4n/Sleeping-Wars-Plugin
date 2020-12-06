@@ -1,13 +1,12 @@
 package com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity;
 
-import java.util.Map;
-
 import com.joenastan.sleepingwar.plugin.enumtypes.LockedEntityType;
 import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
 import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 import com.joenastan.sleepingwar.plugin.utility.Timer.ResourceSpawnTimer;
-
 import org.bukkit.Location;
+
+import java.util.Map;
 
 public class LockedResourceSpawner extends LockedEntities {
 

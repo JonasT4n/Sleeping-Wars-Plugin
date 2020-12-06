@@ -1,15 +1,13 @@
 package com.joenastan.sleepingwar.plugin.utility.Timer;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class AreaEffectTimer extends StopwatchTimer {
 
@@ -22,11 +20,12 @@ public class AreaEffectTimer extends StopwatchTimer {
 
     /**
      * Area effect routine whenever the team enters the area. The area is already auto calculation with minimum and maximum so don't worry.
-     * @param duration Duration 
+     *
+     * @param duration     Duration
      * @param minimalPoint Minimum area X Y Z
      * @param maximalPoint Maximum area X Y Z
      * @param teamEligible The team only eligible to get this effect
-     * @param effect Potion effect which will be gift for eligible team
+     * @param effect       Potion effect which will be gift for eligible team
      */
     public AreaEffectTimer(float duration, Location minPoint, Location maxPoint, @Nullable TeamGroupMaker teamEligible) {
         super(duration);
@@ -57,7 +56,7 @@ public class AreaEffectTimer extends StopwatchTimer {
     public void start() {
         if (effect == null)
             return;
-            
+
         taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
             @Override
             public void run() {
@@ -83,8 +82,8 @@ public class AreaEffectTimer extends StopwatchTimer {
                         if (teamEligible != null)
                             if ((teamEligible.getPlayers().contains(p) && !opposition) || (!teamEligible.getPlayers().contains(p) && opposition))
                                 hitPlayer = p.addPotionEffect(effect);
-                        else
-                            hitPlayer = p.addPotionEffect(effect);
+                            else
+                                hitPlayer = p.addPotionEffect(effect);
                         if (singleShot)
                             break;
                     }
@@ -108,6 +107,7 @@ public class AreaEffectTimer extends StopwatchTimer {
 
     /**
      * Set the effect which is not for team mate.
+     *
      * @param e set true if the effect area is for opposition.
      */
     public void setForOpposition(boolean e) {

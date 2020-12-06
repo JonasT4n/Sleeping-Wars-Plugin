@@ -1,8 +1,5 @@
 package com.joenastan.sleepingwar.plugin.game.ItemPrice;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -10,12 +7,15 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PricetagsItemsPotion extends PricetagsItems {
 
     private PotionData potionBaseData;
     private List<PotionEffect> effects = new ArrayList<PotionEffect>();
 
-    public PricetagsItemsPotion(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter, PotionData potionBaseData){
+    public PricetagsItemsPotion(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter, PotionData potionBaseData) {
         super(item, currency, price, meta, defaultAmountGetter);
         try {
             if (item == Material.POTION || item == Material.TIPPED_ARROW) {
@@ -35,7 +35,7 @@ public class PricetagsItemsPotion extends PricetagsItems {
             return null;
         // Create new potion item
         ItemStack thisItem = new ItemStack(item, defaultAmountGetter);
-        PotionMeta potionMeta = (PotionMeta)meta;
+        PotionMeta potionMeta = (PotionMeta) meta;
         potionMeta.setBasePotionData(potionBaseData);
         for (PotionEffect effect : effects) {
             potionMeta.addCustomEffect(effect, true);
@@ -50,7 +50,7 @@ public class PricetagsItemsPotion extends PricetagsItems {
             return null;
         // Create new potion item
         ItemStack thisItem = new ItemStack(item, amount);
-        PotionMeta potionMeta = (PotionMeta)meta;
+        PotionMeta potionMeta = (PotionMeta) meta;
         potionMeta.setBasePotionData(potionBaseData);
         for (PotionEffect effect : effects) {
             potionMeta.addCustomEffect(effect, true);
