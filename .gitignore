@@ -25,6 +25,7 @@ hs_err_pid*
 # Ignore IDE configurations
 .idea/
 .vscode/
+*.iml
 
 #Ignore compilation
 .sleepingwar/target/
