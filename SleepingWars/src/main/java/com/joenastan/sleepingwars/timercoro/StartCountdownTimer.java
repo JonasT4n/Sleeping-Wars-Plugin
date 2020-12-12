@@ -1,12 +1,8 @@
 package com.joenastan.sleepingwars.timercoro;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/Timer/StartCountdownTimer.java
-import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
-import net.md_5.bungee.api.ChatColor;
-=======
 import com.joenastan.sleepingwars.game.SleepingRoom;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/timercoro/StartCountdownTimer.java
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 

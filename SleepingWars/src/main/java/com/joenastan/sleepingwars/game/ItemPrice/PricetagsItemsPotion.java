@@ -13,7 +13,7 @@ import java.util.List;
 public class PricetagsItemsPotion extends PricetagsItems {
 
     private PotionData potionBaseData;
-    private List<PotionEffect> effects = new ArrayList<PotionEffect>();
+    private final List<PotionEffect> effects = new ArrayList<>();
 
     public PricetagsItemsPotion(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter, PotionData potionBaseData) {
         super(item, currency, price, meta, defaultAmountGetter);

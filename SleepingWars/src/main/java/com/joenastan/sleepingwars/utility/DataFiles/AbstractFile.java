@@ -1,6 +1,5 @@
 package com.joenastan.sleepingwars.utility.DataFiles;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 

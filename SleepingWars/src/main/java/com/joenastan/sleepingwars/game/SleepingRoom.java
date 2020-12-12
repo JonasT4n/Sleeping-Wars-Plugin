@@ -1,18 +1,3 @@
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/SleepingRoom.java
-package com.joenastan.sleepingwar.plugin.game;
-
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameEndedEvent;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
-import com.joenastan.sleepingwar.plugin.events.Tasks.DeleteWorldDelayed;
-import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedEntities;
-import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedResourceSpawner;
-import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
-import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
-import com.joenastan.sleepingwar.plugin.utility.Timer.AreaEffectTimer;
-import com.joenastan.sleepingwar.plugin.utility.Timer.TimelineTimer;
-import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
-=======
 package com.joenastan.sleepingwars.game;
 
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsGameEndedEvent;
@@ -28,7 +13,6 @@ import com.joenastan.sleepingwars.timercoro.TimelineTimer;
 import com.joenastan.sleepingwars.utility.UsefulStaticFunctions;
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/SleepingRoom.java
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -539,12 +523,8 @@ public class SleepingRoom {
             isGEnded = true;
             BedwarsGameEndedEvent gameEndedEvent = new BedwarsGameEndedEvent(this, lastStanding);
             Bukkit.getPluginManager().callEvent(gameEndedEvent);
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/SleepingRoom.java
-            Bukkit.getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(), new Runnable() {
-=======
             // Wait for 10 seconds to automatically return all players to where they were
             Bukkit.getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(), new Runnable(){
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/SleepingRoom.java
                 @Override
                 public void run() {
                     destroyRoom();
@@ -666,7 +646,7 @@ public class SleepingRoom {
      * @return Entity, if not exists then returns null
      */
     public PlayerBedwarsEntity getPlayerEntity(Player player) {
-        for (PlayerBedwarsEntity pBedwarsEntity : playerEntities) {
+        for (PlayerBedwarsEntity pBedwarsEntity : playerEntities.values()) {
             if (pBedwarsEntity.getPlayer().equals(player))
                 return pBedwarsEntity;
         }
@@ -691,21 +671,7 @@ public class SleepingRoom {
         PlayerBedwarsEntity playerEnt = playerEntities.get(player.getUniqueId());
         if (playerEnt == null)
             return null;
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/SleepingRoom.java
-
-        for (TeamGroupMaker team : createdTeams.values()) {
-            for (PlayerBedwarsEntity pbent : team.getPlayerEntities()) {
-                // Find player if it is equal or its name are identical
-                if (pbent.getPlayer() != null) {
-                    if (pbent.getPlayer().equals(player) || pbent.getPlayerName().equals(player.getName()))
-                        return team;
-                }
-            }
-        }
-        return null;
-=======
         return createdTeams.get(playerEnt.getTeamChoice());
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/SleepingRoom.java
     }
 
     /**

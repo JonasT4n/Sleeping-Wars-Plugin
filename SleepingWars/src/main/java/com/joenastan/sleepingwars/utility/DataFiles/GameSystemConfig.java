@@ -1,20 +1,5 @@
 package com.joenastan.sleepingwars.utility.DataFiles;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-import com.joenastan.sleepingwar.plugin.enumtypes.BedwarsShopType;
-import com.joenastan.sleepingwar.plugin.enumtypes.LockedEntityType;
-import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
-import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
-import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedEntities;
-import com.joenastan.sleepingwar.plugin.game.CustomDerivedEntity.LockedResourceSpawner;
-import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
-import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
-import com.joenastan.sleepingwar.plugin.utility.Timer.AreaEffectTimer;
-import com.joenastan.sleepingwar.plugin.utility.Timer.ResourceSpawnTimer;
-import org.bukkit.*;
-import org.bukkit.World.Environment;
-=======
 import com.joenastan.sleepingwars.enumtypes.ResourcesType;
 import com.joenastan.sleepingwars.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsGameTimelineEvent;
@@ -37,7 +22,6 @@ import org.bukkit.WorldBorder;
 import org.bukkit.World.Environment;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.ConfigurationSection;
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -79,22 +63,6 @@ public class GameSystemConfig extends AbstractFile {
             for (String rs : fileConfig.getConfigurationSection(path + "." + t).getKeys(false)) {
                 // Get all resource spawners real information
                 String rsPath = path + "." + t + "." + rs;
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-                if (!filecon.contains(rsPath + ".type"))
-                    filecon.set(rsPath + ".type", 0);
-                if (!filecon.contains(rsPath + ".spawnloc.x"))
-                    filecon.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
-                if (!filecon.contains(rsPath + ".spawnloc.y"))
-                    filecon.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
-                if (!filecon.contains(rsPath + ".spawnloc.z"))
-                    filecon.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
-                if (!filecon.contains(rsPath + ".duration-spawn"))
-                    filecon.set(rsPath + ".duration-spawn", 10f);
-                ResourcesType typeSpawnResource = ResourcesType.values()[filecon.getInt(rsPath + ".type")];
-                Location spawnLoc = new Location(inWorld, filecon.getDouble(rsPath + ".spawnloc.x"), filecon.getDouble(rsPath + ".spawnloc.y"),
-                        filecon.getDouble(rsPath + ".spawnloc.z"));
-                float spawnDur = (float) filecon.getDouble(rsPath + ".duration-spawn");
-=======
                 if (!fileConfig.contains(rsPath + ".type"))
                     fileConfig.set(rsPath + ".type", 0);
                 if (!fileConfig.contains(rsPath + ".spawnloc.x"))
@@ -109,7 +77,6 @@ public class GameSystemConfig extends AbstractFile {
                 Location spawnLoc = new Location(inWorld, fileConfig.getDouble(rsPath + ".spawnloc.x"), fileConfig.getDouble(rsPath + ".spawnloc.y"),
                         fileConfig.getDouble(rsPath + ".spawnloc.z"));
                 float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
                 // Create resource spawner instance
                 ResourceSpawner rsp;
                 if (spawnDur < 0f)
@@ -144,22 +111,6 @@ public class GameSystemConfig extends AbstractFile {
         // Get all Resource spawners
         for (String rs : fileConfig.getConfigurationSection(tPath).getKeys(false)) {
             String rsPath = tPath + "." + rs;
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-            if (!filecon.contains(rsPath + ".type"))
-                filecon.set(rsPath + ".type", 0);
-            if (!filecon.contains(rsPath + ".spawnloc.x"))
-                filecon.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
-            if (!filecon.contains(rsPath + ".spawnloc.y"))
-                filecon.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
-            if (!filecon.contains(rsPath + ".spawnloc.z"))
-                filecon.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
-            if (!filecon.contains(rsPath + ".duration-spawn"))
-                filecon.set(rsPath + ".duration-spawn", 10f);
-            ResourcesType typeSpawnResource = ResourcesType.values()[filecon.getInt(rsPath + ".type")];
-            Location spawnLoc = new Location(inWorld, filecon.getDouble(rsPath + ".spawnloc.x"), filecon.getDouble(rsPath + ".spawnloc.y"),
-                    filecon.getDouble(rsPath + ".spawnloc.z"));
-            float spawnDur = (float) filecon.getDouble(rsPath + ".duration-spawn");
-=======
             if (!fileConfig.contains(rsPath + ".type"))
                 fileConfig.set(rsPath + ".type", 0);
             if (!fileConfig.contains(rsPath + ".spawnloc.x"))
@@ -174,7 +125,6 @@ public class GameSystemConfig extends AbstractFile {
             Location spawnLoc = new Location(inWorld, fileConfig.getDouble(rsPath + ".spawnloc.x"), fileConfig.getDouble(rsPath + ".spawnloc.y"),
                     fileConfig.getDouble(rsPath + ".spawnloc.z"));
             float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
             // Create resource spawner instance
             ResourceSpawner rsp;
             if (spawnDur < 0f)
@@ -242,19 +192,6 @@ public class GameSystemConfig extends AbstractFile {
         if (!team.contains(teamName))
             return null;
         String path = String.format("worlds.%s.teams.%s.bed-location", mapName, teamName);
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-        if (!filecon.contains(path))
-            filecon.createSection(path);
-        if (!filecon.contains(path + ".x"))
-            filecon.set(path + ".x", inWorld.getSpawnLocation().getBlockX());
-        if (!filecon.contains(path + ".y"))
-            filecon.set(path + ".y", inWorld.getSpawnLocation().getBlockY());
-        if (!filecon.contains(path + ".z"))
-            filecon.set(path + ".z", inWorld.getSpawnLocation().getBlockZ());
-        Location bedLocation = new Location(inWorld, filecon.getInt(path + ".x"), filecon.getInt(path + ".y"),
-                filecon.getInt(path + ".z"));
-        return bedLocation;
-=======
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         if (!fileConfig.contains(path + ".x"))
@@ -265,7 +202,6 @@ public class GameSystemConfig extends AbstractFile {
             fileConfig.set(path + ".z", inWorld.getSpawnLocation().getBlockZ());
         return new Location(inWorld, fileConfig.getInt(path + ".x"), fileConfig.getInt(path + ".y"),
                 fileConfig.getInt(path + ".z"));
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
     }
 
     /**
@@ -356,11 +292,7 @@ public class GameSystemConfig extends AbstractFile {
         List<String> teamNames = getTeamNames(mapName);
         if (!teamNames.contains(team.getName()))
             return null;
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-        AreaEffectTimer bufferZoneCoro = new AreaEffectTimer(5f, getTeamMinBuffArea(inWorld, mapName, team.getName()),
-=======
         return new AreaEffectTimer(5f, getTeamMinBuffArea(inWorld, mapName, team.getName()),
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
                 getTeamMaxBuffArea(inWorld, mapName, team.getName()), team);
     }
 
@@ -374,17 +306,6 @@ public class GameSystemConfig extends AbstractFile {
     public List<AreaEffectTimer> getPublicBZCoroutines(World inWorld, String mapName) {
         String path = String.format("worlds.%s.buffer-zone.PUBLIC", mapName);
         List<AreaEffectTimer> listBufferZonesCoro = new ArrayList<AreaEffectTimer>();
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-        if (!filecon.contains(path))
-            filecon.createSection(path);
-        for (String bz : filecon.getConfigurationSection(path).getKeys(false)) {
-            Location minLoc = new Location(inWorld, filecon.getDouble(String.format("%s.%s.minx", path, bz)),
-                    filecon.getDouble(String.format("%s.%s.miny", path, bz)),
-                    filecon.getDouble(String.format("%s.%s.minz", path, bz)));
-            Location maxLoc = new Location(inWorld, filecon.getDouble(String.format("%s.%s.maxx", path, bz)),
-                    filecon.getDouble(String.format("%s.%s.maxy", path, bz)),
-                    filecon.getDouble(String.format("%s.%s.maxz", path, bz)));
-=======
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         ConfigurationSection cs = fileConfig.getConfigurationSection(path);
@@ -395,7 +316,6 @@ public class GameSystemConfig extends AbstractFile {
             Location maxLoc = new Location(inWorld, fileConfig.getDouble(String.format("%s.%s.maxx", path, bz)),
                     fileConfig.getDouble(String.format("%s.%s.maxy", path, bz)),
                     fileConfig.getDouble(String.format("%s.%s.maxz", path, bz)));
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
             AreaEffectTimer bufferZoneCoro = new AreaEffectTimer(5f, minLoc, maxLoc, null);
             listBufferZonesCoro.add(bufferZoneCoro);
         }
@@ -435,19 +355,6 @@ public class GameSystemConfig extends AbstractFile {
      */
     public Location getQueueLocations(World inWorld, String mapName) {
         String path = String.format("worlds.%s.queueloc", mapName);
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-        if (!filecon.contains(path))
-            filecon.createSection(path, new HashMap<>());
-        if (!filecon.contains(path + ".x"))
-            filecon.set(path + ".x", inWorld.getSpawnLocation().getX());
-        if (!filecon.contains(path + ".y"))
-            filecon.set(path + ".y", inWorld.getSpawnLocation().getY());
-        if (!filecon.contains(path + ".z"))
-            filecon.set(path + ".z", inWorld.getSpawnLocation().getZ());
-        Location queueLoc = new Location(inWorld, filecon.getDouble(path + ".x"), filecon.getDouble(path + ".y"),
-                filecon.getDouble(path + ".z"));
-        return queueLoc;
-=======
         if (!fileConfig.contains(path))
             fileConfig.createSection(path, new HashMap<>());
         if (!fileConfig.contains(path + ".x"))
@@ -459,7 +366,6 @@ public class GameSystemConfig extends AbstractFile {
         return new Location(inWorld, fileConfig.getDouble(path + ".x"),
                 fileConfig.getDouble(path + ".y"),
                 fileConfig.getDouble(path + ".z"));
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
     }
 
     /**
@@ -483,18 +389,6 @@ public class GameSystemConfig extends AbstractFile {
             String eventmsg = "Event Trigger";
             TimelineEventType typevent = TimelineEventType.DIAMOND_UPGRADE;
             // Get Real event timeline information
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-            if (filecon.contains(path + ".order"))
-                order = filecon.getInt(path + ".order");
-            if (filecon.contains(path + ".message"))
-                eventmsg = filecon.getString(path + ".message");
-            if (filecon.contains(path + ".type"))
-                typevent = TimelineEventType.fromString(filecon.getString(path + ".type"));
-            if (filecon.contains(path + ".trigger-in-seconds"))
-                secondsToTrigger = (float) filecon.getDouble(path + ".trigger-in-seconds");
-            BedwarsGameTimelineEvent bevent = new BedwarsGameTimelineEvent(typevent, secondsToTrigger, eventName, order, eventmsg);
-            timelineEvents.add(bevent);
-=======
             if (fileConfig.contains(path + ".order"))
                 order = fileConfig.getInt(path + ".order");
             if (fileConfig.contains(path + ".message"))
@@ -506,7 +400,6 @@ public class GameSystemConfig extends AbstractFile {
             BedwarsGameTimelineEvent bent = new BedwarsGameTimelineEvent(typevent, secondsToTrigger, eventNameString,
                     order, eventmsg);
             timelineEvents.add(bent);
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
         }
         // Selection sort
         for (int i = 0; i < timelineEvents.size() - 1; i++) {
@@ -544,13 +437,8 @@ public class GameSystemConfig extends AbstractFile {
                 List<Location> locationList = new ArrayList<Location>();
                 for (String shopLocString : indexStringSet) {
                     String locPath = path + "." + shopTypeString + "." + shopLocString;
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-                    Location loc = new Location(inWorld, filecon.getDouble(locPath + ".x"),
-                            filecon.getDouble(locPath + ".y"), filecon.getDouble(locPath + ".z"));
-=======
                     Location loc = new Location(inWorld, fileConfig.getDouble(locPath + ".x"),
                             fileConfig.getDouble(locPath + ".y"), fileConfig.getDouble(locPath + ".z"));
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
                     locationList.add(loc);
                 }
                 shopMapLoc.put(shopType, locationList);
@@ -581,17 +469,10 @@ public class GameSystemConfig extends AbstractFile {
                     ResourcesType typeRequest = ResourcesType.fromString(req);
                     requirements.put(typeRequest, fileConfig.getInt(tPath + "." + req));
                 }
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-                LockedEntities locked = new LockedEntities(new Location(inWorld,
-                        filecon.getDouble(path + "." + cn + ".loc.x"),
-                        filecon.getDouble(path + "." + cn + ".loc.y"),
-                        filecon.getDouble(path + "." + cn + ".loc.z")), requirements);
-=======
                 LockedEntities locked = new LockedEntities(new Location(inWorld, 
                         fileConfig.getDouble(path + "." + cn + ".loc.x"),
                         fileConfig.getDouble(path + "." + cn + ".loc.y"),
                         fileConfig.getDouble(path + "." + cn + ".loc.z")), requirements);
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
                 listOfLocked.add(locked);
             }
         }
@@ -620,17 +501,10 @@ public class GameSystemConfig extends AbstractFile {
                     ResourcesType typeRequest = ResourcesType.fromString(req);
                     requirements.put(typeRequest, fileConfig.getInt(tPath + "." + req));
                 }
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-                return new LockedResourceSpawner(new Location(inWorld,
-                        filecon.getDouble(path + "." + cn + ".loc.x"),
-                        filecon.getDouble(path + "." + cn + ".loc.y"),
-                        filecon.getDouble(path + "." + cn + ".loc.z")), requirements, rsTimer);
-=======
                 return new LockedResourceSpawner(new Location(inWorld, 
                         fileConfig.getDouble(path + "." + cn + ".loc.x"),
                         fileConfig.getDouble(path + "." + cn + ".loc.y"),
                         fileConfig.getDouble(path + "." + cn + ".loc.z")), requirements, rsTimer);
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
             }
         }
         return null;
@@ -914,17 +788,6 @@ public class GameSystemConfig extends AbstractFile {
             fileConfig.createSection(path);
         if (teamName.equals("PUBLIC")) {
             // Overwrite list of buffer area
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-            Set<String> setListBuffer = filecon.getConfigurationSection(path).getKeys(false);
-            List<Vector> minVec = new ArrayList<Vector>(), maxVec = new ArrayList<Vector>();
-            for (int i = 0; i < setListBuffer.size(); i++) {
-                minVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.minx", path, i)),
-                        filecon.getDouble(String.format("%s.bz%d.miny", path, i)),
-                        filecon.getDouble(String.format("%s.bz%d.minz", path, i))));
-                maxVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.maxx", path, i)),
-                        filecon.getDouble(String.format("%s.bz%d.maxy", path, i)),
-                        filecon.getDouble(String.format("%s.bz%d.maxz", path, i))));
-=======
             Set<String> setListBuffer = fileConfig.getConfigurationSection(path).getKeys(false);
             List<Vector> minVec = new ArrayList<Vector>(), maxVec = new ArrayList<Vector>() ; 
             for (int i = 0; i < setListBuffer.size(); i++) {
@@ -934,7 +797,6 @@ public class GameSystemConfig extends AbstractFile {
                 maxVec.add(new Vector(fileConfig.getDouble(String.format("%s.bz%d.maxx", path, i)),
                         fileConfig.getDouble(String.format("%s.bz%d.maxy", path, i)),
                         fileConfig.getDouble(String.format("%s.bz%d.maxz", path,i))));
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
             }
             minVec.add(new Vector(minLoc.getX(), minLoc.getY(), minLoc.getZ()));
             maxVec.add(new Vector(maxLoc.getX(), maxLoc.getY(), maxLoc.getZ()));
@@ -1065,21 +927,12 @@ public class GameSystemConfig extends AbstractFile {
             return false;
         }
         // Consider a public resource spawner if the team not exists
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-        if (!filecon.contains(path)) {
-            path = String.format("worlds.%s.resource-spawners.PUBLIC", mapName);
-=======
         if (!fileConfig.contains(path)) {
-            path = String.format("worlds.%s.resource-spawners.PUBLIC", mapName); 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
+            path = String.format("worlds.%s.resource-spawners.PUBLIC", mapName);
             // Check PUBLIC section exists
             if (!fileConfig.contains(path)) {
                 // Consider create a public section if not exists
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-                filecon.createSection(path, new HashMap<>());
-=======
                 fileConfig.createSection(path, new HashMap<>());
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
                 return false;
             }
         }
@@ -1114,13 +967,8 @@ public class GameSystemConfig extends AbstractFile {
             String numString = ic.substring(4);
             if (Integer.toString(index).equals(numString))
                 pickedIndex = ic;
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-            Vector vectorLoc = new Vector(filecon.getDouble(path + "." + ic + ".x"), filecon.getDouble(path + "." + ic + ".y"),
-                    filecon.getDouble(path + "." + ic + ".z"));
-=======
-            Vector vectorLoc = new Vector(fileConfig.getDouble(path + "." + ic + ".x"), fileConfig.getDouble(path + "." + ic + ".y"),
-                    fileConfig.getDouble(path + "." + ic + ".z"));
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
+            Vector vectorLoc = new Vector(fileConfig.getDouble(path + "." + ic + ".x"), fileConfig
+                    .getDouble(path + "." + ic + ".y"), fileConfig.getDouble(path + "." + ic + ".z"));
             indexesInConfig.put(ic, vectorLoc);
         }
         // Check if pickedIndex is not null
@@ -1166,21 +1014,12 @@ public class GameSystemConfig extends AbstractFile {
             return false;
         List<Vector> minVec = new ArrayList<Vector>(), maxVec = new ArrayList<Vector>();
         for (int i = 0; i < setListBuffer.size(); i++) {
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-            minVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.minx", path, i)),
-                    filecon.getDouble(String.format("%s.bz%d.miny", path, i)),
-                    filecon.getDouble(String.format("%s.bz%d.minz", path, i))));
-            maxVec.add(new Vector(filecon.getDouble(String.format("%s.bz%d.maxx", path, i)),
-                    filecon.getDouble(String.format("%s.bz%d.maxy", path, i)),
-                    filecon.getDouble(String.format("%s.bz%d.maxz", path, i))));
-=======
             minVec.add(new Vector(fileConfig.getDouble(String.format("%s.bz%d.minx", path, i)),
                     fileConfig.getDouble(String.format("%s.bz%d.miny", path, i)),
                     fileConfig.getDouble(String.format("%s.bz%d.minz", path, i))));
             maxVec.add(new Vector(fileConfig.getDouble(String.format("%s.bz%d.maxx", path, i)),
                     fileConfig.getDouble(String.format("%s.bz%d.maxy", path, i)),
                     fileConfig.getDouble(String.format("%s.bz%d.maxz", path,i))));
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
         }
         overwritePublicBZList(path, minVec, maxVec);
         return true;

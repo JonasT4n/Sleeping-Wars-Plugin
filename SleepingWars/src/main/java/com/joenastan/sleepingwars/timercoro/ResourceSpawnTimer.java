@@ -1,17 +1,12 @@
 package com.joenastan.sleepingwars.timercoro;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/Timer/ResourceSpawnTimer.java
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
-=======
 import com.joenastan.sleepingwars.game.ResourceSpawner;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/timercoro/ResourceSpawnTimer.java
 import org.bukkit.Bukkit;
 
 public class ResourceSpawnTimer extends StopwatchTimer {
 
-    private ResourceSpawner spawner;
+    private final ResourceSpawner spawner;
     private boolean isLocked = false;
 
     public ResourceSpawnTimer(float duration, ResourceSpawner spawner) {

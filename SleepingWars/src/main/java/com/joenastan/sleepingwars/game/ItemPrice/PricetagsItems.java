@@ -15,7 +15,7 @@ public class PricetagsItems {
     protected ItemMeta meta;
     protected int defaultAmountGetter;
     private int price;
-    private int defaultPrice;
+    private final int defaultPrice;
 
     public PricetagsItems(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter) {
         this.item = item;

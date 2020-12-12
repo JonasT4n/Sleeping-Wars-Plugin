@@ -1,12 +1,5 @@
 package com.joenastan.sleepingwars.timercoro;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/Timer/TimelineTimer.java
-import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
-import com.joenastan.sleepingwar.plugin.game.ResourceSpawner;
-import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
-import net.md_5.bungee.api.ChatColor;
-=======
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +10,7 @@ import com.joenastan.sleepingwars.game.SleepingRoom;
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
 import com.joenastan.sleepingwars.utility.UsefulStaticFunctions;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/timercoro/TimelineTimer.java
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -28,10 +21,10 @@ import java.util.List;
 
 public class TimelineTimer extends StopwatchTimer {
 
-    private SleepingRoom room;
-    private BedwarsGameTimelineEvent event;
-    private List<ResourceSpawner> publicSpawners;
-    private List<Location> bedLocations = new ArrayList<Location>();
+    private final SleepingRoom room;
+    private final BedwarsGameTimelineEvent event;
+    private final List<ResourceSpawner> publicSpawners;
+    private final List<Location> bedLocations = new ArrayList<>();
 
     public TimelineTimer(float duration, SleepingRoom room, BedwarsGameTimelineEvent event, List<ResourceSpawner> publicSpawners) {
         super(duration);
@@ -51,12 +44,6 @@ public class TimelineTimer extends StopwatchTimer {
             for (ResourceSpawner rspEntry : publicSpawners) {
                 // Reduce about 25% amount of time
                 // TODO: Make it Generic
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/Timer/TimelineTimer.java
-                if (event.getEventType() == TimelineEventType.DIAMOND_UPGRADE && rspEntry.getMaterialSpawn() == Material.DIAMOND)
-                    rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25 / 100));
-                if (event.getEventType() == TimelineEventType.EMERALD_UPGRADE && rspEntry.getMaterialSpawn() == Material.EMERALD)
-                    rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25 / 100));
-=======
                 if (event.getEventType() == TimelineEventType.DIAMOND_UPGRADE && rspEntry.getMaterialSpawn() == Material.DIAMOND) {
                     rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() - (rspEntry.getSecondsPerSpawn() * 25/100));
                 } else if (event.getEventType() == TimelineEventType.EMERALD_UPGRADE && rspEntry.getMaterialSpawn() == Material.EMERALD) {
@@ -72,7 +59,6 @@ public class TimelineTimer extends StopwatchTimer {
                         }
                     }
                 }
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/timercoro/TimelineTimer.java
             }
         }
         // Update timeline

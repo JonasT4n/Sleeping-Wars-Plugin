@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class PricetagsItemsArmorWeapon extends PricetagsItems {
 
-    private Map<Enchantment, Integer> enchantments;
+    private final Map<Enchantment, Integer> enchantments;
 
     public PricetagsItemsArmorWeapon(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter, Map<Enchantment, Integer> enchancements) {
         super(item, currency, price, meta, defaultAmountGetter);

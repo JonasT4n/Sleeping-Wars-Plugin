@@ -1,12 +1,5 @@
 package com.joenastan.sleepingwars.game.InGameCustomEntity;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/CustomDerivedEntity/LockedEntities.java
-import com.joenastan.sleepingwar.plugin.enumtypes.LockedEntityType;
-import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
-import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
-import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
-import net.md_5.bungee.api.ChatColor;
-=======
 import java.util.Map;
 
 import com.joenastan.sleepingwars.enumtypes.LockedEntityType;
@@ -14,7 +7,7 @@ import com.joenastan.sleepingwars.enumtypes.ResourcesType;
 import com.joenastan.sleepingwars.utility.UsefulStaticFunctions;
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/InGameCustomEntity/LockedEntities.java
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -23,15 +16,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.util.Map;
-
 public class LockedEntities {
 
     protected LockedEntityType typeLock = LockedEntityType.NORMAL_LOCK;
     protected Map<ResourcesType, Integer> requirements;
-    private Location locLocked;
-    private Block blockReference;
-    private Openable openableBlock = null;
+    private final Location locLocked;
+    private final Block blockReference;
     private boolean unlocked = false;
 
     /**
@@ -43,16 +33,14 @@ public class LockedEntities {
         this.locLocked = locLocked;
         this.requirements = requirements;
         Block block = locLocked.getBlock();
-        if (block != null) {
-            blockReference = block;
-            Material blockType = block.getType();
-            if (UsefulStaticFunctions.isStandardDoor(blockType) || UsefulStaticFunctions.isFenceGate(blockType) ||
-                    UsefulStaticFunctions.isTrapDoor(blockType)) {
-                if (block.getBlockData() instanceof Openable) {
-                    openableBlock = (Openable) block.getBlockData();
-                    if (openableBlock.isOpen())
-                        openableBlock.setOpen(false);
-                }
+        blockReference = block;
+        Material blockType = block.getType();
+        if (UsefulStaticFunctions.isStandardDoor(blockType) || UsefulStaticFunctions.isFenceGate(blockType) ||
+                UsefulStaticFunctions.isTrapDoor(blockType)) {
+            if (block.getBlockData() instanceof Openable) {
+                Openable openableBlock = (Openable) block.getBlockData();
+                if (openableBlock.isOpen())
+                    openableBlock.setOpen(false);
             }
         }
     }

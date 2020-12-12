@@ -1,11 +1,5 @@
 package com.joenastan.sleepingwars.game.InventoryMenus;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/InventoryMenus/BedwarsUpgradeMenus.java
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameOnUpgradeEvent;
-import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItems;
-import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
-import net.md_5.bungee.api.ChatColor;
-=======
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,7 +10,7 @@ import com.joenastan.sleepingwars.game.ItemPrice.PricetagsItems;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsGameOnUpgradeEvent;
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/InventoryMenus/BedwarsUpgradeMenus.java
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -41,10 +35,10 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
     public static final String GIFT_FOR_THE_POOR = "Gift for the Poor";
 
     // Attributes
-    private TeamGroupMaker team;
+    private final TeamGroupMaker team;
 
     // Maps and Lists
-    private Map<String, PricetagsItems> pricedItems = new HashMap<String, PricetagsItems>();
+    private final Map<String, PricetagsItems> pricedItems = new HashMap<>();
 
     public BedwarsUpgradeMenus(TeamGroupMaker team) {
         this.team = team;
@@ -92,34 +86,6 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
         // Initialize perma-level upgrades, set all to level 1
         for (Map.Entry<String, PricetagsItems> listUpgradeEntry : pricedItems.entrySet()) {
             team.getPermaLevels().put(listUpgradeEntry.getKey(), 1);
-        }
-    }
-
-    public static int getUpgradeMaxLevel(String upgradeName) {
-        switch (upgradeName) {
-            case SHARPER_BLADE:
-                return 5;
-
-            case MINE_A_HOLIC:
-                return 4;
-
-            case MAKE_IT_RAIN:
-                return 4;
-
-            case HOLY_LIGHT:
-                return 2;
-
-            case TOUGH_SKIN:
-                return 4;
-
-            case EYE_FOR_AN_EYE:
-                return 2;
-
-            case GIFT_FOR_THE_POOR:
-                return 5;
-
-            default:
-                return 0;
         }
     }
 
@@ -189,12 +155,6 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
                         playerInv.setItem(j, null);
                     }
                     // Price for next level 150% of current price
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/InventoryMenus/BedwarsUpgradeMenus.java
-                    int currentPrice = tag.getPrice();
-                    tag.setPrice(currentPrice + (int) (currentPrice * 50 / 100));
-                    team.teamUpgrade(pricedItEntry.getKey());
-                    inv.getItem(slot).setAmount(team.getPermaLevels().get(pricedItEntry.getKey()));
-=======
                     int currentPrice = selectedUp.getPrice();
                     
                     team.teamUpgrade(upgradeName);
@@ -212,7 +172,6 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
                     } else {
                         selectedUp.setPrice(currentPrice + (int)(currentPrice * 50/100));
                     }
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/InventoryMenus/BedwarsUpgradeMenus.java
                     BedwarsGameOnUpgradeEvent event = new BedwarsGameOnUpgradeEvent(team, player, upgradeItem);
                     Bukkit.getPluginManager().callEvent(event);
                     return;
@@ -239,10 +198,6 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
                     targetSlots.add(i);
                     countAmount += playerItem.getAmount();
                 }
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/InventoryMenus/BedwarsUpgradeMenus.java
-                break;
-            }
-=======
         }
         return countAmount;
     }
@@ -272,7 +227,6 @@ public class BedwarsUpgradeMenus implements BedwarsMenus {
 
             default:
                 return 0;
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/InventoryMenus/BedwarsUpgradeMenus.java
         }
     }
 }

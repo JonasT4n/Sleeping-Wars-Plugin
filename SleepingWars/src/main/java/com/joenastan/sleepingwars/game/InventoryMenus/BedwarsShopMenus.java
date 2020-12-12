@@ -1,13 +1,5 @@
 package com.joenastan.sleepingwars.game.InventoryMenus;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/InventoryMenus/BedwarsShopMenus.java
-import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItems;
-import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItemsArmorWeapon;
-import com.joenastan.sleepingwar.plugin.game.ItemPrice.PricetagsItemsPotion;
-import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
-import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
-import net.md_5.bungee.api.ChatColor;
-=======
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +11,7 @@ import com.joenastan.sleepingwars.game.ItemPrice.PricetagsItemsArmorWeapon;
 import com.joenastan.sleepingwars.game.ItemPrice.PricetagsItemsPotion;
 import com.joenastan.sleepingwars.utility.UsefulStaticFunctions;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/InventoryMenus/BedwarsShopMenus.java
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -40,7 +32,7 @@ import java.util.Map;
 
 public class BedwarsShopMenus implements BedwarsMenus {
 
-    private Map<String, PricetagsItems> priceItems = new HashMap<String, PricetagsItems>();
+    private final Map<String, PricetagsItems> priceItems = new HashMap<>();
     private TeamGroupMaker team;
 
     public BedwarsShopMenus(TeamGroupMaker team) {
@@ -103,11 +95,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Iron Armor
         ItemMeta ironArmorMeta = new ItemStack(Material.IRON_CHESTPLATE, 1).getItemMeta();
         ironArmorMeta.setDisplayName(ChatColor.WHITE + "Iron Armor");
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/InventoryMenus/BedwarsShopMenus.java
-        priceItems.put("Iron Armor", new PricetagsItemsArmorWeapon(Material.IRON_CHESTPLATE, Material.GOLD_INGOT, 15,
-=======
-        priceItems.put("Iron Armor", new PricetagsItemsArmorWeapon(Material.IRON_CHESTPLATE, Material.GOLD_INGOT, 16, 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/InventoryMenus/BedwarsShopMenus.java
+        priceItems.put("Iron Armor", new PricetagsItemsArmorWeapon(Material.IRON_CHESTPLATE, Material.GOLD_INGOT, 16,
                 ironArmorMeta, 1, new HashMap<Enchantment, Integer>()));
         // Diamond Armor
         ItemMeta diamondArmorMeta = new ItemStack(Material.DIAMOND_CHESTPLATE, 1).getItemMeta();
@@ -550,10 +538,6 @@ public class BedwarsShopMenus implements BedwarsMenus {
                         return;
                     }
                 }
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/InventoryMenus/BedwarsShopMenus.java
-                break;
-=======
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/InventoryMenus/BedwarsShopMenus.java
             }
         }
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
