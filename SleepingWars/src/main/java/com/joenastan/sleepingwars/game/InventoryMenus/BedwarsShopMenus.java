@@ -25,15 +25,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class BedwarsShopMenus implements BedwarsMenus {
 
     private final Map<String, PricetagsItems> priceItems = new HashMap<>();
-    private TeamGroupMaker team;
+    private final TeamGroupMaker team;
 
     public BedwarsShopMenus(TeamGroupMaker team) {
         this.team = team;
@@ -77,7 +72,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Arrow
         ItemMeta arrowMeta = new ItemStack(Material.ARROW, 1).getItemMeta();
         arrowMeta.setDisplayName(ChatColor.WHITE + "Arrow");
-        priceItems.put("Arrow", new PricetagsItemsArmorWeapon(Material.ARROW, Material.GOLD_INGOT, 3,
+        priceItems.put("Arrow", new PricetagsItemsArmorWeapon(Material.ARROW, Material.GOLD_INGOT, 2,
                 arrowMeta, 8, new HashMap<Enchantment, Integer>()));
         //#endregion
 
@@ -90,41 +85,46 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Chainmail Armor
         ItemMeta chainmailMeta = new ItemStack(Material.CHAINMAIL_CHESTPLATE, 1).getItemMeta();
         chainmailMeta.setDisplayName(ChatColor.GRAY + "Chainmail Armor");
-        priceItems.put("Chainmail Armor", new PricetagsItemsArmorWeapon(Material.CHAINMAIL_CHESTPLATE, Material.IRON_INGOT, 48,
-                chainmailMeta, 1, new HashMap<Enchantment, Integer>()));
+        priceItems.put("Chainmail Armor", new PricetagsItemsArmorWeapon(Material.CHAINMAIL_CHESTPLATE,
+                Material.IRON_INGOT, 48, chainmailMeta, 1, new HashMap<Enchantment, Integer>()));
         // Iron Armor
         ItemMeta ironArmorMeta = new ItemStack(Material.IRON_CHESTPLATE, 1).getItemMeta();
         ironArmorMeta.setDisplayName(ChatColor.WHITE + "Iron Armor");
-        priceItems.put("Iron Armor", new PricetagsItemsArmorWeapon(Material.IRON_CHESTPLATE, Material.GOLD_INGOT, 16,
-                ironArmorMeta, 1, new HashMap<Enchantment, Integer>()));
+        priceItems.put("Iron Armor", new PricetagsItemsArmorWeapon(Material.IRON_CHESTPLATE,
+                Material.GOLD_INGOT, 16, ironArmorMeta, 1, new HashMap<Enchantment, Integer>()));
         // Diamond Armor
         ItemMeta diamondArmorMeta = new ItemStack(Material.DIAMOND_CHESTPLATE, 1).getItemMeta();
         diamondArmorMeta.setDisplayName(ChatColor.AQUA + "Diamond Armor");
-        priceItems.put("Diamond Armor", new PricetagsItemsArmorWeapon(Material.DIAMOND_CHESTPLATE, Material.EMERALD, 8,
-                diamondArmorMeta, 1, new HashMap<Enchantment, Integer>()));
+        priceItems.put("Diamond Armor", new PricetagsItemsArmorWeapon(Material.DIAMOND_CHESTPLATE,
+                Material.EMERALD, 8, diamondArmorMeta, 1, new HashMap<Enchantment, Integer>()));
         //#endregion
 
         //#region Blocks
         // Wool
         ItemMeta woolMeta = new ItemStack(Material.WHITE_WOOL, 1).getItemMeta();
         woolMeta.setDisplayName(ChatColor.WHITE + "Wool");
-        priceItems.put("Wool", new PricetagsItems(Material.WHITE_WOOL, Material.IRON_INGOT, 4, woolMeta, 16));
+        priceItems.put("Wool", new PricetagsItems(Material.WHITE_WOOL, Material.IRON_INGOT, 4,
+                woolMeta, 16));
         // Wood
         ItemMeta woodMeta = new ItemStack(Material.OAK_PLANKS, 1).getItemMeta();
         woodMeta.setDisplayName(ChatColor.GOLD + "Wood");
-        priceItems.put("Wood", new PricetagsItems(Material.OAK_PLANKS, Material.IRON_INGOT, 32, woodMeta, 8));
+        priceItems.put("Wood", new PricetagsItems(Material.OAK_PLANKS, Material.IRON_INGOT, 32,
+                woodMeta, 8));
         // Glass
         ItemMeta glassMeta = new ItemStack(Material.GLASS, 1).getItemMeta();
         glassMeta.setDisplayName(ChatColor.AQUA + "Glass");
-        priceItems.put("Glass", new PricetagsItems(Material.GLASS, Material.IRON_INGOT, 16, glassMeta, 8));
+        priceItems.put("Glass", new PricetagsItems(Material.GLASS, Material.IRON_INGOT, 16,
+                glassMeta, 8));
         // End Stone
         ItemMeta endBlockMeta = new ItemStack(Material.END_STONE, 1).getItemMeta();
         endBlockMeta.setDisplayName(ChatColor.YELLOW + "End Stone");
-        priceItems.put("End Stone", new PricetagsItems(Material.END_STONE, Material.GOLD_INGOT, 8, endBlockMeta, 12));
+        priceItems.put("End Stone", new PricetagsItems(Material.END_STONE, Material.GOLD_INGOT, 8,
+                endBlockMeta, 12));
         // Obsidian
         ItemMeta obsidianMeta = new ItemStack(Material.OBSIDIAN, 1).getItemMeta();
         obsidianMeta.setDisplayName(ChatColor.DARK_BLUE + "Obsidian");
-        priceItems.put("Obsidian", new PricetagsItems(Material.OBSIDIAN, Material.EMERALD, 5, obsidianMeta, 8));
+        priceItems.put("Obsidian", new PricetagsItems(Material.OBSIDIAN, Material.EMERALD, 6,
+                obsidianMeta, 8));
         //#endregion
 
         //#region Potions
@@ -145,7 +145,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Strength
         ItemMeta potionOfStrengthMeta = new ItemStack(Material.POTION, 1).getItemMeta();
         potionOfStrengthMeta.setDisplayName(ChatColor.DARK_PURPLE + "Strength II");
-        PricetagsItemsPotion strength2 = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 5,
+        PricetagsItemsPotion strength2 = new PricetagsItemsPotion(Material.POTION, Material.EMERALD, 6,
                 potionOfStrengthMeta, 1, new PotionData(PotionType.STRENGTH));
         strength2.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 15, 2));
         priceItems.put("Strength II", strength2);
@@ -162,57 +162,69 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Steak
         ItemMeta steakMeta = new ItemStack(Material.COOKED_BEEF, 1).getItemMeta();
         steakMeta.setDisplayName(ChatColor.WHITE + "Beef Steak");
-        priceItems.put("Beef Steak", new PricetagsItems(Material.COOKED_BEEF, Material.IRON_INGOT, 12, steakMeta, 2));
+        priceItems.put("Beef Steak", new PricetagsItems(Material.COOKED_BEEF, Material.IRON_INGOT, 12,
+                steakMeta, 2));
         // Cake
         ItemMeta cakeMeta = new ItemStack(Material.CAKE, 1).getItemMeta();
         cakeMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Cake");
-        priceItems.put("Cake", new PricetagsItems(Material.CAKE, Material.IRON_INGOT, 24, cakeMeta, 1));
+        priceItems.put("Cake", new PricetagsItems(Material.CAKE, Material.IRON_INGOT, 24,
+                cakeMeta, 1));
         // Baked Potatoes
         ItemMeta bakedPotatoMeta = new ItemStack(Material.BAKED_POTATO, 1).getItemMeta();
         bakedPotatoMeta.setDisplayName(ChatColor.WHITE + "Baked Potato");
-        priceItems.put("Baked Potato", new PricetagsItems(Material.BAKED_POTATO, Material.IRON_INGOT, 6, bakedPotatoMeta, 3));
+        priceItems.put("Baked Potato", new PricetagsItems(Material.BAKED_POTATO, Material.IRON_INGOT, 6,
+                bakedPotatoMeta, 3));
         // Golden Carrot
         ItemMeta goldenCarrotMeta = new ItemStack(Material.GOLDEN_CARROT, 1).getItemMeta();
         goldenCarrotMeta.setDisplayName(ChatColor.YELLOW + "Golden Carrot");
-        priceItems.put("Golden Carrot", new PricetagsItems(Material.GOLDEN_CARROT, Material.GOLD_INGOT, 2, goldenCarrotMeta, 1));
+        priceItems.put("Golden Carrot", new PricetagsItems(Material.GOLDEN_CARROT, Material.GOLD_INGOT, 2,
+                goldenCarrotMeta, 1));
         // Golden Apple
         ItemMeta goldenAppleMeta = new ItemStack(Material.GOLDEN_APPLE, 1).getItemMeta();
         goldenAppleMeta.setDisplayName(ChatColor.YELLOW + "Golden Apple");
-        priceItems.put("Golden Apple", new PricetagsItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT, 6, goldenAppleMeta, 1));
+        priceItems.put("Golden Apple", new PricetagsItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT, 6,
+                goldenAppleMeta, 1));
         //#endregion
 
         //#region Tools
         // Shears
         ItemMeta shearsMeta = new ItemStack(Material.SHEARS, 1).getItemMeta();
         shearsMeta.setDisplayName(ChatColor.WHITE + "Shears");
-        priceItems.put("Shears", new PricetagsItemsArmorWeapon(Material.SHEARS, Material.IRON_INGOT, 20, shearsMeta, 1, new HashMap<Enchantment, Integer>()));
+        priceItems.put("Shears", new PricetagsItemsArmorWeapon(Material.SHEARS, Material.IRON_INGOT, 20,
+                shearsMeta, 1, new HashMap<Enchantment, Integer>()));
         // Wooden Pickaxe
         ItemMeta woodPickMeta = new ItemStack(Material.WOODEN_PICKAXE, 1).getItemMeta();
         woodPickMeta.setDisplayName(ChatColor.WHITE + "Wooden Pickaxe");
-        priceItems.put("Wooden Pickaxe", new PricetagsItemsArmorWeapon(Material.WOODEN_PICKAXE, Material.GOLD_INGOT, 6, woodPickMeta, 1, new HashMap<Enchantment, Integer>()));
+        priceItems.put("Wooden Pickaxe", new PricetagsItemsArmorWeapon(Material.WOODEN_PICKAXE,
+                Material.GOLD_INGOT, 6, woodPickMeta, 1, new HashMap<Enchantment, Integer>()));
         // Iron Axe
         ItemMeta ironAxeMeta = new ItemStack(Material.IRON_AXE, 1).getItemMeta();
         ironAxeMeta.setDisplayName(ChatColor.WHITE + "Iron Axe");
-        priceItems.put("Iron Axe", new PricetagsItemsArmorWeapon(Material.IRON_AXE, Material.GOLD_INGOT, 12, ironAxeMeta, 1, new HashMap<Enchantment, Integer>()));
+        priceItems.put("Iron Axe", new PricetagsItemsArmorWeapon(Material.IRON_AXE, Material.GOLD_INGOT, 12,
+                ironAxeMeta, 1, new HashMap<Enchantment, Integer>()));
         // Diamond Pickaxe
         ItemMeta diamondPickMeta = new ItemStack(Material.DIAMOND_PICKAXE, 1).getItemMeta();
         diamondPickMeta.setDisplayName(ChatColor.AQUA + "Diamond Pickaxe");
-        priceItems.put("Diamond Pickaxe", new PricetagsItemsArmorWeapon(Material.DIAMOND_PICKAXE, Material.EMERALD, 4, diamondPickMeta, 1, new HashMap<Enchantment, Integer>()));
+        priceItems.put("Diamond Pickaxe", new PricetagsItemsArmorWeapon(Material.DIAMOND_PICKAXE,
+                Material.EMERALD, 4, diamondPickMeta, 1, new HashMap<Enchantment, Integer>()));
         //#endregion
 
         //#region Items and Others
         // Ender Pearl
         ItemMeta enderPearlMeta = new ItemStack(Material.ENDER_PEARL, 1).getItemMeta();
         enderPearlMeta.setDisplayName(ChatColor.BLUE + "Ender Pearl");
-        priceItems.put("Ender Pearl", new PricetagsItems(Material.ENDER_PEARL, Material.EMERALD, 8, enderPearlMeta, 1));
+        priceItems.put("Ender Pearl", new PricetagsItems(Material.ENDER_PEARL, Material.EMERALD, 8,
+                enderPearlMeta, 1));
         // Water Bucket
         ItemMeta waterBucketMeta = new ItemStack(Material.WATER_BUCKET, 1).getItemMeta();
         waterBucketMeta.setDisplayName(ChatColor.AQUA + "Water Bucket");
-        priceItems.put("Water Bucket", new PricetagsItems(Material.WATER_BUCKET, Material.GOLD_INGOT, 20, waterBucketMeta, 1));
+        priceItems.put("Water Bucket", new PricetagsItems(Material.WATER_BUCKET, Material.GOLD_INGOT, 20,
+                waterBucketMeta, 1));
         // Notch Apple
         ItemMeta notchAppleMeta = new ItemStack(Material.GOLDEN_APPLE, 1).getItemMeta();
         notchAppleMeta.setDisplayName(ChatColor.GOLD + "Notch Apple");
-        priceItems.put("Notch Apple", new PricetagsItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT, 12, notchAppleMeta, 1));
+        priceItems.put("Notch Apple", new PricetagsItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT, 12,
+                notchAppleMeta, 1));
         // Arrows of Harming
         ItemMeta harmingArrowMeta = new ItemStack(Material.TIPPED_ARROW, 1).getItemMeta();
         harmingArrowMeta.setDisplayName(ChatColor.DARK_PURPLE + "Arrow of Harming");
@@ -221,17 +233,19 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Silverfish Egg
         ItemMeta silverfishEggMeta = new ItemStack(Material.SILVERFISH_SPAWN_EGG, 1).getItemMeta();
         silverfishEggMeta.setDisplayName(ChatColor.AQUA + "Silverfish Egg");
-        priceItems.put("Silverfish Egg", new PricetagsItems(Material.SILVERFISH_SPAWN_EGG, Material.IRON_INGOT, 64, silverfishEggMeta, 1));
+        priceItems.put("Silverfish Egg", new PricetagsItems(Material.SILVERFISH_SPAWN_EGG,
+                Material.IRON_INGOT, 64, silverfishEggMeta, 1));
         // TNT
         ItemMeta TNTMeta = new ItemStack(Material.TNT, 1).getItemMeta();
         TNTMeta.setDisplayName(ChatColor.RED + "TNT");
-        priceItems.put("TNT", new PricetagsItems(Material.TNT, Material.GOLD_INGOT, 10, TNTMeta, 1));
+        priceItems.put("TNT", new PricetagsItems(Material.TNT, Material.GOLD_INGOT, 12,
+                TNTMeta, 1));
         //#endregion
     }
 
     private Inventory MainShopMenu() {
         Inventory shopMenuTemplate = Bukkit.getServer().createInventory(null, 54, "Main Shop");
-        shopMenuTemplate = firstRowMenu(shopMenuTemplate);
+        firstRowMenu(shopMenuTemplate);
 
         ItemStack woolio = priceItems.get("Wool").createItem(1);
         ItemStack woodio = priceItems.get("Wood").createItem(1);
@@ -239,8 +253,10 @@ public class BedwarsShopMenus implements BedwarsMenus {
         ItemStack ironSword = priceItems.get("Iron Sword").createItem(1);
         ItemStack regularBow = priceItems.get("Bow").createItem(1);
         ItemStack arrow = priceItems.get("Arrow").createItem(1);
-        ItemStack potionOfSwiftness = priceItems.get("Swiftness III") == null ? new ItemStack(Material.POTION, 1) : priceItems.get("Swiftness III").createItem(1);
-        ItemStack potionOfLeaping = priceItems.get("Leaping IV") == null ? new ItemStack(Material.POTION, 1) : priceItems.get("Leaping IV").createItem(1);
+        ItemStack potionOfSwiftness = priceItems.get("Swiftness III") == null ? new ItemStack(Material.POTION,
+                1) : priceItems.get("Swiftness III").createItem(1);
+        ItemStack potionOfLeaping = priceItems.get("Leaping IV") == null ? new ItemStack(Material.POTION,
+                1) : priceItems.get("Leaping IV").createItem(1);
         ItemStack cake = priceItems.get("Cake").createItem(1);
         ItemStack bakedPotatoes = priceItems.get("Baked Potato").createItem(1);
         ItemStack goldenApple = priceItems.get("Golden Apple").createItem(1);
@@ -266,7 +282,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
 
     private Inventory WeaponShopMenu() {
         Inventory shopWeaponMenuTemplate = Bukkit.getServer().createInventory(null, 54, "Weapon Shop");
-        shopWeaponMenuTemplate = firstRowMenu(shopWeaponMenuTemplate);
+        firstRowMenu(shopWeaponMenuTemplate);
 
         ItemStack stoneSword = priceItems.get("Stone Sword").createItem(1);
         ItemStack ironSword = priceItems.get("Iron Sword").createItem(1);
@@ -289,7 +305,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
 
     private Inventory ArmorShopMenu() {
         Inventory shopArmorMenuTemplate = Bukkit.getServer().createInventory(null, 54, "Armor Shop");
-        shopArmorMenuTemplate = firstRowMenu(shopArmorMenuTemplate);
+        firstRowMenu(shopArmorMenuTemplate);
 
         ItemStack shield = priceItems.get("Shield").createItem(1);
         ItemStack chainmail = priceItems.get("Chainmail Armor").createItem(1);
@@ -306,7 +322,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
 
     private Inventory BlockShopMenu() {
         Inventory shopBlockMenuTemplate = Bukkit.getServer().createInventory(null, 54, "Block Shop");
-        shopBlockMenuTemplate = firstRowMenu(shopBlockMenuTemplate);
+        firstRowMenu(shopBlockMenuTemplate);
 
         ItemStack woolio = priceItems.get("Wool").createItem(1);
         ItemStack woodio = priceItems.get("Wood").createItem(1);
@@ -325,7 +341,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
 
     private Inventory PotionsShopMenu() {
         Inventory shopPotionMenuTemplate = Bukkit.getServer().createInventory(null, 54, "Potions Shop");
-        shopPotionMenuTemplate = firstRowMenu(shopPotionMenuTemplate);
+        firstRowMenu(shopPotionMenuTemplate);
 
         ItemStack potionOfSwiftness = priceItems.get("Swiftness III") == null ? new ItemStack(Material.POTION, 1) : priceItems.get("Swiftness III").createItem(1);
         ItemStack potionOfLeaping = priceItems.get("Leaping IV") == null ? new ItemStack(Material.POTION, 1) : priceItems.get("Leaping IV").createItem(1);
@@ -342,7 +358,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
 
     private Inventory FoodShopMenu() {
         Inventory shopFoodMenuTemplate = Bukkit.getServer().createInventory(null, 54, "Food Shop");
-        shopFoodMenuTemplate = firstRowMenu(shopFoodMenuTemplate);
+        firstRowMenu(shopFoodMenuTemplate);
 
         ItemStack beefSteak = priceItems.get("Beef Steak").createItem(1);
         ItemStack cake = priceItems.get("Cake").createItem(1);
@@ -361,7 +377,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
 
     private Inventory ToolsMenu() {
         Inventory shopToolsMenuTemplate = Bukkit.getServer().createInventory(null, 54, "Tools Shop");
-        shopToolsMenuTemplate = firstRowMenu(shopToolsMenuTemplate);
+        firstRowMenu(shopToolsMenuTemplate);
 
         ItemStack shears = priceItems.get("Shears").createItem(1);
         ItemStack woodenPick = priceItems.get("Wooden Pickaxe").createItem(1);
@@ -378,7 +394,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
 
     private Inventory ItemsShopMenu() {
         Inventory shopItemsMenuTemplate = Bukkit.getServer().createInventory(null, 54, "Items Shop");
-        shopItemsMenuTemplate = firstRowMenu(shopItemsMenuTemplate);
+        firstRowMenu(shopItemsMenuTemplate);
 
         ItemStack enderPearl = priceItems.get("Ender Pearl").createItem(1);
         ItemStack waterBucket = priceItems.get("Water Bucket").createItem(1);
@@ -397,16 +413,18 @@ public class BedwarsShopMenus implements BedwarsMenus {
         return shopItemsMenuTemplate;
     }
 
-    private Inventory firstRowMenu(Inventory inv) {
+    private void firstRowMenu(Inventory inv) {
         // Main Menu
         ItemStack mainShopItem = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta mainShopMeta = mainShopItem.getItemMeta();
+        assert mainShopMeta != null;
         mainShopMeta.setDisplayName(ChatColor.AQUA + "Main Menu");
         mainShopItem.setItemMeta(mainShopMeta);
 
         // Weapon Menu
         ItemStack weaponShopItem = new ItemStack(Material.IRON_SWORD);
         ItemMeta weaponShopMeta = weaponShopItem.getItemMeta();
+        assert weaponShopMeta != null;
         weaponShopMeta.setDisplayName(ChatColor.AQUA + "Weapon Menu");
         weaponShopMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         weaponShopItem.setItemMeta(weaponShopMeta);
@@ -414,6 +432,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Armor Menu
         ItemStack armorShopItem = new ItemStack(Material.IRON_CHESTPLATE);
         ItemMeta armorShopMeta = armorShopItem.getItemMeta();
+        assert armorShopMeta != null;
         armorShopMeta.setDisplayName(ChatColor.AQUA + "Armor Menu");
         armorShopMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         armorShopItem.setItemMeta(armorShopMeta);
@@ -421,6 +440,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Potions Menu
         ItemStack potionShopItem = new ItemStack(Material.POTION);
         ItemMeta potionShopMeta = potionShopItem.getItemMeta();
+        assert potionShopMeta != null;
         potionShopMeta.setDisplayName(ChatColor.AQUA + "Potions Menu");
         PotionMeta realPotionMeta = (PotionMeta) potionShopMeta;
         realPotionMeta.setBasePotionData(new PotionData(PotionType.WATER));
@@ -429,18 +449,21 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Blocks Menu
         ItemStack blockShopItem = new ItemStack(Material.WHITE_WOOL);
         ItemMeta blockShopMeta = blockShopItem.getItemMeta();
+        assert blockShopMeta != null;
         blockShopMeta.setDisplayName(ChatColor.AQUA + "Blocks Menu");
         blockShopItem.setItemMeta(blockShopMeta);
 
         // Food Menu
         ItemStack foodShopItem = new ItemStack(Material.BEEF);
         ItemMeta foodShopMeta = foodShopItem.getItemMeta();
+        assert foodShopMeta != null;
         foodShopMeta.setDisplayName(ChatColor.AQUA + "Food Menu");
         foodShopItem.setItemMeta(foodShopMeta);
 
         // Tools Menu
         ItemStack toolShopItem = new ItemStack(Material.GOLDEN_PICKAXE);
         ItemMeta toolShopMeta = toolShopItem.getItemMeta();
+        assert toolShopMeta != null;
         toolShopMeta.setDisplayName(ChatColor.AQUA + "Tools Menu");
         toolShopMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         toolShopItem.setItemMeta(toolShopMeta);
@@ -448,6 +471,7 @@ public class BedwarsShopMenus implements BedwarsMenus {
         // Items Menu
         ItemStack itemShopItem = new ItemStack(Material.TNT);
         ItemMeta itemShopMeta = itemShopItem.getItemMeta();
+        assert itemShopMeta != null;
         itemShopMeta.setDisplayName(ChatColor.AQUA + "Items Menu");
         itemShopItem.setItemMeta(itemShopMeta);
 
@@ -461,7 +485,6 @@ public class BedwarsShopMenus implements BedwarsMenus {
         inv.setItem(6, toolShopItem);
         inv.setItem(7, itemShopItem);
 
-        return inv;
     }
 
     @Override
@@ -643,7 +666,8 @@ public class BedwarsShopMenus implements BedwarsMenus {
                     break;
 
                 case DIAMOND_CHESTPLATE:
-                    if (bootSample.getType() == Material.LEATHER_BOOTS || bootSample.getType() == Material.CHAINMAIL_BOOTS || bootSample.getType() == Material.IRON_BOOTS) {
+                    if (bootSample.getType() == Material.LEATHER_BOOTS || bootSample.getType() ==
+                            Material.CHAINMAIL_BOOTS || bootSample.getType() == Material.IRON_BOOTS) {
                         ItemStack diamondLegging = new ItemStack(Material.DIAMOND_LEGGINGS, 1);
                         ItemStack diamondBoots = new ItemStack(Material.DIAMOND_BOOTS, 1);
                         checkUpgrade(diamondBoots);
@@ -729,20 +753,26 @@ public class BedwarsShopMenus implements BedwarsMenus {
     public void checkUpgrade(ItemStack item) {
         ItemMeta metaItem = item.getItemMeta();
         // Sharper Blade
-        if (UsefulStaticFunctions.isSword(item.getType()) && team.getPermaLevels().get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
-            metaItem.addEnchant(Enchantment.DAMAGE_ALL, team.getPermaLevels().get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1, true);
+        if (UsefulStaticFunctions.isSword(item.getType()) && team.getPermaLevels()
+                .get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
+            metaItem.addEnchant(Enchantment.DAMAGE_ALL, team.getPermaLevels()
+                    .get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1, true);
         }
         // Tough Skin
         else if (UsefulStaticFunctions.isHumanEntityArmor(item.getType())) {
             if (team.getPermaLevels().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1 != 0)
-                metaItem.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, team.getPermaLevels().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1, true);
+                metaItem.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, team.getPermaLevels()
+                        .get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1, true);
             if (team.getPermaLevels().get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1 != 0)
-                metaItem.addEnchant(Enchantment.THORNS, team.getPermaLevels().get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1, true);
+                metaItem.addEnchant(Enchantment.THORNS, team.getPermaLevels()
+                        .get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1, true);
         }
         // Mine A Holic
-        else if ((UsefulStaticFunctions.isAxe(item.getType()) || item.getType() == Material.SHEARS || UsefulStaticFunctions.isPickaxe(item.getType())) &&
+        else if ((UsefulStaticFunctions.isAxe(item.getType()) || item.getType() == Material.SHEARS ||
+                UsefulStaticFunctions.isPickaxe(item.getType())) &&
                 team.getPermaLevels().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1 != 0) {
-            metaItem.addEnchant(Enchantment.DIG_SPEED, team.getPermaLevels().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1, true);
+            metaItem.addEnchant(Enchantment.DIG_SPEED, team.getPermaLevels()
+                    .get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1, true);
         }
         item.setItemMeta(metaItem);
     }
