@@ -7,7 +7,7 @@ public enum TimelineEventType {
     WORLD_SHRINKING("world-shrink"),
     BUFFER_ZONE_ACTIVE("buffer-zone-active");
 
-    private String eventName;
+    private final String eventName;
 
     private TimelineEventType(String eventName) {
         this.eventName = eventName;

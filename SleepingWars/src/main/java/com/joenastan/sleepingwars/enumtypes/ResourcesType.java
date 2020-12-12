@@ -6,7 +6,7 @@ public enum ResourcesType {
     DIAMOND("diamond"),
     EMERALD("emerald");
 
-    private String resourceName;
+    private final String resourceName;
 
     private ResourcesType(String resourceName) {
         this.resourceName = resourceName;

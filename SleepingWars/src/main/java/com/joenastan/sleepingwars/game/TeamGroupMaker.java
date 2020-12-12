@@ -166,14 +166,8 @@ public class TeamGroupMaker {
     }
 
     /**
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/TeamGroupMaker.java
-     * Reviving player from any death, this function is extremely useful
-     *
-     * @param player Death body
-=======
      * Insert Player into team.
      * @param playerEnt Player entity
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/TeamGroupMaker.java
      */
     public void insertPlayer(PlayerBedwarsEntity playerEnt) {
         playerEnt.getPlayer().sendMessage(String.format("You are in team %s[%s]", UsefulStaticFunctions.getColorString(teamColorPrefix), teamName));
@@ -274,12 +268,7 @@ public class TeamGroupMaker {
     public void playerDisconnectedHandler(PlayerBedwarsEntity playerEnt) {
         // Check if player disconnected from the game by command
         if (playerEnt.isLeavingUsingCommand()) {
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/TeamGroupMaker.java
-            playersNTimer.remove(playerEnt).stop();
             inRoom.roomBroadcast(String.format("%s leave the game.", UsefulStaticFunctions.getColorString(teamColorPrefix) +
-=======
-            inRoom.roomBroadcast(String.format("%s leave the game.", UsefulStaticFunctions.getColorString(teamColorPrefix) + 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/TeamGroupMaker.java
                     playerEnt.getPlayer().getName()));
         } else {
             inRoom.roomBroadcast(String.format("%s disconnected from the game.", UsefulStaticFunctions.getColorString(teamColorPrefix) +

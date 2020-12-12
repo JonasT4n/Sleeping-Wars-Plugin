@@ -12,11 +12,7 @@ public class PlayerBedwarsEntity {
     private Location lastTpFrom;
     private String teamChoice;
     private GameMode lastGameMode;
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/CustomDerivedEntity/PlayerBedwarsEntity.java
-=======
     private boolean eliminated = false;
-    protected boolean isCommandLeave;
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/CustomDerivedEntity/PlayerBedwarsEntity.java
 
     /**
      * Saving a player entity, this object only to prevent player's previous activity went gone.

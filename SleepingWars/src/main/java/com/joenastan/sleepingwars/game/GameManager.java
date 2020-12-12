@@ -1,17 +1,13 @@
 package com.joenastan.sleepingwars.game;
 
-import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 
-import java.io.*;
 import java.util.*;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/game/GameManager.java
-=======
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 
 import java.io.File;
@@ -21,7 +17,6 @@ import java.io.OutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/game/GameManager.java
 public class GameManager {
 
     private static final int IDRange = 4;

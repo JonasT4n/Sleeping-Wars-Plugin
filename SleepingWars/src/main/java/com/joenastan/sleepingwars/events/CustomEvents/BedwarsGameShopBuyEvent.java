@@ -1,11 +1,7 @@
 package com.joenastan.sleepingwars.events.CustomEvents;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/events/CustomEvents/BedwarsGameShopBuyEvent.java
-import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
-=======
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/events/CustomEvents/BedwarsGameShopBuyEvent.java
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

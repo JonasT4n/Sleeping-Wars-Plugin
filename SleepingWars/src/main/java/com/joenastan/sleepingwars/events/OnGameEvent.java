@@ -1,16 +1,5 @@
 package com.joenastan.sleepingwars.events;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/events/OnGameEvent.java
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.*;
-import com.joenastan.sleepingwar.plugin.game.GameManager;
-import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
-import com.joenastan.sleepingwar.plugin.game.TeamGroupMaker;
-import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsEntity;
-import com.joenastan.sleepingwar.plugin.utility.Timer.StartCountdownTimer;
-import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
-=======
 import com.joenastan.sleepingwars.events.CustomEvents.*;
 import com.joenastan.sleepingwars.game.SleepingRoom;
 import com.joenastan.sleepingwars.game.GameManager;
@@ -21,7 +10,6 @@ import com.joenastan.sleepingwars.utility.UsefulStaticFunctions;
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 import com.joenastan.sleepingwars.timercoro.StartCountdownTimer;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/events/OnGameEvent.java
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -403,10 +391,6 @@ public class OnGameEvent implements Listener {
                     team.getRemainingPlayers() + 1, team.getName());
             room.getScoreboard().resetScores(recentScoreboardScore);
         }
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/events/OnGameEvent.java
-
-=======
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/events/OnGameEvent.java
         // Check remaining teams
         room.checkRemainingTeam();
     }

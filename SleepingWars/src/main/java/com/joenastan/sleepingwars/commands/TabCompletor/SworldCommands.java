@@ -1,20 +1,11 @@
 package com.joenastan.sleepingwars.commands.TabCompletor;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/commands/TabCompletor/SworldCommands.java
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.enumtypes.BedwarsShopType;
-import com.joenastan.sleepingwar.plugin.enumtypes.ResourcesType;
-import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
-import com.joenastan.sleepingwar.plugin.events.CustomEvents.BedwarsGameTimelineEvent;
-import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
-=======
 import com.joenastan.sleepingwars.enumtypes.BedwarsShopType;
 import com.joenastan.sleepingwars.enumtypes.ResourcesType;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsGameTimelineEvent;
 import com.joenastan.sleepingwars.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/commands/TabCompletor/SworldCommands.java
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;

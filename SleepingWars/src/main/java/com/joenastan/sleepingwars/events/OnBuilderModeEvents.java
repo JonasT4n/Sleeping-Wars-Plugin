@@ -1,12 +1,5 @@
 package com.joenastan.sleepingwars.events;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/events/OnBuilderModeEvents.java
-import com.joenastan.sleepingwar.plugin.SleepingWarsPlugin;
-import com.joenastan.sleepingwar.plugin.utility.CustomDerivedEntity.PlayerBedwarsBuilderEntity;
-import com.joenastan.sleepingwar.plugin.utility.GameSystemConfig;
-import com.joenastan.sleepingwar.plugin.utility.UsefulStaticFunctions;
-import net.md_5.bungee.api.ChatColor;
-=======
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +9,7 @@ import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsBuilderEntity;
 import com.joenastan.sleepingwars.utility.UsefulStaticFunctions;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/events/OnBuilderModeEvents.java
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;

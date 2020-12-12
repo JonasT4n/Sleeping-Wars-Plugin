@@ -1,13 +1,8 @@
 package com.joenastan.sleepingwars.events.CustomEvents;
 
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/events/CustomEvents/BedwarsGameTimelineEvent.java
-import com.joenastan.sleepingwar.plugin.enumtypes.TimelineEventType;
-import com.joenastan.sleepingwar.plugin.game.SleepingRoom;
-=======
 import com.joenastan.sleepingwars.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwars.game.SleepingRoom;
 
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/events/CustomEvents/BedwarsGameTimelineEvent.java
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
