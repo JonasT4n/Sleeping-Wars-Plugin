@@ -1,15 +1,8 @@
-<<<<<<< Updated upstream:sleepingwar/src/main/resources/plugin.yml
-name: SleepingWars
+name: Sleeping-Wars-Plugin
 version: 1.0-SNAPSHOT
 api-version: 1.16
-description: Bedwars plugin, customize your own map and configure the game yourself.
-main: com.joenastan.sleepingwar.plugin.SleepingWarsPlugin
-=======
-name: Sleeping-Wars-Plugin
-version: 1.0.5
 description: Bedwars plugin, customize your own map and set the game system yourself
 main: com.joenastan.sleepingwars.SleepingWarsPlugin
->>>>>>> Stashed changes:src/main/resources/plugin.yml
 author: Joenastan
 
 permissions:

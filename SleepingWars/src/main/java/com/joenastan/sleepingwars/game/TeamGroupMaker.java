@@ -99,7 +99,8 @@ public class TeamGroupMaker {
         ItemStack woodenSword = new ItemStack(Material.WOODEN_SWORD);
         if (permaLevelData.get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
             ItemMeta wsMeta = woodenSword.getItemMeta();
-            wsMeta.addEnchant(Enchantment.DAMAGE_ALL, permaLevelData.get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1, true);
+            wsMeta.addEnchant(Enchantment.DAMAGE_ALL, permaLevelData.get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1,
+                    true);
             woodenSword.setItemMeta(wsMeta);
         }
         playerInv.setItem(0, woodenSword);

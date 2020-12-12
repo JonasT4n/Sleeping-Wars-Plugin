@@ -22,6 +22,13 @@ public class AbstractFile {
                 e.printStackTrace();
             }
         }
+        LoadFileConfig();
+    }
+
+    /**
+     * Load config.
+     */
+    public void LoadFileConfig() {
         fileConfig = YamlConfiguration.loadConfiguration(file);
         Save();
     }

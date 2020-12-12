@@ -275,16 +275,9 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Immediately get the buffer zone coroutine with empty effects.
-<<<<<<< Updated upstream:sleepingwar/src/main/java/com/joenastan/sleepingwar/plugin/utility/GameSystemConfig.java
-     *
-     * @param inWorld  Current world standing
-     * @param mapName  Original map name
-     * @param teamName On team with name
-=======
      * @param inWorld Current world standing
      * @param mapName Original map name
      * @param team On team with name
->>>>>>> Stashed changes:src/main/java/com/joenastan/sleepingwars/utility/DataFiles/GameSystemConfig.java
      * @return Buffer zone coroutine, including the locations
      */
     public AreaEffectTimer getBufferZoneCoroutine(World inWorld, String mapName, TeamGroupMaker team) {
@@ -1097,18 +1090,22 @@ public class GameSystemConfig extends AbstractFile {
      * Load worlds and config
      */
     public void load() {
-        if (!fileConfig.contains("worlds"))
+        System.out.println("Contains Worlds path: " + fileConfig.contains("worlds"));
+        if (!fileConfig.contains("worlds")) {
             fileConfig.set("worlds", new HashMap<>());
+            System.out.println("Contains Worlds path: " + fileConfig.contains("worlds"));
+        }
         // Loop by World Name
         ConfigurationSection cs = fileConfig.getConfigurationSection("worlds");
-        assert cs != null;
-        for (String key : cs.getKeys(false)) {
-            // load world creator
-            WorldCreator creator = new WorldCreator(key).environment(Environment.values()[fileConfig
-                    .getInt("worlds." + key + ".env")])
-                    .hardcore(fileConfig.getBoolean("worlds." + key + ".hardcore"))
-                    .generateStructures(fileConfig.getBoolean("worlds." + key + ".structure"));
-            Bukkit.createWorld(creator);
+        if (cs != null) {
+            for (String key : cs.getKeys(false)) {
+                // load world creator
+                WorldCreator creator = new WorldCreator(key).environment(Environment.values()[fileConfig
+                        .getInt("worlds." + key + ".env")])
+                        .hardcore(fileConfig.getBoolean("worlds." + key + ".hardcore"))
+                        .generateStructures(fileConfig.getBoolean("worlds." + key + ".structure"));
+                Bukkit.createWorld(creator);
+            }
         }
     }
 
@@ -1155,9 +1152,9 @@ public class GameSystemConfig extends AbstractFile {
         fileConfig.set(String.format("%s.teams.Green", worldPathName), new HashMap<>());
         // Queue Location of Game
         fileConfig.createSection(worldPathName + ".queueloc", new HashMap<>());
-        fileConfig.set(worldPathName + "queueloc.x", defaultSpawnLoc.getX());
-        fileConfig.set(worldPathName + "queueloc.y", defaultSpawnLoc.getX());
-        fileConfig.set(worldPathName + "queueloc.z", defaultSpawnLoc.getX());
+        fileConfig.set(worldPathName + ".queueloc.x", defaultSpawnLoc.getX());
+        fileConfig.set(worldPathName + ".queueloc.y", defaultSpawnLoc.getX());
+        fileConfig.set(worldPathName + ".queueloc.z", defaultSpawnLoc.getX());
         // Empty Resource Spawners
         fileConfig.createSection(worldPathName + ".resource-spawners", new HashMap<>());
         fileConfig.createSection(worldPathName + ".resource-spawners.PUBLIC", new HashMap<>());
