@@ -56,6 +56,6 @@
 |`/bedwars leave`|Leave the game if you are in the game|
 
 #### Note: 
- - This plugin currently works in Paper Minecraft Server.
+ - This plugin currently works in Spigot servers, aswell as Spigot forks such as Paper.
  
  
