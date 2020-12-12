@@ -1,7 +1,0 @@
-{
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "d:\\Work\\Applications\\Paper267 1.16.4\\paper-267.jar"
-    ],
-    "java.configuration.updateBuildConfiguration": "interactive"
-}

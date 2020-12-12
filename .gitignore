@@ -28,4 +28,4 @@ hs_err_pid*
 *.iml
 
 #Ignore compilation
-.sleepingwar/target/
+.SleepingWars/target/
