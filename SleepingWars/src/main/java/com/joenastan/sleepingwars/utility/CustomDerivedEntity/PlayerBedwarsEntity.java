@@ -4,28 +4,56 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.UUID;
+
 public class PlayerBedwarsEntity {
 
-    protected boolean isCommandLeave;
-    private String playerName;
+    // Personal information
+    private UUID playerID;
     private Player player;
+
+    // Before teleport to game information
     private Location lastTpFrom;
-    private String teamChoice;
     private GameMode lastGameMode;
+
+    // In game information
+    protected boolean isCommandLeave = false;
+    private String teamChoice;
     private boolean eliminated = false;
+    private PlayerBedwarsEntity lastHitBy = null;
 
     /**
      * Saving a player entity, this object only to prevent player's previous activity went gone.
      *
-     * @param player       Refered player
+     * @param player       Referred player
      * @param lastTpfrom   Last location before tp to bedwars world
      * @param lastGameMode Previous game mode before entering bedwars
      */
-    public PlayerBedwarsEntity(Player player, Location lastTpfrom, GameMode lastGameMode) {
+    public PlayerBedwarsEntity(@Nonnull Player player, @Nonnull Location lastTpfrom, GameMode lastGameMode) {
         this.player = player;
         this.lastTpFrom = lastTpfrom;
         this.lastGameMode = lastGameMode;
-        playerName = player.getName();
+        playerID = player.getUniqueId();
+    }
+
+    /**
+     * Return the entity to where player were before entering bedwars.
+     */
+    public void returnEntity() {
+        player.getInventory().clear();
+        player.teleport(lastTpFrom);
+        player.setGameMode(lastGameMode);
+        player = null;
+        playerID = null;
+        lastTpFrom = null;
+        lastGameMode = null;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+        playerID = player.getUniqueId();
     }
 
     public String getTeamChoice() {
@@ -40,43 +68,31 @@ public class PlayerBedwarsEntity {
         return player;
     }
 
-    public void setPlayer(Player player) {
-        this.player = player;
-        playerName = player.getName();
-    }
-
-    public String getPlayerName() {
-        return playerName;
+    public UUID getUniqueID() {
+        return playerID;
     }
 
     public boolean isLeavingUsingCommand() {
         return isCommandLeave;
     }
 
-    public boolean isLeavingUsingCommand(boolean e) {
-        if (e != isCommandLeave)
-            isCommandLeave = e;
-        return isCommandLeave;
+    public void setLeavingUsingCommand(boolean e) {
+        isCommandLeave = e;
     }
 
     public boolean isEliminated() {
         return eliminated;
     }
 
-    public boolean isEliminated(boolean eliminated) {
+    public void setEliminated(boolean eliminated) {
         this.eliminated = eliminated;
-        return eliminated;
     }
 
-    /**
-     * Return the entity to where player were before entering bedwars.
-     */
-    public void returnEntity() {
-        player.teleport(lastTpFrom);
-        player.setGameMode(lastGameMode);
-        player = null;
-        playerName = null;
-        lastTpFrom = null;
-        lastGameMode = null;
+    public void setLastHitBy(@Nullable PlayerBedwarsEntity player) {
+        lastHitBy = player;
+    }
+
+    public PlayerBedwarsEntity getLastHitBy() {
+        return lastHitBy;
     }
 }

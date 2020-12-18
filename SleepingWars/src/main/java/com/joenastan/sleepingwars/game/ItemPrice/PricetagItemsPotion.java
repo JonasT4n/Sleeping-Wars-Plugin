@@ -10,12 +10,13 @@ import org.bukkit.potion.PotionEffect;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PricetagsItemsPotion extends PricetagsItems {
+public class PricetagItemsPotion extends PricetagItems {
 
     private PotionData potionBaseData;
     private final List<PotionEffect> effects = new ArrayList<>();
 
-    public PricetagsItemsPotion(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter, PotionData potionBaseData) {
+    public PricetagItemsPotion(Material item, Material currency, int price, ItemMeta meta,
+                               int defaultAmountGetter, PotionData potionBaseData) {
         super(item, currency, price, meta, defaultAmountGetter);
         try {
             if (item == Material.POTION || item == Material.TIPPED_ARROW) {
@@ -37,9 +38,8 @@ public class PricetagsItemsPotion extends PricetagsItems {
         ItemStack thisItem = new ItemStack(item, defaultAmountGetter);
         PotionMeta potionMeta = (PotionMeta) meta;
         potionMeta.setBasePotionData(potionBaseData);
-        for (PotionEffect effect : effects) {
+        for (PotionEffect effect : effects)
             potionMeta.addCustomEffect(effect, true);
-        }
         thisItem.setItemMeta(potionMeta);
         return thisItem;
     }
@@ -60,7 +60,7 @@ public class PricetagsItemsPotion extends PricetagsItems {
     }
 
     // Potion only
-    public PricetagsItemsPotion setPotionData(PotionData data) {
+    public PricetagItemsPotion setPotionData(PotionData data) {
         potionBaseData = data;
         return this;
     }

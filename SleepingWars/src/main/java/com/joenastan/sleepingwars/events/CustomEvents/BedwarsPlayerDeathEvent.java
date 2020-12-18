@@ -1,26 +1,27 @@
 package com.joenastan.sleepingwars.events.CustomEvents;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.joenastan.sleepingwars.game.SleepingRoom;
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
+import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class BedwarsGamePlayerDeathEvent extends Event {
+public class BedwarsPlayerDeathEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private final Player player;
+    private final PlayerBedwarsEntity victim;
     private final SleepingRoom room;
-    private final TeamGroupMaker team;
-    private final Player killer;
+    private final PlayerBedwarsEntity killer;
 
-    public BedwarsGamePlayerDeathEvent(Player player, SleepingRoom room, TeamGroupMaker team, @Nullable Player killer) {
-        this.player = player;
+    public BedwarsPlayerDeathEvent(@Nonnull SleepingRoom room, @Nonnull PlayerBedwarsEntity victim,
+                                   @Nullable PlayerBedwarsEntity killer) {
         this.room = room;
-        this.team = team;
+        this.victim = victim;
         this.killer = killer;
     }
 
@@ -33,19 +34,15 @@ public class BedwarsGamePlayerDeathEvent extends Event {
         return handlers;
     }
 
-    public Player getPlayer() {
-        return player;
+    public PlayerBedwarsEntity getVictim() {
+        return victim;
     }
 
     public SleepingRoom getRoom() {
         return room;
     }
 
-    public TeamGroupMaker getTeam() {
-        return team;
-    }
-
-    public Player getKiller() {
+    public PlayerBedwarsEntity getKiller() {
         return killer;
     }
 

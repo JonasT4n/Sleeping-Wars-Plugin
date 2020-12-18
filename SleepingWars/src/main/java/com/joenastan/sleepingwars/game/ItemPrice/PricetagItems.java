@@ -8,7 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PricetagsItems {
+public class PricetagItems implements Pricetag {
 
     protected Material item;
     protected Material currency;
@@ -17,7 +17,7 @@ public class PricetagsItems {
     private int price;
     private final int defaultPrice;
 
-    public PricetagsItems(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter) {
+    public PricetagItems(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter) {
         this.item = item;
         this.currency = currency;
         this.price = price;
@@ -30,7 +30,7 @@ public class PricetagsItems {
         if (this.meta.hasLore())
             lore = this.meta.getLore();
         else
-            lore = new ArrayList<String>();
+            lore = new ArrayList<>();
 
         lore.add(" ");
         lore.add(getPriceTag());
@@ -75,13 +75,10 @@ public class PricetagsItems {
     public void setPrice(int price) {
         this.price = price;
         List<String> updateLore = meta.getLore();
-
         // Remove line of current pricetag
         updateLore.remove(updateLore.size() - 1);
-
         // Readd line of new pricetag
         updateLore.add(getPriceTag());
-
         // Update Lore
         meta.setLore(updateLore);
     }
@@ -89,6 +86,11 @@ public class PricetagsItems {
     public int getPrice(int price) {
         setPrice(price);
         return price;
+    }
+
+    public Material getCurrency(Material currency) {
+        this.currency = currency;
+        return currency;
     }
 
     public int getDefaultPrice() {
@@ -101,11 +103,6 @@ public class PricetagsItems {
 
     public void setCurrency(Material currency) {
         this.currency = currency;
-    }
-
-    public Material getCurrency(Material currency) {
-        this.currency = currency;
-        return currency;
     }
 
     public Material getItem() {

@@ -3,6 +3,8 @@ package com.joenastan.sleepingwars.game;
 import com.joenastan.sleepingwars.enumtypes.ResourcesType;
 import com.joenastan.sleepingwars.timercoro.ResourceSpawnTimer;
 
+import com.joenastan.sleepingwars.utility.Hologram.Hologram;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -48,13 +50,13 @@ public class ResourceSpawner {
         }
     }
 
-    public ResourceSpawner(String codename, Location spawnLoc, ResourcesType typeSpawnResource, float durationPerSpawn) {
+    public ResourceSpawner(String codename, Location spawnLoc, ResourcesType typeSpawnResource,
+                           float durationPerSpawn) {
         this.spawnLoc = spawnLoc;
         this.typeSpawnResource = typeSpawnResource;
         this.codename = codename;
         isActive = false;
         spawnAmount = 1;
-
         // Defaults values
         switch (typeSpawnResource) {
             case GOLD:
@@ -70,7 +72,7 @@ public class ResourceSpawner {
                 mat = Material.IRON_INGOT;
                 break;
         }
-
+        // Create routine for spawner
         looper = new ResourceSpawnTimer(durationPerSpawn, this);
     }
 
@@ -79,6 +81,17 @@ public class ResourceSpawner {
         World w = spawnLoc.getWorld();
         ItemStack res = new ItemStack(mat, spawnAmount);
         w.dropItemNaturally(spawnLoc, res);
+    }
+
+    public void setRunning(boolean run) {
+        if (isActive == run)
+            return;
+        isActive = run;
+        if (run) {
+            looper.start();
+        } else {
+            looper.stop();
+        }
     }
 
     public String getOwner() {
@@ -121,30 +134,11 @@ public class ResourceSpawner {
         return isActive;
     }
 
-    private void setRunning(boolean run) {
-        if (run) {
-            //System.out.println("[DEBUG] Resource Spawner " + codename + " is now running");
-            looper.start();
-        } else {
-            //System.out.println("[DEBUG] Resource Spawner " + codename + " is now stopped");
-            looper.stop();
-        }
-    }
-
     public float getSecondsPerSpawn() {
         return looper.getDuration();
     }
 
     public ResourceSpawnTimer getCoroutine() {
         return looper;
-    }
-
-    public boolean isRunning(boolean active) {
-        if (isActive == active)
-            return isActive;
-
-        isActive = active;
-        setRunning(isActive);
-        return isActive;
     }
 }

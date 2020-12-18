@@ -28,9 +28,7 @@ public class HostingCommands implements TabCompleter {
             if (args[0].equalsIgnoreCase("host")) {
                 return systemConfig.getWorldNames();
             } else if (args[0].equalsIgnoreCase("join")) {
-                List<String> roomNames = new ArrayList<String>();
-                roomNames.addAll(gameManager.getRoomMap().keySet());
-                return roomNames;
+                return new ArrayList<String>(gameManager.getRoomMap().keySet());
             }
         }
         return null;

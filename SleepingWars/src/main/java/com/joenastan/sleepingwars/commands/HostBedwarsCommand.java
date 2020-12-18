@@ -1,6 +1,6 @@
 package com.joenastan.sleepingwars.commands;
 
-import com.joenastan.sleepingwars.events.CustomEvents.BedwarsGameStartEvent;
+import com.joenastan.sleepingwars.events.CustomEvents.BedwarsStartEvent;
 import com.joenastan.sleepingwars.game.GameManager;
 import com.joenastan.sleepingwars.game.SleepingRoom;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
@@ -16,6 +16,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
+import javax.annotation.Nonnull;
+
 public class HostBedwarsCommand implements Listener, CommandExecutor {
 
     private final GameSystemConfig systemConf = SleepingWarsPlugin.getGameSystemConfig();
@@ -27,7 +29,8 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
     private String changeMapCMD = "cmap"; // Change map on game, if user who use the command is a host
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command,
+                             @Nonnull String label, @Nonnull String[] args) {
         if (sender instanceof Player) {
             Player player = ((Player) sender);
             if (args.length > 0) {
@@ -58,10 +61,11 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
     }
 
     private void bedwarsHelpMessage(CommandSender sender) {
-        sender.sendMessage(ChatColor.GOLD + "Sleeping World Maker Commands for Hosting a Game. " + ChatColor.AQUA
-                + "List of sub-commands:\n" + ChatColor.GREEN
-                + "host => Create room\njoin => join room, must include password\nstart => Start the game, only host able to do it\n"
-                + "leave => Leave room, cannot use while on game");
+        sender.sendMessage(ChatColor.GOLD + "Sleeping World Maker Commands for Hosting a Game. " + ChatColor.AQUA +
+                "List of sub-commands:\n" + ChatColor.GREEN +
+                "host => Create room\njoin => join room, must include password\n" +
+                "start => Start the game, only host able to do it\n" +
+                "leave => Leave room, cannot use while on game");
     }
 
     private void joinRoom(Player player, String[] args) {
@@ -90,7 +94,7 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
         SleepingRoom room = gameManager.getRoom(inWorldName);
         if (room != null) {
             if (room.getHost().equals(player)) {
-                BedwarsGameStartEvent event = new BedwarsGameStartEvent(room);
+                BedwarsStartEvent event = new BedwarsStartEvent(room);
                 Bukkit.getServer().getPluginManager().callEvent(event);
             } else {
                 player.sendMessage(ChatColor.YELLOW + "You aren't the host. Unable to use this command.");
@@ -122,9 +126,9 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
         String inWorldName = player.getWorld().getName();
         SleepingRoom room = gameManager.getRoom(inWorldName);
         if (room != null) {
-            PlayerBedwarsEntity playerEnt = room.findPlayerEntityInRoom(player);
+            PlayerBedwarsEntity playerEnt = room.findPlayer(player);
             if (playerEnt != null)
-                playerEnt.isLeavingUsingCommand(true);
+                playerEnt.setLeavingUsingCommand(true);
             room.playerLeave(player);
         } else {
             player.sendMessage(ChatColor.YELLOW + "You are not in bedwars.");

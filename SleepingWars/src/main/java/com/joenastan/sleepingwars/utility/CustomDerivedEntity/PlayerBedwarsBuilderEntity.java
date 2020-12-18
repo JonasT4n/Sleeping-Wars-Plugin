@@ -9,9 +9,9 @@ import java.util.Queue;
 
 public class PlayerBedwarsBuilderEntity extends PlayerBedwarsEntity {
 
-    private final Queue<Location> placedLocation = new LinkedList<Location>();
+    private final Queue<Location> placedLocation = new LinkedList<>();
     private int requiredAmountLocations = 0;
-    private final Queue<String> codenameHolder = new LinkedList<String>();
+    private final Queue<String> codenameHolder = new LinkedList<>();
 
     public PlayerBedwarsBuilderEntity(Player player, Location lastTpfrom, GameMode lastGameMode) {
         super(player, lastTpfrom, lastGameMode);

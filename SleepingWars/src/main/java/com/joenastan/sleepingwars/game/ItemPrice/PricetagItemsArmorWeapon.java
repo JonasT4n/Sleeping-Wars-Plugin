@@ -7,11 +7,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Map;
 
-public class PricetagsItemsArmorWeapon extends PricetagsItems {
+public class PricetagItemsArmorWeapon extends PricetagItems {
 
     private final Map<Enchantment, Integer> enchantments;
 
-    public PricetagsItemsArmorWeapon(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter, Map<Enchantment, Integer> enchancements) {
+    public PricetagItemsArmorWeapon(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter, Map<Enchantment, Integer> enchancements) {
         super(item, currency, price, meta, defaultAmountGetter);
         this.enchantments = enchancements;
     }

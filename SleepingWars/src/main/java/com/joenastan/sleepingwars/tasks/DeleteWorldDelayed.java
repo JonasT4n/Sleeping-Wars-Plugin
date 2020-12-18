@@ -4,7 +4,7 @@ import java.io.File;
 
 public class DeleteWorldDelayed implements Runnable {
 
-    private File worldFolder;
+    private final File worldFolder;
 
     public DeleteWorldDelayed(File worldFolder) {
         this.worldFolder = worldFolder;
@@ -23,7 +23,6 @@ public class DeleteWorldDelayed implements Runnable {
         }
         // Delete file or folder
         f.delete();
-        //System.out.println("[Sleeping Wars] Deleted \"" + f.getName() + "\"");
     }
 
 }

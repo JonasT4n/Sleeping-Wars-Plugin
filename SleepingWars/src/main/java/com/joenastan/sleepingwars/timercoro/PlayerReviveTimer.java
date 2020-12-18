@@ -8,8 +8,8 @@ import org.bukkit.GameMode;
 
 public class PlayerReviveTimer extends StopwatchTimer {
 
-    private PlayerBedwarsEntity playerEnt;
-    private TeamGroupMaker team;
+    private final PlayerBedwarsEntity playerEnt;
+    private final TeamGroupMaker team;
 
     public PlayerReviveTimer(float duration, PlayerBedwarsEntity playerEnt, TeamGroupMaker team) {
         super(duration);
@@ -19,17 +19,15 @@ public class PlayerReviveTimer extends StopwatchTimer {
 
     @Override
     public void start() {
-        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-            @Override
-            public void run() {
-                if (counter <= 0f) {
-                    runEvent();
-                    reset();
-                    return;
-                }
-                counter -= 0.1f;
-                playerEnt.getPlayer().sendTitle("Reviving...", String.format("In %.1f...", counter), 0, 4, 0);
+        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (counter <= 0f) {
+                runEvent();
+                reset();
+                return;
             }
+            counter -= 0.1f;
+            playerEnt.getPlayer().sendTitle("Reviving...",
+                    String.format("In %.1f...", counter), 0, 4, 0);
         }, 0L, 2L);
     }
 

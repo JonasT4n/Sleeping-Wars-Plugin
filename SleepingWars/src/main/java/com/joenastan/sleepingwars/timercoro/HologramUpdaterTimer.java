@@ -4,7 +4,7 @@ import com.joenastan.sleepingwars.utility.Hologram.Hologram;
 
 public class HologramUpdaterTimer extends StopwatchTimer {
 
-    private Hologram targetUpdater;
+    private final Hologram targetUpdater;
 
     public HologramUpdaterTimer(float duration, Hologram target) {
         super(duration);

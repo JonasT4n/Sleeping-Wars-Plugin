@@ -21,7 +21,7 @@ public class GameManager {
 
     private static final int IDRange = 4;
     private static final String alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    private Map<String, SleepingRoom> createdRooms = new HashMap<String, SleepingRoom>();
+    private Map<String, SleepingRoom> createdRooms = new HashMap<>();
 
     public GameManager() {
         // TODO: Manager performance
@@ -89,7 +89,7 @@ public class GameManager {
      * @return Map of maps currently being played with room counts each
      */
     public Map<String, Integer> getPlayingMaps() {
-        Map<String, Integer> mapMaps = new HashMap<String, Integer>();
+        Map<String, Integer> mapMaps = new HashMap<>();
         for (SleepingRoom room : createdRooms.values()) {
             if (mapMaps.get(room.getMapName()) == null) {
                 mapMaps.put(room.getMapName(), 1);
@@ -104,7 +104,7 @@ public class GameManager {
     /**
      * Check if player is already a host in one game.
      *
-     * @param player
+     * @param player Refered player
      * @return true if player is a host, else then false
      */
     private boolean playerIsHost(Player player) {

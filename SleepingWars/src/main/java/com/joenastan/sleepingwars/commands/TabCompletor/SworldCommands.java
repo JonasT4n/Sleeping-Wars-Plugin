@@ -3,7 +3,7 @@ package com.joenastan.sleepingwars.commands.TabCompletor;
 import com.joenastan.sleepingwars.enumtypes.BedwarsShopType;
 import com.joenastan.sleepingwars.enumtypes.ResourcesType;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
-import com.joenastan.sleepingwars.events.CustomEvents.BedwarsGameTimelineEvent;
+import com.joenastan.sleepingwars.events.CustomEvents.BedwarsTimelineEvent;
 import com.joenastan.sleepingwars.enumtypes.TimelineEventType;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import org.bukkit.command.Command;
@@ -12,7 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class SworldCommands implements TabCompleter {
@@ -61,7 +61,7 @@ public class SworldCommands implements TabCompleter {
         if (sender instanceof Player) {
             Player player = ((Player) sender);
             if (args.length == 1) {
-                List<String> sworldSubs = new ArrayList<String>();
+                List<String> sworldSubs = new ArrayList<>();
                 sworldSubs.add(addEventCMD);
                 sworldSubs.add(setTeamAreaCMD);
                 sworldSubs.add(setAreaOppositionCMD);
@@ -128,8 +128,7 @@ public class SworldCommands implements TabCompleter {
                         args[0].equalsIgnoreCase(setResSpawnerDurCMD) || args[0].equalsIgnoreCase(setTeamAreaCMD)) {
                     String worldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(worldName)) {
-                        List<String> teamNameshint = new ArrayList<String>();
-                        teamNameshint.addAll(systemConf.getTeamNames(worldName));
+                        List<String> teamNameshint = new ArrayList<String>(systemConf.getTeamNames(worldName));
                         teamNameshint.add("PUBLIC");
                         return teamNameshint;
                     }
@@ -143,11 +142,11 @@ public class SworldCommands implements TabCompleter {
                     return eventType;
                 }
                 // Gives delete event hint
-                else if (args[0].equalsIgnoreCase(addEventCMD)) {
+                else if (args[0].equalsIgnoreCase(removeEventCMD)) {
                     String worldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(worldName)) {
-                        List<String> names = new ArrayList<String>();
-                        for (BedwarsGameTimelineEvent ev : systemConf.getTimelineEvents(worldName)) {
+                        List<String> names = new ArrayList<>();
+                        for (BedwarsTimelineEvent ev : systemConf.getTimelineEvents(worldName)) {
                             names.add(ev.getName());
                         }
                         return names;
@@ -164,13 +163,13 @@ public class SworldCommands implements TabCompleter {
                 else if (args[0].equalsIgnoreCase(setLockedEntityCMD)) {
                     String inWorldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(inWorldName))
-                        return Arrays.asList("<codename>");
+                        return Collections.singletonList("<codename>");
                 }
                 // Gives locked entities codename hint
                 else if (args[0].equalsIgnoreCase(addRequestCMD) || args[0].equalsIgnoreCase(deleteLockedEntityCMD)) {
                     String inWorldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(inWorldName))
-                        return systemConf.getLockedCodenames(inWorldName);
+                        return systemConf.getLockedCodename(inWorldName);
                 }
             } else if (args.length == 3) {
                 // Gives coordinate Y hint
@@ -181,13 +180,13 @@ public class SworldCommands implements TabCompleter {
                 }
                 // Gives duration hint
                 else if (args[0].equalsIgnoreCase(addEventCMD)) {
-                    return Arrays.asList("<duration-in-second>");
+                    return Collections.singletonList("<duration-in-second>");
                 }
                 // Gives size hint
                 else if (args[0].equalsIgnoreCase(setBorderCMD)) {
                     String worldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(worldName))
-                        return Arrays.asList("<size|default=1024>");
+                        return Collections.singletonList("<size|default=1024>");
                 }
                 // Gives resource type hint
                 else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD) || args[0].equalsIgnoreCase(addRequestCMD)) {
@@ -203,14 +202,14 @@ public class SworldCommands implements TabCompleter {
                     String worldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(worldName)) {
                         // Give hint by teamname or else other public resource spawners
-                        return systemConf.getRSCodenames(worldName, args[1]);
+                        return systemConf.getRSCodename(worldName, args[1]);
                     }
                 }
                 // Gives hint all public resource spawners
                 else if (args[0].equalsIgnoreCase(setLockedEntityCMD)) {
                     String inWorldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(inWorldName))
-                        return systemConf.getPublicRSCodenames(inWorldName);
+                        return systemConf.getPublicRSCodename(inWorldName);
                 }
             } else if (args.length == 4) {
                 // Gives coordinate Z hint
@@ -233,13 +232,13 @@ public class SworldCommands implements TabCompleter {
                 }
                 // Gives codename hint
                 else if (args[0].equalsIgnoreCase(setResourceSpawnerCMD)) {
-                    return Arrays.asList("codename");
+                    return Collections.singletonList("codename");
                 }
                 // Gives <amount> hint
                 else if (args[0].equalsIgnoreCase(addRequestCMD)) {
                     String inWorldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(inWorldName))
-                        return Arrays.asList("<amount>");
+                        return Collections.singletonList("<amount>");
                 }
             }
         }

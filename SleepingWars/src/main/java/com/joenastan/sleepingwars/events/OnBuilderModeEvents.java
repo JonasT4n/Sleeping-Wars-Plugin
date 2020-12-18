@@ -7,7 +7,8 @@ import java.util.Map;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsBuilderEntity;
-import com.joenastan.sleepingwars.utility.UsefulStaticFunctions;
+import com.joenastan.sleepingwars.utility.Hologram.HologramManager;
+import com.joenastan.sleepingwars.utility.PluginStaticFunc;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -23,18 +24,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class OnBuilderModeEvents implements Listener {
 
-    private static Map<Player, PlayerBedwarsBuilderEntity> customBuilderEntity = new HashMap<Player, PlayerBedwarsBuilderEntity>();
+    private static Map<Player, PlayerBedwarsBuilderEntity> customBuilderEntity = new HashMap<>();
     private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
+    private static final HologramManager holoManager = SleepingWarsPlugin.getHologramManager();
 
     public static Map<Player, PlayerBedwarsBuilderEntity> getCustomBuilderEntity() {
         return customBuilderEntity;
@@ -46,6 +45,7 @@ public class OnBuilderModeEvents implements Listener {
         }
         customBuilderEntity.clear();
         customBuilderEntity = null;
+        holoManager.shutdown();
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -54,7 +54,8 @@ public class OnBuilderModeEvents implements Listener {
         Player player = event.getPlayer();
         // Check if player joined into the world builder
         if (systemConfig.getWorldNames().contains(inWorldName))
-            customBuilderEntity.put(player, new PlayerBedwarsBuilderEntity(player, Bukkit.getWorlds().get(0).getSpawnLocation(), GameMode.SURVIVAL));
+            customBuilderEntity.put(player, new PlayerBedwarsBuilderEntity(player, Bukkit.getWorlds()
+                    .get(0).getSpawnLocation(), GameMode.SURVIVAL));
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -63,12 +64,14 @@ public class OnBuilderModeEvents implements Listener {
         String inWorldName = event.getTo().getWorld().getName();
         String fromWorldName = event.getFrom().getWorld().getName();
         // Check if player teleport from world builder to other world builder, ignore this
-        if (systemConfig.getWorldNames().contains(inWorldName) && systemConfig.getWorldNames().contains(fromWorldName))
+        if (systemConfig.getWorldNames().contains(inWorldName) && systemConfig.getWorldNames()
+                .contains(fromWorldName))
             return;
         // Check if player teleport into world builder
         if (systemConfig.getWorldNames().contains(inWorldName)) {
             if (!customBuilderEntity.containsKey(player))
-                customBuilderEntity.put(player, new PlayerBedwarsBuilderEntity(player, event.getFrom(), player.getGameMode()));
+                customBuilderEntity.put(player, new PlayerBedwarsBuilderEntity(player, event.getFrom(),
+                        player.getGameMode()));
             player.setGameMode(GameMode.CREATIVE);
         }
         // Check if player leave from world builder
@@ -87,8 +90,11 @@ public class OnBuilderModeEvents implements Listener {
         String inWorldName = event.getPlayer().getWorld().getName();
         // Check if player exit from the world builder
         if (systemConfig.getWorldNames().contains(inWorldName)) {
-            if (customBuilderEntity.containsKey(player))
-                customBuilderEntity.remove(player).returnEntity();
+            if (customBuilderEntity.containsKey(player)) {
+                PlayerBedwarsBuilderEntity playerEnt = customBuilderEntity.remove(player);
+                playerEnt.returnEntity();
+                playerEnt.clearLocationsBuffer();
+            }
             if (player.getWorld().getPlayers().size() == 0)
                 systemConfig.Save();
         }
@@ -117,25 +123,35 @@ public class OnBuilderModeEvents implements Listener {
                         // Check required location buffer amount
                         if (playerBE.getRequiredAmountLoc() == 0) {
                             // Check if player put bed in world
-                            if (UsefulStaticFunctions.isMaterialBed(block.getType()) && teamName != "PUBLIC") {
+                            if (PluginStaticFunc.isMaterialBed(block.getType()) && !teamName.equals("PUBLIC")) {
                                 Location onPlacedLoc = block.getLocation();
-                                if (systemConfig.setTeamBedLocation(inWorldName, teamName, onPlacedLoc)) ;
-                                player.sendMessage(String.format("%sBed for team %s has been settled on (X/Y/Z): %d/%d/%d", ChatColor.DARK_AQUA + "", teamName,
-                                        onPlacedLoc.getBlockX(), onPlacedLoc.getBlockY(), onPlacedLoc.getBlockZ()));
-                                playerBE.setTeamChoice(null);
+                                if (systemConfig.setBedLocation(inWorldName, teamName, onPlacedLoc)) {
+                                    player.sendMessage(String.format("%sBed for team %s has been settled on (X/Y/Z): %d/%d/%d",
+                                            ChatColor.DARK_AQUA + "", teamName, onPlacedLoc.getBlockX(), onPlacedLoc.getBlockY(),
+                                            onPlacedLoc.getBlockZ()));
+                                    playerBE.setTeamChoice(null);
+                                }
                             }
                             // Check if player put any kind of doors
-                            else if (teamName == "PUBLIC" && playerBE.countCodenameHolder() > 0 && (UsefulStaticFunctions.isFenceGate(block.getType()) ||
-                                    UsefulStaticFunctions.isTrapDoor(block.getType()) || UsefulStaticFunctions.isStandardDoor(block.getType()))) {
+                            else if (teamName.equals("PUBLIC") && playerBE.countCodenameHolder() > 0 &&
+                                    (PluginStaticFunc.isFenceGate(block.getType()) || PluginStaticFunc
+                                            .isTrapDoor(block.getType()) || PluginStaticFunc
+                                            .isStandardDoor(block.getType()))) {
                                 Location onPlacedLoc = block.getLocation();
                                 if (playerBE.countCodenameHolder() == 1) {
-                                    if (systemConfig.setLockedRequestEntity(inWorldName, playerBE.removeCodename(), onPlacedLoc))
-                                        player.sendMessage(String.format("%sLocking the door on (X/Y/Z): %d/%d/%d", ChatColor.AQUA + "", onPlacedLoc.getBlockX(),
+                                    if (systemConfig.setLockedRequest(inWorldName, playerBE.removeCodename(),
+                                            onPlacedLoc)) {
+                                        player.sendMessage(String.format("%sLocking the door on (X/Y/Z): %d/%d/%d",
+                                                ChatColor.AQUA + "", onPlacedLoc.getBlockX(),
                                                 onPlacedLoc.getBlockY(), onPlacedLoc.getBlockZ()));
+                                    }
                                 } else if (playerBE.countCodenameHolder() == 2) {
-                                    if (systemConfig.setLockedRequestEntity(inWorldName, playerBE.removeCodename(), onPlacedLoc, playerBE.removeCodename()))
-                                        player.sendMessage(String.format("%sLocking the Resource Spawner on (X/Y/Z): %d/%d/%d", ChatColor.AQUA + "", onPlacedLoc.getBlockX(),
+                                    if (systemConfig.setLockedRequest(inWorldName, playerBE.removeCodename(),
+                                            playerBE.removeCodename(), onPlacedLoc)) {
+                                        player.sendMessage(String.format("%sLocking the Resource Spawner on (X/Y/Z): %d/%d/%d",
+                                                ChatColor.AQUA + "", onPlacedLoc.getBlockX(),
                                                 onPlacedLoc.getBlockY(), onPlacedLoc.getBlockZ()));
+                                    }
                                 }
                                 playerBE.setTeamChoice(null);
                             }
@@ -143,7 +159,8 @@ public class OnBuilderModeEvents implements Listener {
                             // With any other block set location buffer
                             playerBE.addLocationBuffer(block.getLocation());
                             if (playerBE.countLocationsBuffer() >= 2) {
-                                systemConfig.setTeamBufferArea(inWorldName, teamName, playerBE.removeLocationBuffer(), playerBE.removeLocationBuffer());
+                                systemConfig.setAreaBuff(inWorldName, teamName, playerBE.removeLocationBuffer(),
+                                        playerBE.removeLocationBuffer());
                                 playerBE.setTeamChoice(null);
                                 playerBE.setRequiredAmountLoc(0);
                                 player.sendMessage(ChatColor.BLUE + "Buffer Zone has been set.");
@@ -155,7 +172,6 @@ public class OnBuilderModeEvents implements Listener {
             } else {
                 event.setCancelled(true);
                 player.sendMessage(ChatColor.YELLOW + "You don't have permission to build.");
-                return;
             }
         }
     }
@@ -178,5 +194,10 @@ public class OnBuilderModeEvents implements Listener {
         // Check if player put TNT explosion in game world or builder world
         if (systemConfig.getWorldNames().contains(inWorldName))
             blockList.clear();
+    }
+
+    @EventHandler
+    public void onArmorStandReact(PlayerArmorStandManipulateEvent event) {
+
     }
 }

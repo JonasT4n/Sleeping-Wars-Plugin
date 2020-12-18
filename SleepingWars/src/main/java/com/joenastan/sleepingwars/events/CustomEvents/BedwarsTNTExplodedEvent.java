@@ -7,15 +7,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class BedwarsGameTNTExplosionEvent extends Event {
+public class BedwarsTNTExplodedEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private SleepingRoom room;
-    private Player byPlayer;
-    private TeamGroupMaker ownedByTeam;
+    private final SleepingRoom room;
+    private final Player byPlayer;
+    private final TeamGroupMaker ownedByTeam;
 
-    public BedwarsGameTNTExplosionEvent(SleepingRoom room, Player byPlayer) {
+    public BedwarsTNTExplodedEvent(SleepingRoom room, Player byPlayer) {
         this.room = room;
         this.byPlayer = byPlayer;
         ownedByTeam = room.findTeam(byPlayer);

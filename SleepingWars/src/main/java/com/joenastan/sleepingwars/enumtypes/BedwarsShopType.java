@@ -1,12 +1,14 @@
 package com.joenastan.sleepingwars.enumtypes;
 
+import net.md_5.bungee.api.ChatColor;
+
 public enum BedwarsShopType {
     ITEMS_SHOP("ItemShop"),
     PERMA_SHOP("PermanentShop");
 
-    private String shopName;
+    private final String shopName;
 
-    private BedwarsShopType(String shopName) {
+    BedwarsShopType(String shopName) {
         this.shopName = shopName;
     }
 

@@ -4,9 +4,10 @@ import com.joenastan.sleepingwars.utility.DataFiles.HologramDataConfig;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.List;
+
 public class HologramManager {
-    
-    private JavaPlugin plugin;
+
     private static HologramManager instance;
 
     private HologramDataConfig dataConfig;
@@ -18,7 +19,6 @@ public class HologramManager {
             return;
         }
         instance = this;
-        this.plugin = plugin;
         dataConfig = new HologramDataConfig(plugin, "floattext.yml");
     }
 

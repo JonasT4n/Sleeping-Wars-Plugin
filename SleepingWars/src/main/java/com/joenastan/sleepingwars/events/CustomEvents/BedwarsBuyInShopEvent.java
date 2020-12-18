@@ -7,15 +7,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class BedwarsGameShopBuyEvent extends Event {
+public class BedwarsBuyInShopEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private Player player;
-    private Material itemBought;
-    private TeamGroupMaker team;
+    private final Player player;
+    private final Material itemBought;
+    private final TeamGroupMaker team;
 
-    public BedwarsGameShopBuyEvent(Player player, Material itemBought, TeamGroupMaker team) {
+    public BedwarsBuyInShopEvent(Player player, Material itemBought, TeamGroupMaker team) {
         this.player = player;
         this.itemBought = itemBought;
         this.team = team;

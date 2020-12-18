@@ -5,7 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 
-public class AbstractFile {
+public abstract class AbstractFile {
 
     protected JavaPlugin main;
     protected YamlConfiguration fileConfig;

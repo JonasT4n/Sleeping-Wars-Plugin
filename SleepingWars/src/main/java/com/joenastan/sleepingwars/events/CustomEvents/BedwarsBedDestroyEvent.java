@@ -6,15 +6,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class BedwarsGameBedDestroyedEvent extends Event {
+public class BedwarsBedDestroyEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private Player whoDestroy;
-    private TeamGroupMaker bedTeamDestroyed;
-    private TeamGroupMaker byTeam;
+    private final Player whoDestroy;
+    private final TeamGroupMaker bedTeamDestroyed;
+    private final TeamGroupMaker byTeam;
 
-    public BedwarsGameBedDestroyedEvent(Player whoDestroy, TeamGroupMaker bedTeamDestroyed, TeamGroupMaker byTeam) {
+    public BedwarsBedDestroyEvent(Player whoDestroy, TeamGroupMaker bedTeamDestroyed, TeamGroupMaker byTeam) {
         this.whoDestroy = whoDestroy;
         this.bedTeamDestroyed = bedTeamDestroyed;
         this.byTeam = byTeam;

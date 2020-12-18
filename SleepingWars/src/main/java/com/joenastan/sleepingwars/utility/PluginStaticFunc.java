@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class UsefulStaticFunctions {
+public class PluginStaticFunc {
 
     /**
      * Remove items in any inventory by specific item type.
@@ -18,7 +18,6 @@ public class UsefulStaticFunctions {
         for (ItemStack itm : inv.getContents()) {
             if (itm == null)
                 continue;
-
             if (itm.getType() == itemType) {
                 if (itm.getAmount() < amount) {
                     amount -= itm.getAmount();
@@ -28,7 +27,6 @@ public class UsefulStaticFunctions {
                     amount = 0;
                 }
             }
-
             if (amount <= 0)
                 break;
         }
@@ -56,20 +54,10 @@ public class UsefulStaticFunctions {
     public static boolean isSword(Material mat) {
         switch (mat) {
             case WOODEN_SWORD:
-                return true;
-
             case STONE_SWORD:
-                return true;
-
             case IRON_SWORD:
-                return true;
-
             case GOLDEN_SWORD:
-                return true;
-
             case DIAMOND_SWORD:
-                return true;
-
             case NETHERITE_SWORD:
                 return true;
 
@@ -81,20 +69,10 @@ public class UsefulStaticFunctions {
     public static boolean isPickaxe(Material mat) {
         switch (mat) {
             case WOODEN_PICKAXE:
-                return true;
-
             case STONE_PICKAXE:
-                return true;
-
             case IRON_PICKAXE:
-                return true;
-
             case GOLDEN_PICKAXE:
-                return true;
-
             case DIAMOND_PICKAXE:
-                return true;
-
             case NETHERITE_PICKAXE:
                 return true;
 
@@ -106,23 +84,12 @@ public class UsefulStaticFunctions {
     public static boolean isAxe(Material mat) {
         switch (mat) {
             case WOODEN_AXE:
-                return true;
-
             case STONE_AXE:
-                return true;
-
             case IRON_AXE:
-                return true;
-
             case GOLDEN_AXE:
-                return true;
-
             case DIAMOND_AXE:
-                return true;
-
             case NETHERITE_AXE:
                 return true;
-
             default:
                 return false;
         }
@@ -131,35 +98,20 @@ public class UsefulStaticFunctions {
     public static boolean isMaterialBed(Material material) {
         switch (material) {
             case BLACK_BED:
-                return true;
             case BLUE_BED:
-                return true;
             case BROWN_BED:
-                return true;
             case CYAN_BED:
-                return true;
             case GREEN_BED:
-                return true;
             case YELLOW_BED:
-                return true;
             case RED_BED:
-                return true;
             case ORANGE_BED:
-                return true;
             case GRAY_BED:
-                return true;
             case LIGHT_BLUE_BED:
-                return true;
             case LIME_BED:
-                return true;
             case PINK_BED:
-                return true;
             case MAGENTA_BED:
-                return true;
             case PURPLE_BED:
-                return true;
             case WHITE_BED:
-                return true;
             case LIGHT_GRAY_BED:
                 return true;
             default:
@@ -170,53 +122,29 @@ public class UsefulStaticFunctions {
     public static boolean isHumanEntityArmor(Material material) {
         switch (material) {
             case LEATHER_BOOTS:
-                return true;
             case LEATHER_CHESTPLATE:
-                return true;
             case LEATHER_HELMET:
-                return true;
             case LEATHER_LEGGINGS:
-                return true;
             case TURTLE_HELMET:
-                return true;
             case CHAINMAIL_BOOTS:
-                return true;
             case CHAINMAIL_CHESTPLATE:
-                return true;
             case CHAINMAIL_HELMET:
-                return true;
             case CHAINMAIL_LEGGINGS:
-                return true;
             case IRON_BOOTS:
-                return true;
             case IRON_CHESTPLATE:
-                return true;
             case IRON_HELMET:
-                return true;
             case IRON_LEGGINGS:
-                return true;
             case GOLDEN_BOOTS:
-                return true;
             case GOLDEN_CHESTPLATE:
-                return true;
             case GOLDEN_HELMET:
-                return true;
             case GOLDEN_LEGGINGS:
-                return true;
             case DIAMOND_BOOTS:
-                return true;
             case DIAMOND_CHESTPLATE:
-                return true;
             case DIAMOND_LEGGINGS:
-                return true;
             case DIAMOND_HELMET:
-                return true;
             case NETHERITE_BOOTS:
-                return true;
             case NETHERITE_LEGGINGS:
-                return true;
             case NETHERITE_HELMET:
-                return true;
             case NETHERITE_CHESTPLATE:
                 return true;
             default:
@@ -227,32 +155,15 @@ public class UsefulStaticFunctions {
     public static boolean isStandardDoor(Material mat) {
         switch (mat) {
             case IRON_DOOR:
-                return true;
-
             case DARK_OAK_DOOR:
-                return true;
-
             case OAK_DOOR:
-                return true;
-
             case SPRUCE_DOOR:
-                return true;
-
             case JUNGLE_DOOR:
-                return true;
-
             case BIRCH_DOOR:
-                return true;
-
             case ACACIA_DOOR:
-                return true;
-
             case CRIMSON_DOOR:
-                return true;
-
             case WARPED_DOOR:
                 return true;
-
             default:
                 return false;
         }
@@ -261,32 +172,15 @@ public class UsefulStaticFunctions {
     public static boolean isTrapDoor(Material mat) {
         switch (mat) {
             case IRON_TRAPDOOR:
-                return true;
-
             case OAK_TRAPDOOR:
-                return true;
-
             case DARK_OAK_TRAPDOOR:
-                return true;
-
             case SPRUCE_TRAPDOOR:
-                return true;
-
             case JUNGLE_TRAPDOOR:
-                return true;
-
             case BIRCH_TRAPDOOR:
-                return true;
-
             case ACACIA_TRAPDOOR:
-                return true;
-
             case CRIMSON_TRAPDOOR:
-                return true;
-
             case WARPED_TRAPDOOR:
                 return true;
-
             default:
                 return false;
         }
@@ -295,29 +189,14 @@ public class UsefulStaticFunctions {
     public static boolean isFenceGate(Material mat) {
         switch (mat) {
             case OAK_FENCE_GATE:
-                return true;
-
             case SPRUCE_FENCE_GATE:
-                return true;
-
             case BIRCH_FENCE_GATE:
-                return true;
-
             case JUNGLE_FENCE_GATE:
-                return true;
-
             case ACACIA_FENCE_GATE:
-                return true;
-
             case DARK_OAK_FENCE_GATE:
-                return true;
-
             case CRIMSON_FENCE_GATE:
-                return true;
-
             case WARPED_FENCE_GATE:
                 return true;
-
             default:
                 return false;
         }

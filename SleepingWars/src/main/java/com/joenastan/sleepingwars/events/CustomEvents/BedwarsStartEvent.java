@@ -4,13 +4,15 @@ import com.joenastan.sleepingwars.game.SleepingRoom;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class BedwarsGameStartEvent extends Event {
+import javax.annotation.Nonnull;
+
+public class BedwarsStartEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private SleepingRoom room;
+    private final SleepingRoom room;
 
-    public BedwarsGameStartEvent(SleepingRoom room) {
+    public BedwarsStartEvent(@Nonnull SleepingRoom room) {
         this.room = room;
     }
 

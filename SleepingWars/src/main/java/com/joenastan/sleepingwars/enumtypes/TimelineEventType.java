@@ -9,7 +9,7 @@ public enum TimelineEventType {
 
     private final String eventName;
 
-    private TimelineEventType(String eventName) {
+    TimelineEventType(String eventName) {
         this.eventName = eventName;
     }
 

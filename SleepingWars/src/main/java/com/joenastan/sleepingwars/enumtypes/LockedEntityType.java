@@ -6,7 +6,7 @@ public enum LockedEntityType {
 
     private final String lockString;
 
-    private LockedEntityType(String lockString) {
+    LockedEntityType(String lockString) {
         this.lockString = lockString;
     }
 

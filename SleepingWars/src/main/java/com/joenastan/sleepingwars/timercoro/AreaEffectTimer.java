@@ -28,7 +28,8 @@ public class AreaEffectTimer extends StopwatchTimer {
      * @param maxPoint Maximum area X Y Z
      * @param teamEligible The team only eligible to get this effect
      */
-    public AreaEffectTimer(float duration, Location minPoint, Location maxPoint, @Nullable TeamGroupMaker teamEligible) {
+    public AreaEffectTimer(float duration, Location minPoint, Location maxPoint,
+                           @Nullable TeamGroupMaker teamEligible) {
         super(duration);
         // Auto calculate minimum and maximum point
         double temp;
@@ -57,17 +58,12 @@ public class AreaEffectTimer extends StopwatchTimer {
     public void start() {
         if (effect == null)
             return;
-
-        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-            @Override
-            public void run() {
-                if (counter <= 0f) {
-                    runEvent();
-                    return;
-                }
-
-                counter -= 0.5f;
+        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (counter <= 0f) {
+                runEvent();
+                return;
             }
+            counter -= 0.5f;
         }, 0L, 10L);
     }
 
@@ -76,18 +72,19 @@ public class AreaEffectTimer extends StopwatchTimer {
         boolean hitPlayer = false;
         List<Player> playersInWorld = minimalPoint.getWorld().getPlayers();
         for (Player p : playersInWorld) {
-            Location playerCurrentLocation = p.getLocation();
-            if (playerCurrentLocation.getX() <= maximalPoint.getX() && playerCurrentLocation.getX() >= minimalPoint.getX())
-                if (playerCurrentLocation.getY() <= maximalPoint.getY() && playerCurrentLocation.getY() >= minimalPoint.getY())
-                    if (playerCurrentLocation.getZ() <= maximalPoint.getZ() && playerCurrentLocation.getZ() >= minimalPoint.getZ()) {
-                        if (teamEligible != null)
-                            if ((teamEligible.getPlayers().contains(p) && !opposition) || (!teamEligible.getPlayers().contains(p) && opposition))
-                                hitPlayer = p.addPotionEffect(effect);
-                            else
-                                hitPlayer = p.addPotionEffect(effect);
-                        if (singleShot)
-                            break;
-                    }
+            Location pCurrentLoc = p.getLocation();
+            if (pCurrentLoc.getX() <= maximalPoint.getX() && pCurrentLoc.getX() >= minimalPoint.getX() &&
+                    pCurrentLoc.getY() <= maximalPoint.getY() && pCurrentLoc.getY() >= minimalPoint.getY() &&
+                    pCurrentLoc.getZ() <= maximalPoint.getZ() && pCurrentLoc.getZ() >= minimalPoint.getZ()) {
+                if (teamEligible != null)
+                    if ((teamEligible.getPlayers().contains(p) && !opposition) ||
+                            (!teamEligible.getPlayers().contains(p) && opposition))
+                        hitPlayer = p.addPotionEffect(effect);
+                    else
+                        hitPlayer = p.addPotionEffect(effect);
+                if (singleShot)
+                    break;
+            }
         }
         reset();
         if (!singleShot || !hitPlayer)

@@ -17,16 +17,13 @@ public class StopwatchTimer {
     }
 
     public void start() {
-        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-            @Override
-            public void run() {
-                if (counter <= 0f) {
-                    runEvent();
-                    reset();
-                    return;
-                }
-                counter -= 0.5f;
+        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (counter <= 0f) {
+                runEvent();
+                reset();
+                return;
             }
+            counter -= 0.5f;
         }, 0L, 10L);
     }
 

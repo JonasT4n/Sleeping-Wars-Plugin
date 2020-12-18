@@ -8,6 +8,7 @@ import com.joenastan.sleepingwars.commands.WorldMakerCommand;
 import com.joenastan.sleepingwars.events.OnBuilderModeEvents;
 import com.joenastan.sleepingwars.events.OnGameEvent;
 import com.joenastan.sleepingwars.game.GameManager;
+import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsShopMenus;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import com.joenastan.sleepingwars.utility.Hologram.HologramManager;
 
@@ -28,6 +29,10 @@ public class SleepingWarsPlugin extends JavaPlugin {
         return instance;
     }
 
+    public static HologramManager getHologramManager() {
+        return hologramManager;
+    }
+
     public static GameSystemConfig getGameSystemConfig() {
         return gameSystemConfig;
     }
@@ -41,19 +46,16 @@ public class SleepingWarsPlugin extends JavaPlugin {
         // Initial Loader
         instance = this;
         initSW();
-
         // Load Game Events
         getServer().getPluginManager().registerEvents(new OnGameEvent(), this);
         getServer().getPluginManager().registerEvents(new OnBuilderModeEvents(), this);
-
         // Load Commands
         getCommand("SWorld").setExecutor(new WorldMakerCommand());
         getCommand("SWorld").setTabCompleter(new SworldCommands());
         getCommand("Bedwars").setExecutor(new HostBedwarsCommand());
         getCommand("Bedwars").setTabCompleter(new HostingCommands());
         getCommand("SwPerm").setExecutor(new SleepingWarsPermissionsCommand());
-
-        System.out.println("~ Ready to Sleep! ~");
+        System.out.println("[SleepingWars] ~ Ready to Sleep! ~");
     }
 
     @Override
@@ -68,8 +70,8 @@ public class SleepingWarsPlugin extends JavaPlugin {
         hologramManager = null;
         OnBuilderModeEvents.clearStatic();
         HandlerList.unregisterAll(this);
-
-        System.out.println("Sleeping war is over, see you next time!");
+        BedwarsShopMenus.destroy();
+        System.out.println("[SleepingWars] Sleeping war is over, see you next time!");
     }
 
     // Other Stuff in plugin
@@ -88,24 +90,6 @@ public class SleepingWarsPlugin extends JavaPlugin {
         gameSystemConfig = new GameSystemConfig(instance, "worlds.yml");
         hologramManager = new HologramManager(instance);
         gameManager = new GameManager();
+        BedwarsShopMenus.init();
     }
 }
-
-/**
- * Bug:
- - Bow (DONE)
- - Shield (DONE)
- - Event Score board not showing (DONE)
- - Make an eliminated players can chat globally (DONE)
- - Player left minus on scoreboard (DONE)
- - Last standing win bug (DONE)
- - Public chest bug (DONE)
-
- Design:
- - Make iron Usefull
- - Gapple 6 Emeralds
-
- Future Feature:
- - World shrinking Event (DONE)
- - All bed destroyed Event (DONE)
- */

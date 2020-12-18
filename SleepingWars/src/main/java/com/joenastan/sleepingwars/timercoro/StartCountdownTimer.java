@@ -8,7 +8,7 @@ import org.bukkit.Sound;
 
 public class StartCountdownTimer extends StopwatchTimer {
 
-    private SleepingRoom room;
+    private final SleepingRoom room;
 
     public StartCountdownTimer(float duration, SleepingRoom room) {
         super(duration);
@@ -17,28 +17,26 @@ public class StartCountdownTimer extends StopwatchTimer {
 
     @Override
     public void start() {
-        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-            @Override
-            public void run() {
-                room.getWorld().playSound(room.getQueueLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 2f);
-                if (counter <= 0f) {
-                    runEvent();
-                    reset();
-                    return;
-                }
-                counter -= 1f;
-                room.roomBroadcastTitle(ChatColor.RED + "Starting...", String.format("In: %d", (int) counter), 0, 21, 0);
+        taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            room.getWorld().playSound(room.getQueueLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 2f);
+            if (counter <= 0f) {
+                runEvent();
+                reset();
+                return;
             }
+            counter -= 1f;
+            room.roomBroadcastTitle(ChatColor.RED + "Starting...",
+                    String.format("In: %d", (int) counter), 0, 21, 0);
         }, 0L, 20L);
     }
 
     @Override
     protected void runEvent() {
+        room.setStarting(false);
         room.gameStart();
     }
 
     public SleepingRoom getRoom() {
         return room;
     }
-
 }

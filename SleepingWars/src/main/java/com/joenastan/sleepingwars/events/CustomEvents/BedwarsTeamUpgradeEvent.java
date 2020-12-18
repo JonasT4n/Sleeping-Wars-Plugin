@@ -5,20 +5,23 @@ import com.joenastan.sleepingwars.game.TeamGroupMaker;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-public class BedwarsGameOnUpgradeEvent extends Event {
+import javax.annotation.Nonnull;
+
+public class BedwarsTeamUpgradeEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private ItemStack itemUpgrade;
-    private TeamGroupMaker team;
-    private Player player;
+    private final ItemMeta upgradeMeta;
+    private final TeamGroupMaker team;
+    private final Player player;
 
-    public BedwarsGameOnUpgradeEvent(TeamGroupMaker team, Player player, ItemStack itemUpgrade) {
+    public BedwarsTeamUpgradeEvent(@Nonnull TeamGroupMaker team, @Nonnull Player player,
+                                   @Nonnull ItemMeta upgradeMeta) {
         this.team = team;
         this.player = player;
-        this.itemUpgrade = itemUpgrade;
+        this.upgradeMeta = upgradeMeta;
     }
 
     public static HandlerList getHandlerList() {
@@ -38,8 +41,7 @@ public class BedwarsGameOnUpgradeEvent extends Event {
         return player;
     }
 
-    public ItemStack getUpgradeItem() {
-        return itemUpgrade;
+    public ItemMeta getMetaData() {
+        return upgradeMeta;
     }
-
 }

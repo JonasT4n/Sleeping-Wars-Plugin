@@ -1,10 +1,11 @@
-package com.joenastan.sleepingwars.game.InGameCustomEntity;
+package com.joenastan.sleepingwars.game.CustomEntity;
 
 import java.util.Map;
 
 import com.joenastan.sleepingwars.enumtypes.LockedEntityType;
 import com.joenastan.sleepingwars.enumtypes.ResourcesType;
-import com.joenastan.sleepingwars.utility.UsefulStaticFunctions;
+import com.joenastan.sleepingwars.utility.Hologram.Hologram;
+import com.joenastan.sleepingwars.utility.PluginStaticFunc;
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 
 import net.md_5.bungee.api.ChatColor;
@@ -16,31 +17,56 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class LockedEntities {
+import javax.annotation.Nonnull;
+
+public class LockedNormalEntity {
 
     protected LockedEntityType typeLock = LockedEntityType.NORMAL_LOCK;
     protected Map<ResourcesType, Integer> requirements;
+
     private final Location locLocked;
     private final Block blockReference;
+
     private boolean unlocked = false;
+    private Hologram holoSign;
 
     /**
      * Automatically get block that will be lock.
      *
      * @param locLocked Block Location, if there's no entity then it is null
      */
-    public LockedEntities(Location locLocked, Map<ResourcesType, Integer> requirements) {
+    public LockedNormalEntity(@Nonnull Location locLocked, Map<ResourcesType, Integer> requirements) {
         this.locLocked = locLocked;
         this.requirements = requirements;
         Block block = locLocked.getBlock();
         blockReference = block;
         Material blockType = block.getType();
-        if (UsefulStaticFunctions.isStandardDoor(blockType) || UsefulStaticFunctions.isFenceGate(blockType) ||
-                UsefulStaticFunctions.isTrapDoor(blockType)) {
+        if (PluginStaticFunc.isStandardDoor(blockType) || PluginStaticFunc.isFenceGate(blockType) ||
+                PluginStaticFunc.isTrapDoor(blockType)) {
             if (block.getBlockData() instanceof Openable) {
                 Openable openableBlock = (Openable) block.getBlockData();
                 if (openableBlock.isOpen())
                     openableBlock.setOpen(false);
+            }
+        }
+        // Create hologram sign
+        holoSign = new Hologram(new Location(locLocked.getWorld(), locLocked.getBlockX() + 0.5d,
+                locLocked.getBlockY() - 1d, locLocked.getBlockZ() + 0.5d));
+        if (requirements.isEmpty()) {
+            holoSign.addLine(ChatColor.RED + "Permanently locked");
+        } else {
+            holoSign.addLine(ChatColor.YELLOW + "Required:");
+            for (Map.Entry<ResourcesType, Integer> r_entry : requirements.entrySet()) {
+                if (r_entry.getKey() == ResourcesType.IRON)
+                    holoSign.addLine(ChatColor.GRAY + String.format("%d IRON(s)", r_entry.getValue()));
+                else if (r_entry.getKey() == ResourcesType.GOLD)
+                    holoSign.addLine(ChatColor.GOLD + String.format("%d GOLD(s)", r_entry.getValue()));
+                else if (r_entry.getKey() == ResourcesType.DIAMOND)
+                    holoSign.addLine(ChatColor.AQUA + String.format("%d DIAMOND(s)", r_entry.getValue()));
+                else if (r_entry.getKey() == ResourcesType.EMERALD)
+                    holoSign.addLine(ChatColor.GREEN + String.format("%d EMERALD(s)", r_entry.getValue()));
+                else
+                    holoSign.addLine(String.format("%d Undefined(s)", r_entry.getValue()));
             }
         }
     }
@@ -71,7 +97,8 @@ public class LockedEntities {
     }
 
     /**
-     * Unlock the door with player entity in bedwars. If the requirements is empty it will premanently locked.
+     * Unlock the door with player entity in bedwars.
+     * If the requirements is empty it will permanently locked.
      *
      * @param keyEntity Requirement to unlock
      * @return True if successfully unlocked, else then false
@@ -112,17 +139,20 @@ public class LockedEntities {
         // Eat all resources from player's data
         for (Map.Entry<ResourcesType, Integer> rEntry : requirements.entrySet()) {
             if (rEntry.getKey() == ResourcesType.IRON) {
-                UsefulStaticFunctions.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.IRON_INGOT, rEntry.getValue());
+                PluginStaticFunc.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.IRON_INGOT, rEntry.getValue());
             } else if (rEntry.getKey() == ResourcesType.GOLD) {
-                UsefulStaticFunctions.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.GOLD_INGOT, rEntry.getValue());
+                PluginStaticFunc.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.GOLD_INGOT, rEntry.getValue());
             } else if (rEntry.getKey() == ResourcesType.DIAMOND) {
-                UsefulStaticFunctions.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.DIAMOND, rEntry.getValue());
+                PluginStaticFunc.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.DIAMOND, rEntry.getValue());
             } else if (rEntry.getKey() == ResourcesType.EMERALD) {
-                UsefulStaticFunctions.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.EMERALD, rEntry.getValue());
+                PluginStaticFunc.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.EMERALD, rEntry.getValue());
             }
         }
+        // Unlocked
+        holoSign.clear();
+        holoSign = null;
         unlocked = true;
-        return unlocked;
+        return true;
     }
 
     /**
@@ -154,18 +184,18 @@ public class LockedEntities {
      */
     private void sendRequirements(Player player) {
         player.sendMessage(ChatColor.YELLOW + "You need these requirements to unlock:");
-        String description = "";
+        StringBuilder description = new StringBuilder();
         for (Map.Entry<ResourcesType, Integer> rEntry : requirements.entrySet()) {
             if (rEntry.getKey() == ResourcesType.IRON) {
-                description += String.format("%s%d Iron; ", ChatColor.GRAY + "", rEntry.getValue());
+                description.append(String.format("%s%d Iron; ", ChatColor.GRAY + "", rEntry.getValue()));
             } else if (rEntry.getKey() == ResourcesType.GOLD) {
-                description += String.format("%s%d Gold; ", ChatColor.GOLD + "", rEntry.getValue());
+                description.append(String.format("%s%d Gold; ", ChatColor.GOLD + "", rEntry.getValue()));
             } else if (rEntry.getKey() == ResourcesType.DIAMOND) {
-                description += String.format("%s%d Diamond; ", ChatColor.AQUA + "", rEntry.getValue());
+                description.append(String.format("%s%d Diamond; ", ChatColor.AQUA + "", rEntry.getValue()));
             } else if (rEntry.getKey() == ResourcesType.EMERALD) {
-                description += String.format("%s%d Emerald; ", ChatColor.GREEN + "", rEntry.getValue());
+                description.append(String.format("%s%d Emerald; ", ChatColor.GREEN + "", rEntry.getValue()));
             }
         }
-        player.sendMessage(description);
+        player.sendMessage(description.toString());
     }
 }
