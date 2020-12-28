@@ -3,6 +3,7 @@ package com.joenastan.sleepingwars.utility.CustomDerivedEntity;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,12 +29,12 @@ public class PlayerBedwarsEntity {
      * Saving a player entity, this object only to prevent player's previous activity went gone.
      *
      * @param player       Referred player
-     * @param lastTpfrom   Last location before tp to bedwars world
+     * @param lastTpFrom   Last location before tp to bedwars world
      * @param lastGameMode Previous game mode before entering bedwars
      */
-    public PlayerBedwarsEntity(@Nonnull Player player, @Nonnull Location lastTpfrom, GameMode lastGameMode) {
+    public PlayerBedwarsEntity(@Nonnull Player player, @Nonnull Location lastTpFrom, GameMode lastGameMode) {
         this.player = player;
-        this.lastTpFrom = lastTpfrom;
+        this.lastTpFrom = lastTpFrom;
         this.lastGameMode = lastGameMode;
         playerID = player.getUniqueId();
     }
@@ -42,6 +43,8 @@ public class PlayerBedwarsEntity {
      * Return the entity to where player were before entering bedwars.
      */
     public void returnEntity() {
+        for (PotionEffect effect : player.getActivePotionEffects())
+            player.removePotionEffect(effect.getType());
         player.getInventory().clear();
         player.teleport(lastTpFrom);
         player.setGameMode(lastGameMode);

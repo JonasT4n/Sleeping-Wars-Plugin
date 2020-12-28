@@ -11,6 +11,8 @@ import com.joenastan.sleepingwars.game.CustomEntity.LockedNormalEntity;
 import com.joenastan.sleepingwars.game.CustomEntity.LockedResourceSpawner;
 import com.joenastan.sleepingwars.timercoro.AreaEffectTimer;
 
+import com.joenastan.sleepingwars.timercoro.TimelineTimer;
+import com.joenastan.sleepingwars.utility.VoidGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.GameRule;
@@ -31,11 +33,13 @@ import java.util.*;
 
 public class GameSystemConfig extends AbstractFile {
 
+    // Constructor
     public GameSystemConfig(JavaPlugin main, String filename) {
         super(main, filename);
         load();
     }
 
+    //#region Getter Methods
     /**
      * All world names or map names that registered as bedwars world or map.
      *
@@ -89,6 +93,27 @@ public class GameSystemConfig extends AbstractFile {
             }
         }
         return rSpawner;
+    }
+
+    /**
+     * Get border data from configuration file.
+     *
+     * @param mapName Original map name
+     */
+    public int getBorderData(String mapName, boolean shrunkBorder) {
+        String path = String.format("worlds.%s.border", mapName);
+        if (!fileConfig.contains(path))
+            fileConfig.createSection(path);
+        // Check if path exists, if not then create default
+        if (shrunkBorder) {
+            if (!fileConfig.contains(path + ".shrunk"))
+                fileConfig.set(path + ".shrunk", 24);
+            return fileConfig.getInt(path + ".shrunk");
+        } else {
+            if (!fileConfig.contains(path + ".normal"))
+                fileConfig.set(path + ".normal", 1024);
+            return fileConfig.getInt(path + ".normal");
+        }
     }
 
     /**
@@ -405,6 +430,19 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
+     * Get bedwars timeline events
+     *
+     * @param mapName Original map name
+     * @return List of event names in timeline
+     */
+    public List<String> getTimelineEventNames(String mapName) {
+        String path = String.format("worlds.%s.timeline", mapName);
+        if (!fileConfig.contains(path))
+            fileConfig.createSection(path, new HashMap<>());
+        return new ArrayList<>(fileConfig.getConfigurationSection(path).getKeys(false));
+    }
+
+    /**
      * Get shops information on map or registered world.
      *
      * @param inWorld Current world standing
@@ -447,7 +485,8 @@ public class GameSystemConfig extends AbstractFile {
             fileConfig.createSection(path, new HashMap<>());
         List<LockedNormalEntity> listOfLocked = new ArrayList<>();
         for (String cn : fileConfig.getConfigurationSection(path).getKeys(false)) {
-            LockedEntityType typeLock = LockedEntityType.values()[fileConfig.getInt(path + ".type-lock")];
+            LockedEntityType typeLock = LockedEntityType.values()[fileConfig.getInt(
+                    path + "." + cn + ".type-lock")];
             // Get requirements to unlock
             String tPath = path + "." + cn + ".request";
             Map<ResourcesType, Integer> requirements = new HashMap<>();
@@ -464,7 +503,7 @@ public class GameSystemConfig extends AbstractFile {
                         fileConfig.getDouble(path + "." + cn + ".loc.y"),
                         fileConfig.getDouble(path + "." + cn + ".loc.z")), requirements));
             } else if (typeLock == LockedEntityType.RESOURCE_SPAWNER_LOCK) {
-                String lockedRSPath = path + "." + cn + ".rs-lock";
+                String lockedRSPath = String.format("%s.%s.rs-lock", path, cn);
                 List<ResourceSpawner> rsList = new ArrayList<>();
                 for (String rs : fileConfig.getConfigurationSection(lockedRSPath).getKeys(false)) {
                     String rsPath = lockedRSPath + "." + rs;
@@ -485,7 +524,7 @@ public class GameSystemConfig extends AbstractFile {
                     float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
                     // Create resource spawner instance
                     ResourceSpawner rsp;
-                    if (spawnDur < 0f)
+                    if (spawnDur <= 0f)
                         rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource);
                     else
                         rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource, spawnDur);
@@ -532,142 +571,9 @@ public class GameSystemConfig extends AbstractFile {
             fileConfig.createSection(path, new HashMap<>());
         return new ArrayList<>(fileConfig.getConfigurationSection(path).getKeys(false));
     }
+    //#endregion
 
-    /**
-     * Insert a new team into bedwars team list.
-     *
-     * @param mapName     Original map name
-     * @param teamName    Name of new team
-     * @param colorPrefix Raw color for team prefix color
-     * @return True if successfully added, if team already exists the it returns false
-     */
-    public boolean addTeam(String mapName, String teamName, String colorPrefix) {
-        // Check existing team
-        List<String> team = getTeamNames(mapName);
-        if (team.contains(teamName))
-            return false;
-        // Proceed Insertion
-        String path = String.format("worlds.%s.teams.%s", mapName, teamName);
-        fileConfig.createSection(path, new HashMap<>());
-        fileConfig.set(path + ".color", colorPrefix);
-        String bufferZonePath = String.format("worlds.%s.buffer-zone", mapName);
-        fileConfig.createSection(bufferZonePath + "." + teamName, new HashMap<>());
-        fileConfig.createSection(bufferZonePath + "-effects." + teamName, new HashMap<>());
-        String resourceSpawnerPath = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
-        fileConfig.createSection(resourceSpawnerPath, new HashMap<>());
-        return true;
-    }
-
-    /**
-     * Add event into list
-     *
-     * @param mapName Original map name
-     */
-    public void addEventTimeline(String mapName, @Nonnull BedwarsTimelineEvent eventSample) {
-        if (!getWorldNames().contains(mapName))
-            return;
-        String path = String.format("worlds.%s.timeline.%s", mapName, eventSample.getName());
-        if (!fileConfig.contains(path))
-            fileConfig.createSection(path);
-        fileConfig.set(path + ".order", eventSample.getTimelineOrder());
-        fileConfig.set(path + ".type", eventSample.getEventType().toString());
-        fileConfig.set(path + ".trigger-in-seconds", eventSample.getTriggerSeconds());
-    }
-
-    /**
-     * Add a new resource spawner to the map.
-     *
-     * @param mapName  Original map name
-     * @param teamName On team by name
-     * @param spawner  Already created spawner
-     */
-    public void addResourceSpawner(String mapName, String teamName, @Nonnull ResourceSpawner spawner) {
-        // Check available team
-        List<String> team = getTeamNames(mapName);
-        if (!team.contains(teamName))
-            teamName = "PUBLIC";
-        String path = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
-        if (!fileConfig.contains(path))
-            fileConfig.createSection(path, new HashMap<>());
-        // Add into config file
-        String rsPath = path + "." + spawner.getCodename();
-        fileConfig.set(rsPath, new HashMap<>());
-        fileConfig.set(rsPath + ".type", spawner.getTypeResourceSpawner().ordinal());
-        fileConfig.set(rsPath + ".spawnloc.x", spawner.getSpawnLocation().getX());
-        fileConfig.set(rsPath + ".spawnloc.y", spawner.getSpawnLocation().getY());
-        fileConfig.set(rsPath + ".spawnloc.z", spawner.getSpawnLocation().getZ());
-        fileConfig.set(rsPath + ".duration-spawn", spawner.getSecondsPerSpawn());
-    }
-
-    /**
-     * Add a new shop spawner to the map.
-     *
-     * @param mapName        Original map name
-     * @param type           Type of shop
-     * @param playerLocation Player current location
-     * @return true if successfuly added, else then false
-     */
-    public boolean addShopLocationSpawn(String mapName, @Nonnull BedwarsShopType type, Location playerLocation) {
-        String path = String.format("worlds.%s.shop-location.%s", mapName, type.toString());
-        if (!getWorldNames().contains(mapName))
-            return false;
-        if (!fileConfig.contains(path))
-            fileConfig.createSection(path, new HashMap<>());
-        // Add shop spawn location into config file
-        String newPath = String.format("%s.shop%d", path, fileConfig.getConfigurationSection(path)
-                .getKeys(false).size());
-        fileConfig.set(newPath + ".x", playerLocation.getX());
-        fileConfig.set(newPath + ".y", playerLocation.getY());
-        fileConfig.set(newPath + ".z", playerLocation.getZ());
-        return true;
-    }
-
-    /**
-     * Add a potion effect to buffer zone.
-     *
-     * @param mapName    Original map name
-     * @param teamName   On team with name
-     * @param effectType Potion effect included in buffer zone
-     * @return True if successfully added, if the effect is already in list then it returns false
-     */
-    public boolean addTeamAreaPotionEffect(String mapName, String teamName, PotionEffectType effectType) {
-        // Check available team
-        List<String> team = getTeamNames(mapName);
-        if (!team.contains(teamName))
-            teamName = "PUBLIC";
-        // Add into config file
-        String path = String.format("worlds.%s.buffer-zone-effects.%s", mapName, teamName);
-        if (!fileConfig.contains(path))
-            fileConfig.createSection(path);
-        String tPath = path + "." + effectType.getName();
-        if (!fileConfig.contains(tPath)) {
-            fileConfig.createSection(tPath);
-            fileConfig.set(tPath + ".seconds-hit", 5f);
-            fileConfig.set(tPath + ".for-opposition", false);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Add requirement on locked entity.
-     *
-     * @param mapName  Original map name
-     * @param codename Locked entity has their own codename
-     * @param typeRes  Resource type which required
-     * @return True if successfully set, if the locked entity not exists then it returns false
-     */
-    public boolean addLockedRequest(String mapName, String codename, ResourcesType typeRes, int amount) {
-        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
-        if (!fileConfig.contains(path))
-            return false;
-        if (!fileConfig.contains(path + ".request"))
-            fileConfig.createSection(path + ".request");
-        path = path + ".request." + typeRes.toString();
-        fileConfig.set(path, amount);
-        return true;
-    }
-
+    //#region Setter Methods
     /**
      * Set team color prefix, you can use any of string but the plugin itself will decide if it is a color.
      *
@@ -700,6 +606,23 @@ public class GameSystemConfig extends AbstractFile {
         fileConfig.set(path + ".y", queueLoc.getY());
         fileConfig.set(path + ".z", queueLoc.getZ());
         return true;
+    }
+
+    /**
+     * Set world border, save it into database.
+     *
+     * @param mapName Original map name
+     * @param blockSize Size in block
+     * @param shrunkBorder Set true to set how wide border after shrunk
+     */
+    public void setBorderData(String mapName, int blockSize, boolean shrunkBorder) {
+        String path = String.format("worlds.%s.border", mapName);
+        if (!fileConfig.contains(path))
+            fileConfig.createSection(path);
+        if (shrunkBorder)
+            fileConfig.set(path + ".shrunk", blockSize);
+        else
+            fileConfig.set(path + ".normal", blockSize);
     }
 
     /**
@@ -746,7 +669,7 @@ public class GameSystemConfig extends AbstractFile {
 
     /**
      * Set team area buffer zone, this area gives effect of any potion effects.
-     * This function automaticaly recalculate minimum and maximum value of location.
+     * This function automatically recalculate minimum and maximum value of location.
      * Each team can only have 1 buffer area.
      *
      * @param mapName  Original map name
@@ -882,6 +805,161 @@ public class GameSystemConfig extends AbstractFile {
         return true;
     }
 
+    /**
+     * Set event order. Procedurally will be sorted by order when the event will be invoked.
+     *
+     * @param mapName Original map name
+     * @param eventName Event name
+     * @param order Order index
+     * @return True if successfully set, if event not exists then it returns false
+     */
+    public boolean setEventOrder(String mapName, String eventName, int order) {
+        String path = String.format("worlds.%s.timeline.%s", mapName, eventName);
+        if (!fileConfig.contains(path))
+            return false;
+        fileConfig.set(path + ".order", order);
+        return true;
+    }
+    //#endregion
+
+    //#region Creator and Adder Methods
+    /**
+     * Insert a new team into bedwars team list.
+     *
+     * @param mapName     Original map name
+     * @param teamName    Name of new team
+     * @param colorPrefix Raw color for team prefix color
+     * @return True if successfully added, if team already exists the it returns false
+     */
+    public boolean addTeam(String mapName, String teamName, String colorPrefix) {
+        // Check existing team
+        List<String> team = getTeamNames(mapName);
+        if (team.contains(teamName))
+            return false;
+        // Proceed Insertion
+        String path = String.format("worlds.%s.teams.%s", mapName, teamName);
+        fileConfig.createSection(path, new HashMap<>());
+        fileConfig.set(path + ".color", colorPrefix);
+        String bufferZonePath = String.format("worlds.%s.buffer-zone", mapName);
+        fileConfig.createSection(bufferZonePath + "." + teamName, new HashMap<>());
+        fileConfig.createSection(bufferZonePath + "-effects." + teamName, new HashMap<>());
+        String resourceSpawnerPath = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        fileConfig.createSection(resourceSpawnerPath, new HashMap<>());
+        return true;
+    }
+
+    /**
+     * Add event into list
+     *
+     * @param mapName Original map name
+     */
+    public void addEventTimeline(String mapName, @Nonnull BedwarsTimelineEvent eventSample) {
+        if (!getWorldNames().contains(mapName))
+            return;
+        String path = String.format("worlds.%s.timeline.%s", mapName, eventSample.getName());
+        if (!fileConfig.contains(path))
+            fileConfig.createSection(path);
+        fileConfig.set(path + ".order", eventSample.getTimelineOrder());
+        fileConfig.set(path + ".type", eventSample.getEventType().toString());
+        fileConfig.set(path + ".trigger-in-seconds", eventSample.getSecTrigger());
+    }
+
+    /**
+     * Add a new resource spawner to the map.
+     *
+     * @param mapName  Original map name
+     * @param teamName On team by name
+     * @param spawner  Already created spawner
+     */
+    public void addResourceSpawner(String mapName, String teamName, @Nonnull ResourceSpawner spawner) {
+        // Check available team
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            teamName = "PUBLIC";
+        String path = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        if (!fileConfig.contains(path))
+            fileConfig.createSection(path, new HashMap<>());
+        // Add into config file
+        String rsPath = path + "." + spawner.getCodename();
+        fileConfig.set(rsPath, new HashMap<>());
+        fileConfig.set(rsPath + ".type", spawner.getTypeSpawner().ordinal());
+        fileConfig.set(rsPath + ".spawnloc.x", spawner.getSpawnLocation().getX());
+        fileConfig.set(rsPath + ".spawnloc.y", spawner.getSpawnLocation().getY());
+        fileConfig.set(rsPath + ".spawnloc.z", spawner.getSpawnLocation().getZ());
+        fileConfig.set(rsPath + ".duration-spawn", spawner.getSecondsPerSpawn());
+    }
+
+    /**
+     * Add a new shop spawner to the map.
+     *
+     * @param mapName        Original map name
+     * @param type           Type of shop
+     * @param playerLocation Player current location
+     * @return true if successfuly added, else then false
+     */
+    public boolean addShopLocationSpawn(String mapName, @Nonnull BedwarsShopType type, Location playerLocation) {
+        String path = String.format("worlds.%s.shop-location.%s", mapName, type.toString());
+        if (!getWorldNames().contains(mapName))
+            return false;
+        if (!fileConfig.contains(path))
+            fileConfig.createSection(path, new HashMap<>());
+        // Add shop spawn location into config file
+        String newPath = String.format("%s.shop%d", path, fileConfig.getConfigurationSection(path)
+                .getKeys(false).size());
+        fileConfig.set(newPath + ".x", playerLocation.getX());
+        fileConfig.set(newPath + ".y", playerLocation.getY());
+        fileConfig.set(newPath + ".z", playerLocation.getZ());
+        return true;
+    }
+
+    /**
+     * Add a potion effect to buffer zone.
+     *
+     * @param mapName    Original map name
+     * @param teamName   On team with name
+     * @param effectType Potion effect included in buffer zone
+     * @return True if successfully added, if the effect is already in list then it returns false
+     */
+    public boolean addTeamAreaPotionEffect(String mapName, String teamName, PotionEffectType effectType) {
+        // Check available team
+        List<String> team = getTeamNames(mapName);
+        if (!team.contains(teamName))
+            teamName = "PUBLIC";
+        // Add into config file
+        String path = String.format("worlds.%s.buffer-zone-effects.%s", mapName, teamName);
+        if (!fileConfig.contains(path))
+            fileConfig.createSection(path);
+        String tPath = path + "." + effectType.getName();
+        if (!fileConfig.contains(tPath)) {
+            fileConfig.createSection(tPath);
+            fileConfig.set(tPath + ".seconds-hit", 5f);
+            fileConfig.set(tPath + ".for-opposition", false);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Add requirement on locked entity.
+     *
+     * @param mapName  Original map name
+     * @param codename Locked entity has their own codename
+     * @param typeRes  Resource type which required
+     * @return True if successfully set, if the locked entity not exists then it returns false
+     */
+    public boolean addLockedRequest(String mapName, String codename, ResourcesType typeRes, int amount) {
+        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
+        if (!fileConfig.contains(path))
+            return false;
+        if (!fileConfig.contains(path + ".request"))
+            fileConfig.createSection(path + ".request");
+        path = path + ".request." + typeRes.toString();
+        fileConfig.set(path, amount);
+        return true;
+    }
+    //#endregion
+
+    //#region Remove and Delete Methods
     /**
      * Delete a team from this map.
      *
@@ -1049,7 +1127,9 @@ public class GameSystemConfig extends AbstractFile {
         fileConfig.set(path, null);
         return true;
     }
+    //#endregion
 
+    //#region Utility and Other Methods
     /**
      * Count overall resource spawners in this map
      *
@@ -1106,6 +1186,7 @@ public class GameSystemConfig extends AbstractFile {
                         .getInt("worlds." + key + ".env")])
                         .hardcore(fileConfig.getBoolean("worlds." + key + ".hardcore"))
                         .generateStructures(fileConfig.getBoolean("worlds." + key + ".structure"));
+                creator.generator(new VoidGenerator());
                 Bukkit.createWorld(creator);
             }
         }
@@ -1211,4 +1292,5 @@ public class GameSystemConfig extends AbstractFile {
             fileConfig.set(String.format("%s.bz%d.maxz", path, i), maxLoc.getZ());
         }
     }
+    //#endregion
 }

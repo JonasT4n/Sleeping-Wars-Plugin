@@ -9,6 +9,7 @@ import com.joenastan.sleepingwars.game.TeamGroupMaker;
 import com.joenastan.sleepingwars.game.ItemPrice.PricetagItems;
 import com.joenastan.sleepingwars.game.ItemPrice.PricetagItemsArmorWeapon;
 import com.joenastan.sleepingwars.game.ItemPrice.PricetagItemsPotion;
+import com.joenastan.sleepingwars.utility.PluginStaticColor;
 import com.joenastan.sleepingwars.utility.PluginStaticFunc;
 
 import net.md_5.bungee.api.ChatColor;
@@ -28,14 +29,18 @@ import org.bukkit.potion.PotionType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class BedwarsShopMenus {
+public class BedwarsShopMenu {
+
+    public static final String VILLAGER_NAME_TAG = ChatColor.GOLD + String.format(
+            "BW %sShop", ChatColor.LIGHT_PURPLE + "");
 
     private static final Map<String, PricetagItems> PRICED_ITEMS = new HashMap<>();
     private static final Map<String, Inventory> SHOP_MENUS = new HashMap<>();
     private static boolean initialized = false;
 
-    private BedwarsShopMenus() { }
+    private BedwarsShopMenu() { }
 
+    // TODO: Code Smell
     public static void init() {
         if (!initialized) {
             // Set Initialized to true
@@ -43,211 +48,173 @@ public class BedwarsShopMenus {
             // Insert all default shop items
             //#region Weapons and Bows
             // Stone Sword
-            ItemMeta stoneSwordMeta = new ItemStack(Material.STONE_SWORD, 1).getItemMeta();
-            stoneSwordMeta.setDisplayName(ChatColor.GRAY + "Stone Sword");
             PRICED_ITEMS.put("Stone Sword", new PricetagItemsArmorWeapon(Material.STONE_SWORD, Material.IRON_INGOT,
-                    32, stoneSwordMeta, 1, new HashMap<Enchantment, Integer>()));
+                    "Stone Sword", 32, 1, null, new HashMap<>()));
+            PRICED_ITEMS.get("Stone Sword").setDisplayColor(ChatColor.GRAY);
             // Iron Sword
-            ItemMeta ironSwordMeta = new ItemStack(Material.IRON_SWORD, 1).getItemMeta();
-            ironSwordMeta.setDisplayName(ChatColor.WHITE + "Iron Sword");
             PRICED_ITEMS.put("Iron Sword", new PricetagItemsArmorWeapon(Material.IRON_SWORD, Material.GOLD_INGOT,
-                    16, ironSwordMeta, 1, new HashMap<Enchantment, Integer>()));
+                    "Iron Sword", 16, 1, null, new HashMap<>()));
             // Diamond Sword
-            ItemMeta diamondSwordMeta = new ItemStack(Material.DIAMOND_SWORD, 1).getItemMeta();
-            diamondSwordMeta.setDisplayName(ChatColor.AQUA + "Diamond Sword");
             PRICED_ITEMS.put("Diamond Sword", new PricetagItemsArmorWeapon(Material.DIAMOND_SWORD, Material.EMERALD,
-                    8, diamondSwordMeta, 1, new HashMap<Enchantment, Integer>()));
+                    "Diamond Sword", 8, 1, null, new HashMap<>()));
+            PRICED_ITEMS.get("Diamond Sword").setDisplayColor(ChatColor.AQUA);
             // Bow
-            ItemMeta normalBowMeta = new ItemStack(Material.BOW, 1).getItemMeta();
-            normalBowMeta.setDisplayName(ChatColor.WHITE + "Bow");
-            PRICED_ITEMS.put("Bow", new PricetagItemsArmorWeapon(Material.BOW, Material.GOLD_INGOT, 18,
-                    normalBowMeta, 1, new HashMap<Enchantment, Integer>()));
+            PRICED_ITEMS.put("Bow", new PricetagItemsArmorWeapon(Material.BOW, Material.GOLD_INGOT,
+                    "Bow", 18, 1, null, new HashMap<>()));
             // Bow Level 2
-            ItemMeta lvl2BowMeta = new ItemStack(Material.BOW, 1).getItemMeta();
-            lvl2BowMeta.setDisplayName(ChatColor.YELLOW + "Bow II");
-            Map<Enchantment, Integer> lvl2BowEnhancement = new HashMap<Enchantment, Integer>();
+            Map<Enchantment, Integer> lvl2BowEnhancement = new HashMap<>();
             lvl2BowEnhancement.put(Enchantment.ARROW_DAMAGE, 1);
-            PRICED_ITEMS.put("Bow II", new PricetagItemsArmorWeapon(Material.BOW, Material.EMERALD, 6,
-                    lvl2BowMeta, 1, lvl2BowEnhancement));
+            PRICED_ITEMS.put("Bow II", new PricetagItemsArmorWeapon(Material.BOW, Material.EMERALD,
+                    "Bow II", 6, 1, null, lvl2BowEnhancement));
+            PRICED_ITEMS.get("Bow II").setDisplayColor(ChatColor.YELLOW);
             // Bow Level 3
-            ItemMeta lvl3BowMeta = new ItemStack(Material.BOW, 1).getItemMeta();
-            lvl3BowMeta.setDisplayName(ChatColor.GREEN + "Bow III");
-            Map<Enchantment, Integer> lvl3BowEnhancement = new HashMap<Enchantment, Integer>();
+            Map<Enchantment, Integer> lvl3BowEnhancement = new HashMap<>();
             lvl3BowEnhancement.put(Enchantment.ARROW_DAMAGE, 2);
             lvl3BowEnhancement.put(Enchantment.ARROW_KNOCKBACK, 2);
-            PRICED_ITEMS.put("Bow III", new PricetagItemsArmorWeapon(Material.BOW, Material.EMERALD, 12,
-                    lvl3BowMeta, 1, lvl3BowEnhancement));
+            PRICED_ITEMS.put("Bow III", new PricetagItemsArmorWeapon(Material.BOW, Material.EMERALD,
+                    "Bow III", 12, 1, null, lvl3BowEnhancement));
+            PRICED_ITEMS.get("Bow III").setDisplayColor(ChatColor.GREEN);
             // Arrow
-            ItemMeta arrowMeta = new ItemStack(Material.ARROW, 1).getItemMeta();
-            arrowMeta.setDisplayName(ChatColor.WHITE + "Arrow");
-            PRICED_ITEMS.put("Arrow", new PricetagItemsArmorWeapon(Material.ARROW, Material.GOLD_INGOT, 2,
-                    arrowMeta, 8, new HashMap<Enchantment, Integer>()));
+            PRICED_ITEMS.put("Arrow", new PricetagItemsArmorWeapon(Material.ARROW, Material.GOLD_INGOT,
+                    "Arrow", 2, 8, null, new HashMap<>()));
             //#endregion
 
             //#region Armors and Defenses
             // Shield
-            ItemMeta shieldMeta = new ItemStack(Material.SHIELD, 1).getItemMeta();
-            shieldMeta.setDisplayName(ChatColor.GOLD + "Shield");
-            PRICED_ITEMS.put("Shield", new PricetagItemsArmorWeapon(Material.SHIELD, Material.GOLD_INGOT, 12,
-                    shieldMeta, 1, new HashMap<>()));
+            PRICED_ITEMS.put("Shield", new PricetagItemsArmorWeapon(Material.SHIELD, Material.GOLD_INGOT,
+                    "Shield", 12, 1, null, new HashMap<>()));
             // Chainmail Armor
-            ItemMeta chainmailMeta = new ItemStack(Material.CHAINMAIL_CHESTPLATE, 1).getItemMeta();
-            chainmailMeta.setDisplayName(ChatColor.GRAY + "Chainmail Armor");
             PRICED_ITEMS.put("Chainmail Armor", new PricetagItemsArmorWeapon(Material.CHAINMAIL_CHESTPLATE,
-                    Material.IRON_INGOT, 48, chainmailMeta, 1, new HashMap<>()));
+                    Material.IRON_INGOT, "Chainmail Armor", 48, 1, null,
+                    new HashMap<>()));
+            PRICED_ITEMS.get("Chainmail Armor").setDisplayColor(ChatColor.GRAY);
             // Iron Armor
-            ItemMeta ironArmorMeta = new ItemStack(Material.IRON_CHESTPLATE, 1).getItemMeta();
-            ironArmorMeta.setDisplayName(ChatColor.WHITE + "Iron Armor");
             PRICED_ITEMS.put("Iron Armor", new PricetagItemsArmorWeapon(Material.IRON_CHESTPLATE,
-                    Material.GOLD_INGOT, 16, ironArmorMeta, 1, new HashMap<>()));
+                    Material.GOLD_INGOT, "Iron Armor", 16, 1, null,
+                    new HashMap<>()));
             // Diamond Armor
-            ItemMeta diamondArmorMeta = new ItemStack(Material.DIAMOND_CHESTPLATE, 1).getItemMeta();
-            diamondArmorMeta.setDisplayName(ChatColor.AQUA + "Diamond Armor");
             PRICED_ITEMS.put("Diamond Armor", new PricetagItemsArmorWeapon(Material.DIAMOND_CHESTPLATE,
-                    Material.EMERALD, 8, diamondArmorMeta, 1, new HashMap<>()));
+                    Material.EMERALD, "Diamond Armor", 8, 1, null, new HashMap<>()));
+            PRICED_ITEMS.get("Diamond Armor").setDisplayColor(ChatColor.AQUA);
             //#endregion
 
             //#region Blocks
             // Wool
-            ItemMeta woolMeta = new ItemStack(Material.WHITE_WOOL, 1).getItemMeta();
-            woolMeta.setDisplayName(ChatColor.WHITE + "Wool");
-            PRICED_ITEMS.put("Wool", new PricetagItems(Material.WHITE_WOOL, Material.IRON_INGOT, 4,
-                    woolMeta, 16));
+            PRICED_ITEMS.put("Wool", new PricetagItems(Material.WHITE_WOOL, Material.IRON_INGOT,
+                    "Wool", 4, 16, null));
             // Wood
-            ItemMeta woodMeta = new ItemStack(Material.OAK_PLANKS, 1).getItemMeta();
-            woodMeta.setDisplayName(ChatColor.GOLD + "Wood");
-            PRICED_ITEMS.put("Wood", new PricetagItems(Material.OAK_PLANKS, Material.IRON_INGOT, 32,
-                    woodMeta, 8));
+            PRICED_ITEMS.put("Wood", new PricetagItems(Material.OAK_PLANKS, Material.IRON_INGOT,
+                    "Wood", 32, 8, null));
+            PRICED_ITEMS.get("Wood").setDisplayColor(ChatColor.GOLD);
             // Glass
-            ItemMeta glassMeta = new ItemStack(Material.GLASS, 1).getItemMeta();
-            glassMeta.setDisplayName(ChatColor.AQUA + "Glass");
-            PRICED_ITEMS.put("Glass", new PricetagItems(Material.GLASS, Material.IRON_INGOT, 16,
-                    glassMeta, 8));
+            PRICED_ITEMS.put("Glass", new PricetagItems(Material.GLASS, Material.IRON_INGOT,
+                    "Glass", 16, 8, null));
+            PRICED_ITEMS.get("Glass").setDisplayColor(ChatColor.AQUA);
             // End Stone
-            ItemMeta endBlockMeta = new ItemStack(Material.END_STONE, 1).getItemMeta();
-            endBlockMeta.setDisplayName(ChatColor.YELLOW + "End Stone");
-            PRICED_ITEMS.put("End Stone", new PricetagItems(Material.END_STONE, Material.GOLD_INGOT, 8,
-                    endBlockMeta, 12));
+            PRICED_ITEMS.put("End Stone", new PricetagItems(Material.END_STONE, Material.GOLD_INGOT,
+                    "End Stone", 8,12, null));
+            PRICED_ITEMS.get("End Stone").setDisplayColor(ChatColor.YELLOW);
+            // Terracotta
+            PRICED_ITEMS.put("Terracotta", new PricetagItems(Material.TERRACOTTA, Material.GOLD_INGOT,
+                    "Terracotta", 6, 8, null));
+            PRICED_ITEMS.get("Terracotta").setDisplayColor(ChatColor.GOLD);
             // Obsidian
-            ItemMeta obsidianMeta = new ItemStack(Material.OBSIDIAN, 1).getItemMeta();
-            obsidianMeta.setDisplayName(ChatColor.DARK_BLUE + "Obsidian");
-            PRICED_ITEMS.put("Obsidian", new PricetagItems(Material.OBSIDIAN, Material.EMERALD, 6,
-                    obsidianMeta, 8));
+            PRICED_ITEMS.put("Obsidian", new PricetagItems(Material.OBSIDIAN, Material.EMERALD,
+                    "Obsidian", 6, 8, null));
+            PRICED_ITEMS.get("Obsidian").setDisplayColor(ChatColor.DARK_BLUE);
             //#endregion
 
             //#region Potions
             // Swiftness
-            ItemMeta potionOfSwiftnessMeta = new ItemStack(Material.POTION, 1).getItemMeta();
-            potionOfSwiftnessMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Swiftness III");
-            PricetagItemsPotion swift3 = new PricetagItemsPotion(Material.POTION, Material.EMERALD, 2,
-                    potionOfSwiftnessMeta, 1, new PotionData(PotionType.SPEED));
+            PricetagItemsPotion swift3 = new PricetagItemsPotion(Material.POTION, Material.EMERALD,
+                    "Swiftness III", 2, 1, null, new PotionData(PotionType.SPEED));
             swift3.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 15, 3));
+            swift3.setDisplayColor(ChatColor.LIGHT_PURPLE);
             PRICED_ITEMS.put("Swiftness III", swift3);
             // Leaping
-            ItemMeta potionOfLeapingMeta = new ItemStack(Material.POTION, 1).getItemMeta();
-            potionOfLeapingMeta.setDisplayName(ChatColor.GREEN + "Leaping IV");
-            PricetagItemsPotion leap4 = new PricetagItemsPotion(Material.POTION, Material.EMERALD, 2,
-                    potionOfLeapingMeta, 1, new PotionData(PotionType.JUMP));
+            PricetagItemsPotion leap4 = new PricetagItemsPotion(Material.POTION, Material.EMERALD,
+                    "Leaping IV",2, 1, null, new PotionData(PotionType.JUMP));
             leap4.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 15, 4));
+            leap4.setDisplayColor(ChatColor.GREEN);
             PRICED_ITEMS.put("Leaping IV", leap4);
             // Strength
-            ItemMeta potionOfStrengthMeta = new ItemStack(Material.POTION, 1).getItemMeta();
-            potionOfStrengthMeta.setDisplayName(ChatColor.DARK_PURPLE + "Strength II");
-            PricetagItemsPotion strength2 = new PricetagItemsPotion(Material.POTION, Material.EMERALD, 6,
-                    potionOfStrengthMeta, 1, new PotionData(PotionType.STRENGTH));
+            PricetagItemsPotion strength2 = new PricetagItemsPotion(Material.POTION, Material.EMERALD,
+                    "Strength II", 6, 1, null, new PotionData(PotionType.STRENGTH));
             strength2.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 15, 2));
+            strength2.setDisplayColor(ChatColor.DARK_PURPLE);
             PRICED_ITEMS.put("Strength II", strength2);
             // Invisibility
-            ItemMeta potionOfInvisibleMeta = new ItemStack(Material.POTION, 1).getItemMeta();
-            potionOfInvisibleMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Invisibility");
-            PricetagItemsPotion invisibility = new PricetagItemsPotion(Material.POTION, Material.EMERALD, 8,
-                    potionOfInvisibleMeta, 1, new PotionData(PotionType.INVISIBILITY));
+            PricetagItemsPotion invisibility = new PricetagItemsPotion(Material.POTION, Material.EMERALD,
+                    "Invisibility", 8, 1, null, new PotionData(PotionType.INVISIBILITY));
             invisibility.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 15, 1));
+            invisibility.setDisplayColor(ChatColor.LIGHT_PURPLE);
             PRICED_ITEMS.put("Invisibility", invisibility);
             //#endregion
 
             //#region Foods and Beverages
             // Steak
-            ItemMeta steakMeta = new ItemStack(Material.COOKED_BEEF, 1).getItemMeta();
-            steakMeta.setDisplayName(ChatColor.WHITE + "Beef Steak");
-            PRICED_ITEMS.put("Beef Steak", new PricetagItems(Material.COOKED_BEEF, Material.IRON_INGOT, 12,
-                    steakMeta, 2));
+            PRICED_ITEMS.put("Beef Steak", new PricetagItems(Material.COOKED_BEEF, Material.IRON_INGOT,
+                    "Beef Steak", 12, 2, null));
             // Cake
-            ItemMeta cakeMeta = new ItemStack(Material.CAKE, 1).getItemMeta();
-            cakeMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Cake");
-            PRICED_ITEMS.put("Cake", new PricetagItems(Material.CAKE, Material.IRON_INGOT, 24,
-                    cakeMeta, 1));
+            PRICED_ITEMS.put("Cake", new PricetagItems(Material.CAKE, Material.IRON_INGOT,
+                    "Cake", 24, 1, null));
             // Baked Potatoes
-            ItemMeta bakedPotatoMeta = new ItemStack(Material.BAKED_POTATO, 1).getItemMeta();
-            bakedPotatoMeta.setDisplayName(ChatColor.WHITE + "Baked Potato");
-            PRICED_ITEMS.put("Baked Potato", new PricetagItems(Material.BAKED_POTATO, Material.IRON_INGOT, 6,
-                    bakedPotatoMeta, 3));
+            PRICED_ITEMS.put("Baked Potato", new PricetagItems(Material.BAKED_POTATO, Material.IRON_INGOT,
+                    "Baked Potato", 6, 3, null));
+            // Bread
+            PRICED_ITEMS.put("Bread", new PricetagItems(Material.BREAD, Material.IRON_INGOT,
+                    "Bread", 8, 1, null));
+            PRICED_ITEMS.get("Bread").setDisplayColor(ChatColor.YELLOW);
             // Golden Carrot
-            ItemMeta goldenCarrotMeta = new ItemStack(Material.GOLDEN_CARROT, 1).getItemMeta();
-            goldenCarrotMeta.setDisplayName(ChatColor.YELLOW + "Golden Carrot");
-            PRICED_ITEMS.put("Golden Carrot", new PricetagItems(Material.GOLDEN_CARROT, Material.GOLD_INGOT, 2,
-                    goldenCarrotMeta, 1));
+            PRICED_ITEMS.put("Golden Carrot", new PricetagItems(Material.GOLDEN_CARROT, Material.GOLD_INGOT,
+                    "Golden Carrot", 2, 1, null));
+            PRICED_ITEMS.get("Golden Carrot").setDisplayColor(ChatColor.YELLOW);
             // Golden Apple
-            ItemMeta goldenAppleMeta = new ItemStack(Material.GOLDEN_APPLE, 1).getItemMeta();
-            goldenAppleMeta.setDisplayName(ChatColor.YELLOW + "Golden Apple");
-            PRICED_ITEMS.put("Golden Apple", new PricetagItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT, 6,
-                    goldenAppleMeta, 1));
+            PRICED_ITEMS.put("Golden Apple", new PricetagItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT,
+                    "Golden Apple", 6, 1, null));
+            PRICED_ITEMS.get("Golden Apple").setDisplayColor(ChatColor.YELLOW);
             //#endregion
 
             //#region Tools
             // Shears
-            ItemMeta shearsMeta = new ItemStack(Material.SHEARS, 1).getItemMeta();
-            shearsMeta.setDisplayName(ChatColor.WHITE + "Shears");
-            PRICED_ITEMS.put("Shears", new PricetagItemsArmorWeapon(Material.SHEARS, Material.IRON_INGOT, 20,
-                    shearsMeta, 1, new HashMap<>()));
+            PRICED_ITEMS.put("Shears", new PricetagItemsArmorWeapon(Material.SHEARS, Material.IRON_INGOT,
+                    "Shears", 20, 1, null, new HashMap<>()));
             // Wooden Pickaxe
-            ItemMeta woodPickMeta = new ItemStack(Material.WOODEN_PICKAXE, 1).getItemMeta();
-            woodPickMeta.setDisplayName(ChatColor.WHITE + "Wooden Pickaxe");
-            PRICED_ITEMS.put("Wooden Pickaxe", new PricetagItemsArmorWeapon(Material.WOODEN_PICKAXE,
-                    Material.GOLD_INGOT, 6, woodPickMeta, 1, new HashMap<>()));
+            PRICED_ITEMS.put("Wooden Pickaxe", new PricetagItemsArmorWeapon(Material.WOODEN_PICKAXE, Material.GOLD_INGOT,
+                    "Wooden Pickaxe", 6, 1, null, new HashMap<>()));
             // Iron Axe
-            ItemMeta ironAxeMeta = new ItemStack(Material.IRON_AXE, 1).getItemMeta();
-            ironAxeMeta.setDisplayName(ChatColor.WHITE + "Iron Axe");
-            PRICED_ITEMS.put("Iron Axe", new PricetagItemsArmorWeapon(Material.IRON_AXE, Material.GOLD_INGOT, 12,
-                    ironAxeMeta, 1, new HashMap<Enchantment, Integer>()));
+            PRICED_ITEMS.put("Iron Axe", new PricetagItemsArmorWeapon(Material.IRON_AXE, Material.GOLD_INGOT,
+                    "Iron Axe", 12, 1, null, new HashMap<>()));
             // Diamond Pickaxe
-            ItemMeta diamondPickMeta = new ItemStack(Material.DIAMOND_PICKAXE, 1).getItemMeta();
-            diamondPickMeta.setDisplayName(ChatColor.AQUA + "Diamond Pickaxe");
-            PRICED_ITEMS.put("Diamond Pickaxe", new PricetagItemsArmorWeapon(Material.DIAMOND_PICKAXE,
-                    Material.EMERALD, 4, diamondPickMeta, 1, new HashMap<>()));
+            PRICED_ITEMS.put("Diamond Pickaxe", new PricetagItemsArmorWeapon(Material.DIAMOND_PICKAXE, Material.EMERALD,
+                    "Diamond Pickaxe", 4, 1, null, new HashMap<>()));
+            PRICED_ITEMS.get("Diamond Pickaxe").setDisplayColor(ChatColor.AQUA);
             //#endregion
 
             //#region Items and Others
             // Ender Pearl
-            ItemMeta enderPearlMeta = new ItemStack(Material.ENDER_PEARL, 1).getItemMeta();
-            enderPearlMeta.setDisplayName(ChatColor.BLUE + "Ender Pearl");
-            PRICED_ITEMS.put("Ender Pearl", new PricetagItems(Material.ENDER_PEARL, Material.EMERALD, 8,
-                    enderPearlMeta, 1));
+            PRICED_ITEMS.put("Ender Pearl", new PricetagItems(Material.ENDER_PEARL, Material.EMERALD,
+                    "Ender Pearl",8, 1, null));
+            PRICED_ITEMS.get("Ender Pearl").setDisplayColor(ChatColor.BLUE);
             // Water Bucket
-            ItemMeta waterBucketMeta = new ItemStack(Material.WATER_BUCKET, 1).getItemMeta();
-            waterBucketMeta.setDisplayName(ChatColor.AQUA + "Water Bucket");
-            PRICED_ITEMS.put("Water Bucket", new PricetagItems(Material.WATER_BUCKET, Material.GOLD_INGOT, 20,
-                    waterBucketMeta, 1));
+            PRICED_ITEMS.put("Water Bucket", new PricetagItems(Material.WATER_BUCKET, Material.GOLD_INGOT,
+                    "Water Bucket", 20, 1, null));
+            PRICED_ITEMS.get("Water Bucket").setDisplayColor(ChatColor.AQUA);
             // Notch Apple
-            ItemMeta notchAppleMeta = new ItemStack(Material.GOLDEN_APPLE, 1).getItemMeta();
-            notchAppleMeta.setDisplayName(ChatColor.GOLD + "Notch Apple");
-            PRICED_ITEMS.put("Notch Apple", new PricetagItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT, 12,
-                    notchAppleMeta, 1));
+            PRICED_ITEMS.put("Notch Apple", new PricetagItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT,
+                    "Notch Apple", 12, 1, null));
+            PRICED_ITEMS.get("Notch Apple").setDisplayColor(ChatColor.GOLD);
             // Arrows of Harming
-            ItemMeta meta_harmArrow = new ItemStack(Material.TIPPED_ARROW, 1).getItemMeta();
-            meta_harmArrow.setDisplayName(ChatColor.DARK_PURPLE + "Arrow of Harming");
-            PRICED_ITEMS.put("Arrow of Harming", new PricetagItemsPotion(Material.TIPPED_ARROW, Material.EMERALD, 2,
-                    meta_harmArrow, 16, new PotionData(PotionType.INSTANT_DAMAGE)));
+            PRICED_ITEMS.put("Arrow of Harming", new PricetagItemsPotion(Material.TIPPED_ARROW, Material.EMERALD,
+                    "Arrow of Harming", 2, 16, null,
+                    new PotionData(PotionType.INSTANT_DAMAGE)));
+            PRICED_ITEMS.get("Arrow of Harming").setDisplayColor(ChatColor.DARK_PURPLE);
             // Silverfish Egg
-            ItemMeta meta_silverEgg = new ItemStack(Material.SILVERFISH_SPAWN_EGG, 1).getItemMeta();
-            meta_silverEgg.setDisplayName(ChatColor.AQUA + "Silverfish Egg");
             PRICED_ITEMS.put("Silverfish Egg", new PricetagItems(Material.SILVERFISH_SPAWN_EGG,
-                    Material.IRON_INGOT, 64, meta_silverEgg, 1));
+                    Material.IRON_INGOT, "Silverfish Egg", 64, 1, null));
             // TNT
-            ItemMeta TNTMeta = new ItemStack(Material.TNT, 1).getItemMeta();
-            TNTMeta.setDisplayName(ChatColor.RED + "TNT");
-            PRICED_ITEMS.put("TNT", new PricetagItems(Material.TNT, Material.GOLD_INGOT, 12,
-                    TNTMeta, 1));
+            PRICED_ITEMS.put("TNT", new PricetagItems(Material.TNT, Material.GOLD_INGOT,
+                    "TNT", 12, 1, null));
             //#endregion
 
             // Create all inventory menus
@@ -301,13 +268,15 @@ public class BedwarsShopMenus {
             ItemStack i_wood = PRICED_ITEMS.get("Wood").createItem(1);
             ItemStack i_glass = PRICED_ITEMS.get("Glass").createItem(1);
             ItemStack i_end = PRICED_ITEMS.get("End Stone").createItem(1);
+            ItemStack i_terracotta = PRICED_ITEMS.get("Terracotta").createItem(1);
             ItemStack i_obsidian = PRICED_ITEMS.get("Obsidian").createItem(1);
 
             shopBlockMenuTemplate.setItem(19, i_wool);
             shopBlockMenuTemplate.setItem(20, i_wood);
             shopBlockMenuTemplate.setItem(21, i_glass);
             shopBlockMenuTemplate.setItem(22, i_end);
-            shopBlockMenuTemplate.setItem(23, i_obsidian);
+            shopBlockMenuTemplate.setItem(23, i_terracotta);
+            shopBlockMenuTemplate.setItem(24, i_obsidian);
             //#endregion
 
             //#region Potion Shop Menu
@@ -340,14 +309,16 @@ public class BedwarsShopMenus {
             ItemStack i_beefSteak = PRICED_ITEMS.get("Beef Steak").createItem(1);
             ItemStack i_cake = PRICED_ITEMS.get("Cake").createItem(1);
             ItemStack i_bakedPotatoes = PRICED_ITEMS.get("Baked Potato").createItem(1);
+            ItemStack i_bread = PRICED_ITEMS.get("Bread").createItem(1);
             ItemStack i_goldenCarrot = PRICED_ITEMS.get("Golden Carrot").createItem(1);
             ItemStack i_goldenApple = PRICED_ITEMS.get("Golden Apple").createItem(1);
 
             shopFoodMenuTemplate.setItem(19, i_beefSteak);
             shopFoodMenuTemplate.setItem(20, i_cake);
             shopFoodMenuTemplate.setItem(21, i_bakedPotatoes);
-            shopFoodMenuTemplate.setItem(22, i_goldenCarrot);
-            shopFoodMenuTemplate.setItem(23, i_goldenApple);
+            shopFoodMenuTemplate.setItem(22, i_bread);
+            shopFoodMenuTemplate.setItem(23, i_goldenCarrot);
+            shopFoodMenuTemplate.setItem(24, i_goldenApple);
             //#endregion
 
             //#region Tools Shop Menu
@@ -499,18 +470,17 @@ public class BedwarsShopMenus {
         return true;
     }
 
-    public static PricetagItems selectedSlot(@Nonnull Player player, Inventory invMenu, int slot) {
-        ItemStack upgradeItem = invMenu.getItem(slot);
-        if (upgradeItem != null) {
-            ItemMeta upgradeMeta = upgradeItem.getItemMeta();
-            assert upgradeMeta != null;
+    public static PricetagItems selectedSlot(Inventory invMenu, int slot) {
+        ItemStack itemBuy = invMenu.getItem(slot);
+        if (itemBuy != null) {
+            ItemMeta upgradeMeta = itemBuy.getItemMeta();
             return PRICED_ITEMS.get(ChatColor.stripColor(upgradeMeta.getDisplayName()));
         }
         return null;
     }
 
-    public static boolean buyItem(@Nonnull Player player, @Nonnull PricetagItems pricedItemTag,
-                                  @Nullable TeamGroupMaker team) {
+    public static void buyItem(@Nonnull Player player, @Nonnull PricetagItems pricedItemTag,
+                               @Nullable TeamGroupMaker team) {
         // Check default buy item
         Material currency = pricedItemTag.getCurrency();
         List<Integer> onCurrencySlots = new ArrayList<>();
@@ -538,18 +508,17 @@ public class BedwarsShopMenus {
                     }
                 }
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1f, 1f);
-                return true;
+                return;
             }
         }
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
-        return false;
     }
 
     /**
      * Check player bought the item by type.
      *
      * @param player Player who buy it
-     * @param tag Refered price tag
+     * @param tag Referred price tag
      * @return True if player successfully bought the item, else then false
      */
     private static boolean receiveItem(@Nonnull Player player, @Nonnull PricetagItems tag,
@@ -557,203 +526,213 @@ public class BedwarsShopMenus {
         PlayerInventory playerInv = player.getInventory();
         if (team != null) {
             if (tag instanceof PricetagItemsArmorWeapon) {
-                ItemStack bootSample = playerInv.getBoots();
-                switch (tag.getItem()) {
+                switch (tag.getItemMaterial()) {
                     case STONE_SWORD:
-                        for (int i = 0; i < playerInv.getSize(); i++) {
-                            ItemStack onSlot = playerInv.getItem(i);
-                            if (onSlot == null)
-                                continue;
-                            // Replace the current Item
-                            if (onSlot.getType() == Material.WOODEN_SWORD) {
-                                ItemStack newSword = tag.createItem();
-                                setUpgrade(team, newSword);
-                                playerInv.setItem(i, newSword);
-                                break;
-                            }
-                            // Cancel buy when already have this stuff
-                            else if (onSlot.getType() == Material.STONE_SWORD || onSlot.getType() ==
-                                    Material.IRON_SWORD || onSlot.getType() == Material.DIAMOND_SWORD) {
-                                player.sendMessage(ChatColor.AQUA + "You already have this or better weapon.");
-                                return false;
-                            }
-                        }
-                        return true;
-
                     case IRON_SWORD:
-                        for (int i = 0; i < playerInv.getSize(); i++) {
-                            ItemStack onSlot = playerInv.getItem(i);
-                            if (onSlot == null)
-                                continue;
-                            // Replace the current Item
-                            if (onSlot.getType() == Material.WOODEN_SWORD || onSlot.getType() ==
-                                    Material.STONE_SWORD) {
-                                ItemStack newSword = tag.createItem();
-                                setUpgrade(team, newSword);
-                                playerInv.setItem(i, newSword);
-                                break;
-                            }
-                            // Cancel buy when already have this stuff
-                            else if (onSlot.getType() == Material.IRON_SWORD || onSlot.getType()
-                                    == Material.DIAMOND_SWORD) {
-                                player.sendMessage(ChatColor.AQUA + "You already have this or better weapon.");
-                                return false;
-                            }
-                        }
-                        return true;
-
                     case DIAMOND_SWORD:
-                        for (int i = 0; i < playerInv.getSize(); i++) {
-                            ItemStack onSlot = playerInv.getItem(i);
-                            if (onSlot == null)
-                                continue;
-                            // Replace the current Item
-                            if (onSlot.getType() == Material.WOODEN_SWORD || onSlot.getType() ==
-                                    Material.STONE_SWORD || onSlot.getType() == Material.IRON_SWORD) {
-                                ItemStack newSword = tag.createItem();
-                                setUpgrade(team, newSword);
-                                playerInv.setItem(i, newSword);
-                                break;
-                            }
-                            // Cancel buy when already have this stuff
-                            else if (onSlot.getType() == Material.DIAMOND_SWORD) {
-                                player.sendMessage(ChatColor.AQUA + "You already have this or better weapon.");
-                                return false;
-                            }
+                        // Replace the current Item
+                        if (!createSword(tag, playerInv, team)) {
+                            player.sendMessage(ChatColor.AQUA + "You already have this or better weapon.");
+                            return false;
                         }
                         return true;
-
                     case CHAINMAIL_CHESTPLATE:
-                        if (bootSample.getType() == Material.LEATHER_BOOTS) {
-                            ItemStack chainmailLegging = new ItemStack(Material.CHAINMAIL_LEGGINGS, 1);
-                            ItemStack chainmailBoots = new ItemStack(Material.CHAINMAIL_BOOTS, 1);
-                            setUpgrade(team, chainmailBoots);
-                            setUpgrade(team, chainmailLegging);
-                            playerInv.setBoots(chainmailBoots);
-                            playerInv.setLeggings(chainmailLegging);
-                        } else {
-                            player.sendMessage(ChatColor.AQUA + "You already have this or better armor");
-                            return false;
-                        }
-                        return true;
-
                     case IRON_CHESTPLATE:
-                        if (bootSample.getType() == Material.LEATHER_BOOTS || bootSample.getType() ==
-                                Material.CHAINMAIL_BOOTS) {
-                            ItemStack ironLegging = new ItemStack(Material.IRON_LEGGINGS, 1);
-                            ItemStack ironBoots = new ItemStack(Material.IRON_BOOTS, 1);
-                            setUpgrade(team, ironBoots);
-                            setUpgrade(team, ironLegging);
-                            playerInv.setBoots(ironBoots);
-                            playerInv.setLeggings(ironLegging);
-                        } else {
-                            player.sendMessage(ChatColor.AQUA + "You already have this or better armor");
-                            return false;
-                        }
-                        return true;
-
                     case DIAMOND_CHESTPLATE:
-                        if (bootSample.getType() == Material.LEATHER_BOOTS || bootSample.getType() ==
-                                Material.CHAINMAIL_BOOTS || bootSample.getType() == Material.IRON_BOOTS) {
-                            ItemStack diamondLegging = new ItemStack(Material.DIAMOND_LEGGINGS, 1);
-                            ItemStack diamondBoots = new ItemStack(Material.DIAMOND_BOOTS, 1);
-                            setUpgrade(team, diamondBoots);
-                            setUpgrade(team, diamondLegging);
-                            playerInv.setBoots(diamondBoots);
-                            playerInv.setLeggings(diamondLegging);
-                        } else {
+                        if (!createArmor(tag, playerInv, team)) {
                             player.sendMessage(ChatColor.AQUA + "You already have this or better armor");
                             return false;
                         }
                         return true;
-
                     case SHEARS:
-                        ItemStack shears = new ItemStack(Material.SHEARS, 1);
-                        setUpgrade(team, shears);
-                        playerInv.addItem(shears);
-                        return true;
-
                     case WOODEN_PICKAXE:
-                        ItemStack woodenPick = new ItemStack(Material.WOODEN_PICKAXE, 1);
-                        setUpgrade(team, woodenPick);
-                        playerInv.addItem(woodenPick);
-                        return true;
-
                     case IRON_AXE:
-                        ItemStack ironAxe = new ItemStack(Material.IRON_AXE, 1);
-                        setUpgrade(team, ironAxe);
-                        playerInv.addItem(ironAxe);
-                        return true;
-
                     case DIAMOND_PICKAXE:
-                        ItemStack diamondPick = new ItemStack(Material.DIAMOND_PICKAXE, 1);
-                        setUpgrade(team, diamondPick);
-                        playerInv.addItem(diamondPick);
+                        ItemStack tools = createNormalItem(tag, playerInv);
+                        setUpgrade(team, tools);
                         return true;
-
                     default:
                         break;
                 }
-            } else if (tag.getItem() == Material.WHITE_WOOL) {
-                ItemStack coloredWool = new ItemStack(woolColor(team.getRawColor()), tag.getDefaultAmount());
+            } else if (tag.getItemMaterial() == Material.WHITE_WOOL) {
+                ItemStack coloredWool = new ItemStack(PluginStaticColor.woolColor(team.getRawColor()),
+                        tag.getDefaultAmount());
                 playerInv.addItem(coloredWool);
                 return true;
             }
         }
+        createNormalItem(tag, playerInv);
+        return true;
+    }
+
+    /**
+     * Create an item that is the same as its display.
+     *
+     * @param tag Pricetag reference
+     */
+    private static ItemStack createNormalItem(@Nonnull PricetagItems tag) {
         // Create a new item without lore
         ItemStack createdItemStack = tag.createItem();
         ItemMeta createdItemMeta = createdItemStack.getItemMeta();
         createdItemMeta.setLore(null);
         createdItemStack.setItemMeta(createdItemMeta);
-        playerInv.addItem(tag.createItem());
+        return createdItemStack;
+    }
+
+    /**
+     * Create an item that is the same as its display.
+     * Adding it into target inventory immediately.
+     *
+     * @param tag Pricetag reference
+     * @param playerInv Target player inventory
+     */
+    private static ItemStack createNormalItem(@Nonnull PricetagItems tag, @Nonnull PlayerInventory playerInv) {
+        // Create a new item without lore
+        ItemStack createdItemStack = tag.createItem();
+        ItemMeta createdItemMeta = createdItemStack.getItemMeta();
+        createdItemMeta.setLore(null);
+        createdItemStack.setItemMeta(createdItemMeta);
+        playerInv.addItem(createdItemStack);
+        return createdItemStack;
+    }
+
+    private static boolean createSword(@Nonnull PricetagItems tag, @Nonnull PlayerInventory playerInv,
+                                       @Nullable TeamGroupMaker team) {
+        ItemStack sword = null;
+        for (int i = 0; i < playerInv.getSize(); i++) {
+            ItemStack onSlot = playerInv.getItem(i);
+            if (onSlot == null)
+                continue;
+            if (PluginStaticFunc.isSword(onSlot.getType())) {
+                sword = onSlot;
+                break;
+            }
+        }
+        // Check if player has any kind of sword
+        if (sword != null) {
+            Material swordMat = sword.getType();
+            switch (tag.getItemMaterial()) {
+                case STONE_SWORD:
+                    if (swordMat == Material.STONE_SWORD || swordMat == Material.IRON_SWORD ||
+                            swordMat == Material.DIAMOND_SWORD)
+                        return false;
+                    break;
+                case IRON_SWORD:
+                    if (swordMat == Material.IRON_SWORD || swordMat == Material.DIAMOND_SWORD)
+                        return false;
+                    break;
+                case DIAMOND_SWORD:
+                    if (swordMat == Material.DIAMOND_SWORD)
+                        return false;
+                    break;
+            }
+            sword.setType(tag.getItemMaterial());
+        } else {
+            sword = createNormalItem(tag, playerInv);
+        }
+        // Check team exists
+        if (team != null)
+            setUpgrade(team, sword);
         return true;
     }
 
-    private static Material woolColor(String color) {
-        if (color.equalsIgnoreCase("blue")) {
-            return Material.BLUE_WOOL;
-        } else if (color.equalsIgnoreCase("green")) {
-            return Material.GREEN_WOOL;
-        } else if (color.equalsIgnoreCase("yellow")) {
-            return Material.YELLOW_WOOL;
-        } else if (color.equalsIgnoreCase("aqua")) {
-            return Material.CYAN_WOOL;
-        } else if (color.equalsIgnoreCase("red")) {
-            return Material.RED_WOOL;
-        } else if (color.equalsIgnoreCase("purple")) {
-            return Material.MAGENTA_WOOL;
-        } else if (color.equalsIgnoreCase("gold")) {
-            return Material.YELLOW_WOOL;
-        } else if (color.equalsIgnoreCase("gray")) {
-            return Material.GRAY_WOOL;
-        } else { // Default is White
-            return Material.WHITE_WOOL;
+    private static boolean createArmor(@Nonnull PricetagItems tag, @Nonnull PlayerInventory playerInv,
+                                       @Nullable TeamGroupMaker team) {
+        ItemStack bootSample = playerInv.getBoots();
+        ItemStack leggingSample = playerInv.getLeggings();
+        // Check boot sample
+        if (bootSample != null) {
+            Material bootMat = bootSample.getType();
+            switch (tag.getItemMaterial()) {
+                case CHAINMAIL_CHESTPLATE:
+                    if (bootMat == Material.CHAINMAIL_BOOTS || bootMat == Material.IRON_BOOTS ||
+                            bootMat == Material.DIAMOND_BOOTS)
+                        return false;
+                    break;
+                case IRON_CHESTPLATE:
+                    if (bootMat == Material.IRON_BOOTS || bootMat == Material.DIAMOND_BOOTS)
+                        return false;
+                    break;
+                case DIAMOND_CHESTPLATE:
+                    if (bootMat == Material.DIAMOND_BOOTS)
+                        return false;
+                    break;
+                default:
+                    return false;
+            }
         }
+        // Check legging sample
+        if (leggingSample != null) {
+            Material leggingMat = leggingSample.getType();
+            switch (tag.getItemMaterial()) {
+                case CHAINMAIL_CHESTPLATE:
+                    if (leggingMat == Material.CHAINMAIL_BOOTS || leggingMat == Material.IRON_BOOTS ||
+                            leggingMat == Material.DIAMOND_BOOTS)
+                        return false;
+                    break;
+                case IRON_CHESTPLATE:
+                    if (leggingMat == Material.IRON_BOOTS || leggingMat == Material.DIAMOND_BOOTS)
+                        return false;
+                    break;
+                case DIAMOND_CHESTPLATE:
+                    if (leggingMat == Material.DIAMOND_BOOTS)
+                        return false;
+                    break;
+                default:
+                    return false;
+            }
+        }
+        // Set boots and legging
+        ItemStack newBoot, newLegging;
+        switch (tag.getItemMaterial()) {
+            case CHAINMAIL_CHESTPLATE:
+                newBoot = new ItemStack(Material.CHAINMAIL_BOOTS, 1);
+                newLegging = new ItemStack(Material.CHAINMAIL_LEGGINGS, 1);
+                break;
+            case IRON_CHESTPLATE:
+                newBoot = new ItemStack(Material.IRON_BOOTS, 1);
+                newLegging = new ItemStack(Material.IRON_LEGGINGS, 1);
+                break;
+            case DIAMOND_CHESTPLATE:
+                newBoot = new ItemStack(Material.DIAMOND_BOOTS, 1);
+                newLegging = new ItemStack(Material.DIAMOND_LEGGINGS, 1);
+                break;
+            default:
+                return false;
+        }
+        // Check team exists
+        if (team != null) {
+            setUpgrade(team, newBoot);
+            setUpgrade(team, newLegging);
+        }
+        playerInv.setBoots(newBoot);
+        playerInv.setLeggings(newLegging);
+        return true;
     }
 
     private static void setUpgrade(@Nonnull TeamGroupMaker team, ItemStack item) {
         ItemMeta metaItem = item.getItemMeta();
         // Sharper Blade
         if (PluginStaticFunc.isSword(item.getType()) && team.getPermLevels()
-                .get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
+                .get(BedwarsUpgradeMenu.SHARPER_BLADE) - 1 != 0) {
             metaItem.addEnchant(Enchantment.DAMAGE_ALL, team.getPermLevels()
-                    .get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1, true);
+                    .get(BedwarsUpgradeMenu.SHARPER_BLADE) - 1, true);
         }
         // Tough Skin
         else if (PluginStaticFunc.isHumanEntityArmor(item.getType())) {
-            if (team.getPermLevels().get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1 != 0)
+            if (team.getPermLevels().get(BedwarsUpgradeMenu.TOUGH_SKIN) - 1 != 0)
                 metaItem.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, team.getPermLevels()
-                        .get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1, true);
-            if (team.getPermLevels().get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1 != 0)
+                        .get(BedwarsUpgradeMenu.TOUGH_SKIN) - 1, true);
+            if (team.getPermLevels().get(BedwarsUpgradeMenu.EYE_FOR_AN_EYE) - 1 != 0)
                 metaItem.addEnchant(Enchantment.THORNS, team.getPermLevels()
-                        .get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1, true);
+                        .get(BedwarsUpgradeMenu.EYE_FOR_AN_EYE) - 1, true);
         }
         // Mine A Holic
         else if ((PluginStaticFunc.isAxe(item.getType()) || item.getType() == Material.SHEARS ||
                 PluginStaticFunc.isPickaxe(item.getType())) &&
-                team.getPermLevels().get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1 != 0) {
+                team.getPermLevels().get(BedwarsUpgradeMenu.MINE_A_HOLIC) - 1 != 0) {
             metaItem.addEnchant(Enchantment.DIG_SPEED, team.getPermLevels()
-                    .get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1, true);
+                    .get(BedwarsUpgradeMenu.MINE_A_HOLIC) - 1, true);
         }
         item.setItemMeta(metaItem);
     }
@@ -770,10 +749,8 @@ public class BedwarsShopMenus {
             case "Tool Shop":
             case "Item Shop":
                 return true;
-
-            default:
-                return false;
         }
+        return false;
     }
 
     /**

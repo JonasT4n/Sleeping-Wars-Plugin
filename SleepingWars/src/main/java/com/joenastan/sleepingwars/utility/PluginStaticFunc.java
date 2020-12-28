@@ -152,9 +152,12 @@ public class PluginStaticFunc {
         }
     }
 
+    public static boolean isGateOrDoor(Material mat) {
+        return isStandardDoor(mat) || isFenceGate(mat) || isTrapDoor(mat);
+    }
+
     public static boolean isStandardDoor(Material mat) {
         switch (mat) {
-            case IRON_DOOR:
             case DARK_OAK_DOOR:
             case OAK_DOOR:
             case SPRUCE_DOOR:
@@ -199,33 +202,6 @@ public class PluginStaticFunc {
                 return true;
             default:
                 return false;
-        }
-    }
-
-    /**
-     * Team color string.
-     *
-     * @return returns the color code, if the color not match any, then it returns white
-     */
-    public static String getColorString(String colorString) {
-        if (colorString.equalsIgnoreCase("blue")) {
-            return ChatColor.BLUE + "";
-        } else if (colorString.equalsIgnoreCase("green")) {
-            return ChatColor.GREEN + "";
-        } else if (colorString.equalsIgnoreCase("yellow")) {
-            return ChatColor.YELLOW + "";
-        } else if (colorString.equalsIgnoreCase("aqua")) {
-            return ChatColor.AQUA + "";
-        } else if (colorString.equalsIgnoreCase("red")) {
-            return ChatColor.RED + "";
-        } else if (colorString.equalsIgnoreCase("purple")) {
-            return ChatColor.LIGHT_PURPLE + "";
-        } else if (colorString.equalsIgnoreCase("gold")) {
-            return ChatColor.GOLD + "";
-        } else if (colorString.equalsIgnoreCase("gray")) {
-            return ChatColor.GRAY + "";
-        } else { // Default is White
-            return ChatColor.WHITE + "";
         }
     }
 }

@@ -33,6 +33,8 @@ public class PlayerReviveTimer extends StopwatchTimer {
 
     @Override
     protected void runEvent() {
+        if (playerEnt.getPlayer() == null)
+            stop();
         playerEnt.getPlayer().teleport(team.getTeamSpawnLocation());
         playerEnt.getPlayer().setGameMode(GameMode.SURVIVAL);
         team.setStarterPack(playerEnt.getPlayer());

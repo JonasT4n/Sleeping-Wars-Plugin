@@ -3,8 +3,6 @@ package com.joenastan.sleepingwars.game;
 import com.joenastan.sleepingwars.enumtypes.ResourcesType;
 import com.joenastan.sleepingwars.timercoro.ResourceSpawnTimer;
 
-import com.joenastan.sleepingwars.utility.Hologram.Hologram;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -122,7 +120,7 @@ public class ResourceSpawner {
         return spawnLoc;
     }
 
-    public ResourcesType getTypeResourceSpawner() {
+    public ResourcesType getTypeSpawner() {
         return typeSpawnResource;
     }
 

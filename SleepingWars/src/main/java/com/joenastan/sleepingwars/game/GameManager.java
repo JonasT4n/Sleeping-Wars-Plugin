@@ -151,7 +151,7 @@ public class GameManager {
      */
     private void copyWorld(File source, File target) {
         try {
-            ArrayList<String> ignore = new ArrayList<String>(Arrays.asList("uid.dat", "session.dat"));
+            ArrayList<String> ignore = new ArrayList<>(Arrays.asList("uid.dat", "session.dat"));
             if (!ignore.contains(source.getName())) {
                 if (source.isDirectory()) {
                     if (!target.exists())

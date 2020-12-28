@@ -3,12 +3,12 @@ package com.joenastan.sleepingwars;
 import com.joenastan.sleepingwars.commands.HostBedwarsCommand;
 import com.joenastan.sleepingwars.commands.SleepingWarsPermissionsCommand;
 import com.joenastan.sleepingwars.commands.TabCompletor.HostingCommands;
-import com.joenastan.sleepingwars.commands.TabCompletor.SworldCommands;
+import com.joenastan.sleepingwars.commands.TabCompletor.SWorldCommands;
 import com.joenastan.sleepingwars.commands.WorldMakerCommand;
 import com.joenastan.sleepingwars.events.OnBuilderModeEvents;
 import com.joenastan.sleepingwars.events.OnGameEvent;
 import com.joenastan.sleepingwars.game.GameManager;
-import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsShopMenus;
+import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsShopMenu;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import com.joenastan.sleepingwars.utility.Hologram.HologramManager;
 
@@ -51,7 +51,7 @@ public class SleepingWarsPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new OnBuilderModeEvents(), this);
         // Load Commands
         getCommand("SWorld").setExecutor(new WorldMakerCommand());
-        getCommand("SWorld").setTabCompleter(new SworldCommands());
+        getCommand("SWorld").setTabCompleter(new SWorldCommands());
         getCommand("Bedwars").setExecutor(new HostBedwarsCommand());
         getCommand("Bedwars").setTabCompleter(new HostingCommands());
         getCommand("SwPerm").setExecutor(new SleepingWarsPermissionsCommand());
@@ -70,7 +70,7 @@ public class SleepingWarsPlugin extends JavaPlugin {
         hologramManager = null;
         OnBuilderModeEvents.clearStatic();
         HandlerList.unregisterAll(this);
-        BedwarsShopMenus.destroy();
+        BedwarsShopMenu.destroy();
         System.out.println("[SleepingWars] Sleeping war is over, see you next time!");
     }
 
@@ -90,6 +90,6 @@ public class SleepingWarsPlugin extends JavaPlugin {
         gameSystemConfig = new GameSystemConfig(instance, "worlds.yml");
         hologramManager = new HologramManager(instance);
         gameManager = new GameManager();
-        BedwarsShopMenus.init();
+        BedwarsShopMenu.init();
     }
 }

@@ -22,11 +22,11 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
 
     private final GameSystemConfig systemConf = SleepingWarsPlugin.getGameSystemConfig();
     private final GameManager gameManager = SleepingWarsPlugin.getGameManager();
-    private String hostCMD = "host"; // Host the game
-    private String joinCMD = "join"; // Join the game
-    private String startCMD = "start"; // Start the game, if user who use the command is a host
-    private String exitCMD = "leave"; // Leave the game
-    private String changeMapCMD = "cmap"; // Change map on game, if user who use the command is a host
+    private static final String HOST_CMD = "host"; // Host the game
+    private static final String JOIN_CMD = "join"; // Join the game
+    private static final String START_CMD = "start"; // Start the game, if user who use the command is a host
+    private static final String EXIT_CMD = "leave"; // Leave the game
+    private static final String CHANGE_MAP_CMD = "cmap"; // Change map on game, if user who use the command is a host
 
     @Override
     public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command,
@@ -34,21 +34,21 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
         if (sender instanceof Player) {
             Player player = ((Player) sender);
             if (args.length > 0) {
-                // Host Comamnd
+                // Host Command
                 String subCommand = args[0];
-                if (subCommand.equalsIgnoreCase(hostCMD)) {
+                if (subCommand.equalsIgnoreCase(HOST_CMD)) {
                     hostBedwars(player, args);
                 }
                 // Join Command
-                else if (subCommand.equalsIgnoreCase(joinCMD)) {
+                else if (subCommand.equalsIgnoreCase(JOIN_CMD)) {
                     joinRoom(player, args);
                 }
                 // Start Command
-                else if (subCommand.equalsIgnoreCase(startCMD)) {
+                else if (subCommand.equalsIgnoreCase(START_CMD)) {
                     startBedwars(player, args);
                 }
                 // Exit Command
-                else if (subCommand.equalsIgnoreCase(exitCMD)) {
+                else if (subCommand.equalsIgnoreCase(EXIT_CMD)) {
                     leaveBedwars(player);
                 }
             } else {
@@ -106,7 +106,8 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
 
     private void hostBedwars(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(ChatColor.GOLD + "Include a world name (/bedwars host <worldname>), use one of the map that you have made.");
+            player.sendMessage(ChatColor.GOLD + "Include a world name (/bedwars " + HOST_CMD + " <worldname>), " +
+                    "use one of the map that you have made.");
         } else {
             if (systemConf.getWorldNames().contains(args[1])) {
                 // Check if world still contains Player
@@ -127,9 +128,17 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
         SleepingRoom room = gameManager.getRoom(inWorldName);
         if (room != null) {
             PlayerBedwarsEntity playerEnt = room.findPlayer(player);
-            if (playerEnt != null)
+            if (playerEnt != null) {
                 playerEnt.setLeavingUsingCommand(true);
-            room.playerLeave(player);
+                playerEnt = room.playerLeave(player);
+                if (room.isGameProcessing())
+                    room.checkRemainingTeam();
+                if (playerEnt != null)
+                    playerEnt.returnEntity();
+            } else {
+                player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+            }
+            player.sendMessage(ChatColor.YELLOW + "You leave the game.");
         } else {
             player.sendMessage(ChatColor.YELLOW + "You are not in bedwars.");
         }

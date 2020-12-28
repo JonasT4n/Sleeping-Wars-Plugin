@@ -79,7 +79,7 @@ public class LockedNormalEntity {
     }
 
     /**
-     * Block which was refereced when it was constructed.
+     * Block which was referenced when it was constructed.
      *
      * @return if not exists then it returns null
      */
@@ -158,7 +158,7 @@ public class LockedNormalEntity {
     /**
      * Whenever it requires items from player's inventory.
      *
-     * @param playerInv Player's refered inventory
+     * @param playerInv Player's referred inventory
      * @param find      Find all items with material type
      * @param require   Required amount
      * @return True if player has amount of required items, else then false
@@ -180,7 +180,7 @@ public class LockedNormalEntity {
     /**
      * Send a description of requirements.
      *
-     * @param player Refered Player
+     * @param player Referred Player
      */
     private void sendRequirements(Player player) {
         player.sendMessage(ChatColor.YELLOW + "You need these requirements to unlock:");

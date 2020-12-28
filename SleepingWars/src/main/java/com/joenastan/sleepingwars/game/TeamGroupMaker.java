@@ -2,10 +2,11 @@ package com.joenastan.sleepingwars.game;
 
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsTeamUpgradeEvent;
-import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsUpgradeMenus;
+import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsUpgradeMenu;
 import com.joenastan.sleepingwars.game.ItemPrice.PricetagItems;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import com.joenastan.sleepingwars.timercoro.AreaEffectTimer;
+import com.joenastan.sleepingwars.utility.PluginStaticColor;
 import com.joenastan.sleepingwars.utility.PluginStaticFunc;
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 
@@ -38,7 +39,7 @@ public class TeamGroupMaker {
     private final AreaEffectTimer bufferZone;
     private final String teamColorPrefix;
     private final SleepingRoom inRoom;
-    private final BedwarsUpgradeMenus upgradeMenu;
+    private final BedwarsUpgradeMenu upgradeMenu;
 
     // Maps and Lists
     private final Map<String, Integer> perLevelData = new HashMap<>();
@@ -60,7 +61,7 @@ public class TeamGroupMaker {
         teamBedLocation = systemConfig.getBedLocation(inRoom.getWorld(), inRoom.getMapName(), teamName);
         teamColorPrefix = systemConfig.getRawColor(inRoom.getMapName(), teamName);
         // Initialize team upgrade menu and shop menu
-        upgradeMenu = new BedwarsUpgradeMenus(this);
+        upgradeMenu = new BedwarsUpgradeMenu(this);
         // Get all owned by team resource spawners
         resourceSpawners = systemConfig.getWorldRS(inRoom.getWorld(), inRoom.getMapName(), teamName);
         bufferZone = systemConfig.getAreaBuffRoutine(inRoom.getWorld(), inRoom.getMapName(), this);
@@ -84,13 +85,13 @@ public class TeamGroupMaker {
             ItemMeta leatherArmorMeta = i_armor.getItemMeta();
             ((LeatherArmorMeta) leatherArmorMeta).setColor(getPureColor());
             // Upgrade by level
-            if (perLevelData.get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1 != 0) {
+            if (perLevelData.get(BedwarsUpgradeMenu.TOUGH_SKIN) - 1 != 0) {
                 leatherArmorMeta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, perLevelData
-                        .get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1, true);
+                        .get(BedwarsUpgradeMenu.TOUGH_SKIN) - 1, true);
             }
-            if (perLevelData.get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1 != 0) {
+            if (perLevelData.get(BedwarsUpgradeMenu.EYE_FOR_AN_EYE) - 1 != 0) {
                 leatherArmorMeta.addEnchant(Enchantment.THORNS, perLevelData
-                        .get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1, true);
+                        .get(BedwarsUpgradeMenu.TOUGH_SKIN) - 1, true);
             }
             i_armor.setItemMeta(leatherArmorMeta);
         }
@@ -100,10 +101,10 @@ public class TeamGroupMaker {
         playerInv.setArmorContents(leatherArmorPack);
         // Create wooden sword
         ItemStack woodenSword = new ItemStack(Material.WOODEN_SWORD);
-        if (perLevelData.get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1 != 0) {
+        if (perLevelData.get(BedwarsUpgradeMenu.SHARPER_BLADE) - 1 != 0) {
             ItemMeta wsMeta = woodenSword.getItemMeta();
             wsMeta.addEnchant(Enchantment.DAMAGE_ALL, perLevelData
-                    .get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1,true);
+                    .get(BedwarsUpgradeMenu.SHARPER_BLADE) - 1,true);
             woodenSword.setItemMeta(wsMeta);
         }
         playerInv.setItem(0, woodenSword);
@@ -120,7 +121,7 @@ public class TeamGroupMaker {
         perLevelData.put(upgradeName, currentLvl + 1);
         // Effect all player in team
         switch (upgradeName) {
-            case BedwarsUpgradeMenus.SHARPER_BLADE:
+            case BedwarsUpgradeMenu.SHARPER_BLADE:
                 for (PlayerBedwarsEntity pbent : playerEntities.values()) {
                     PlayerInventory pInv = pbent.getPlayer().getInventory();
                     for (int i = 0; i < pInv.getSize(); i++) {
@@ -131,14 +132,14 @@ public class TeamGroupMaker {
                             // Enhance each player sword
                             ItemMeta i_swordMeta = pItem.getItemMeta();
                             i_swordMeta.addEnchant(Enchantment.DAMAGE_ALL, perLevelData
-                                    .get(BedwarsUpgradeMenus.SHARPER_BLADE) - 1,true);
+                                    .get(BedwarsUpgradeMenu.SHARPER_BLADE) - 1,true);
                             pItem.setItemMeta(i_swordMeta);
                         }
                     }
                 }
                 break;
 
-            case BedwarsUpgradeMenus.MINE_A_HOLIC:
+            case BedwarsUpgradeMenu.MINE_A_HOLIC:
                 for (PlayerBedwarsEntity pbent : playerEntities.values()) {
                     PlayerInventory pInv = pbent.getPlayer().getInventory();
                     for (int i = 0; i < pInv.getSize(); i++) {
@@ -150,14 +151,14 @@ public class TeamGroupMaker {
                                 PluginStaticFunc.isPickaxe(itemType)) {
                             ItemMeta i_toolMeta = pItem.getItemMeta();
                             i_toolMeta.addEnchant(Enchantment.DIG_SPEED, perLevelData
-                                    .get(BedwarsUpgradeMenus.MINE_A_HOLIC) - 1, true);
+                                    .get(BedwarsUpgradeMenu.MINE_A_HOLIC) - 1, true);
                             pItem.setItemMeta(i_toolMeta);
                         }
                     }
                 }
                 break;
 
-            case BedwarsUpgradeMenus.MAKE_IT_RAIN:
+            case BedwarsUpgradeMenu.MAKE_IT_RAIN:
                 for (ResourceSpawner rspEntry : resourceSpawners) {
                     // TODO: Create Generic upgrades, custom percentage upgrade
                     // 25% duration reduction
@@ -166,36 +167,36 @@ public class TeamGroupMaker {
                 }
                 break;
 
-            case BedwarsUpgradeMenus.HOLY_LIGHT:
+            case BedwarsUpgradeMenu.HOLY_LIGHT:
                 bufferZone.setEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 0));
                 bufferZone.start();
                 break;
 
-            case BedwarsUpgradeMenus.TOUGH_SKIN:
+            case BedwarsUpgradeMenu.TOUGH_SKIN:
                 for (PlayerBedwarsEntity pbent : playerEntities.values()) {
                     ItemStack[] armorPack = pbent.getPlayer().getInventory().getArmorContents();
                     for (ItemStack i_armorStack : armorPack) {
                         ItemMeta i_armorMeta = i_armorStack.getItemMeta();
                         i_armorMeta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, perLevelData
-                                .get(BedwarsUpgradeMenus.TOUGH_SKIN) - 1, true);
+                                .get(BedwarsUpgradeMenu.TOUGH_SKIN) - 1, true);
                         i_armorStack.setItemMeta(i_armorMeta);
                     }
                 }
                 break;
 
-            case BedwarsUpgradeMenus.EYE_FOR_AN_EYE:
+            case BedwarsUpgradeMenu.EYE_FOR_AN_EYE:
                 for (PlayerBedwarsEntity pbent : playerEntities.values()) {
                     ItemStack[] armorPack = pbent.getPlayer().getInventory().getArmorContents();
                     for (ItemStack i_armorStack : armorPack) {
                         ItemMeta i_armorMeta = i_armorStack.getItemMeta();
                         i_armorMeta.addEnchant(Enchantment.THORNS, perLevelData
-                                .get(BedwarsUpgradeMenus.EYE_FOR_AN_EYE) - 1, true);
+                                .get(BedwarsUpgradeMenu.EYE_FOR_AN_EYE) - 1, true);
                         i_armorStack.setItemMeta(i_armorMeta);
                     }
                 }
                 break;
 
-            case BedwarsUpgradeMenus.GIFT_FOR_THE_POOR:
+            case BedwarsUpgradeMenu.GIFT_FOR_THE_POOR:
                 // TODO: Easter Egg
                 break;
         }
@@ -207,7 +208,7 @@ public class TeamGroupMaker {
      */
     public void insertPlayer(PlayerBedwarsEntity playerEnt) {
         playerEnt.getPlayer().sendMessage(String.format("You are in team %s[%s]",
-                PluginStaticFunc.getColorString(teamColorPrefix), teamName));
+                PluginStaticColor.getColorString(teamColorPrefix), teamName));
         playerEnt.getPlayer().teleport(teamSpawnPoint);
         playerEnt.getPlayer().setGameMode(GameMode.SURVIVAL);
         playerEntities.put(playerEnt.getPlayer().getUniqueId(), playerEnt);
@@ -221,8 +222,8 @@ public class TeamGroupMaker {
     public void removePlayer(PlayerBedwarsEntity playerEnt) {
         playerEntities.remove(playerEnt.getPlayer().getUniqueId());
         // Scoreboard sync
-        String recentScore = String.format("%s%d %s", PluginStaticFunc.getColorString(teamColorPrefix),
-                playerEntities.size() + 1, teamName);
+        String recentScore = String.format("%s%d %s", PluginStaticColor
+                .getColorString(teamColorPrefix), playerEntities.size() + 1, teamName);
         inRoom.getScoreboard().resetScores(recentScore);
     }
 
@@ -266,10 +267,10 @@ public class TeamGroupMaker {
         Player player = playerEnt.getPlayer();
         if (isTeamStandStill()) {
             playerEntities.put(player.getUniqueId(), playerEnt);
-            inRoom.roomBroadcast(PluginStaticFunc.getColorString(getRawColor()) +
+            inRoom.roomBroadcast(PluginStaticColor.getColorString(getRawColor()) +
                     player.getName() + ChatColor.WHITE + " reconnected to the game.");
             // Scoreboard sync
-            String recentScore = String.format("%s%d %s", PluginStaticFunc.getColorString(teamColorPrefix),
+            String recentScore = String.format("%s%d %s", PluginStaticColor.getColorString(teamColorPrefix),
                     playerEntities.size() - 1, teamName);
             inRoom.getScoreboard().resetScores(recentScore);
         } else {
@@ -286,15 +287,15 @@ public class TeamGroupMaker {
     public void playerDisconnectedHandler(PlayerBedwarsEntity playerEnt) {
         // Check if player disconnected from the game by command
         if (playerEnt.isLeavingUsingCommand()) {
-            inRoom.roomBroadcast(String.format("%s leave the game.", PluginStaticFunc
+            inRoom.roomBroadcast(String.format("%s leave the game.", PluginStaticColor
                     .getColorString(teamColorPrefix) + playerEnt.getPlayer().getName()));
         } else {
-            inRoom.roomBroadcast(String.format("%s disconnected from the game.", PluginStaticFunc
+            inRoom.roomBroadcast(String.format("%s disconnected from the game.", PluginStaticColor
                     .getColorString(teamColorPrefix) + playerEnt.getPlayer().getName()));
         }
         playerEntities.remove(playerEnt.getPlayer().getUniqueId());
         // Scoreboard sync
-        String recentScore = String.format("%s%d %s", PluginStaticFunc.getColorString(teamColorPrefix),
+        String recentScore = String.format("%s%d %s", PluginStaticColor.getColorString(teamColorPrefix),
                 playerEntities.size() + 1, teamName);
         inRoom.getScoreboard().resetScores(recentScore);
     }
@@ -332,7 +333,7 @@ public class TeamGroupMaker {
      */
     public void sendTeamMessage(String msg) {
         for (PlayerBedwarsEntity pbent : playerEntities.values())
-            pbent.getPlayer().sendMessage(PluginStaticFunc.getColorString(teamColorPrefix) +
+            pbent.getPlayer().sendMessage(PluginStaticColor.getColorString(teamColorPrefix) +
                     "[" + teamName + "] " + ChatColor.WHITE + msg);
     }
 
@@ -368,7 +369,7 @@ public class TeamGroupMaker {
      * All players in team, this list of player not associated with team's data, only a copy of it.
      */
     public List<Player> getPlayers() {
-        List<Player> listPlayer = new ArrayList<Player>();
+        List<Player> listPlayer = new ArrayList<>();
         for (PlayerBedwarsEntity pbent : playerEntities.values())
             listPlayer.add(pbent.getPlayer());
         return listPlayer;
@@ -378,7 +379,7 @@ public class TeamGroupMaker {
      * List of player entities. This function is not derived from the object data.
      */
     public List<PlayerBedwarsEntity> getPlayerEntities() {
-        return new ArrayList<PlayerBedwarsEntity>(playerEntities.values());
+        return new ArrayList<>(playerEntities.values());
     }
 
     /**

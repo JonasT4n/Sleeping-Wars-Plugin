@@ -23,13 +23,13 @@ public class ResourceSpawnTimer extends StopwatchTimer {
         if (isLocked)
             return;
         if (holoSign == null) {
-            if (spawner.getTypeResourceSpawner() == ResourcesType.IRON) {
+            if (spawner.getTypeSpawner() == ResourcesType.IRON) {
                 holoSign = new Hologram(spawner.getSpawnLocation(), ChatColor.GRAY + "Iron Spawner");
-            } else if (spawner.getTypeResourceSpawner() == ResourcesType.GOLD) {
+            } else if (spawner.getTypeSpawner() == ResourcesType.GOLD) {
                 holoSign = new Hologram(spawner.getSpawnLocation(), ChatColor.GOLD + "Gold Spawner");
-            } else if (spawner.getTypeResourceSpawner() == ResourcesType.DIAMOND) {
+            } else if (spawner.getTypeSpawner() == ResourcesType.DIAMOND) {
                 holoSign = new Hologram(spawner.getSpawnLocation(), ChatColor.AQUA + "Diamond Spawner");
-            } else if (spawner.getTypeResourceSpawner() == ResourcesType.EMERALD) {
+            } else if (spawner.getTypeSpawner() == ResourcesType.EMERALD) {
                 holoSign = new Hologram(spawner.getSpawnLocation(), ChatColor.GREEN + "Emerald Spawner");
             } else {
                 holoSign = new Hologram(spawner.getSpawnLocation(), "Unknown Resource Spawner");

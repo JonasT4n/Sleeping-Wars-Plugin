@@ -25,12 +25,10 @@ public class LockedResourceSpawner extends LockedNormalEntity {
 
     @Override
     public boolean unlockEntity(PlayerBedwarsEntity keyEntity) {
-        System.out.println("[DEBUG] Unlocking...");
         if (super.unlockEntity(keyEntity)) {
             for (ResourceSpawner rs : rSpawner) {
                 rs.getCoroutine().setLocked(false);
                 rs.getCoroutine().start();
-                System.out.println("[DEBUG] Resource Spawner Unlocked! " + rs.getCodename());
             }
             return true;
         }

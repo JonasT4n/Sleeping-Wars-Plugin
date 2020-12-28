@@ -42,7 +42,7 @@ public class BedwarsTimelineEvent extends Event {
         return type;
     }
 
-    public float getTriggerSeconds() {
+    public float getSecTrigger() {
         return secondsToTrigger;
     }
 

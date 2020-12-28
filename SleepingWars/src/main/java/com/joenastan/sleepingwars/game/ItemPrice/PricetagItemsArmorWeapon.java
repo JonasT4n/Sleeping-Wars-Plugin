@@ -5,20 +5,25 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 
 public class PricetagItemsArmorWeapon extends PricetagItems {
 
     private final Map<Enchantment, Integer> enchantments;
 
-    public PricetagItemsArmorWeapon(Material item, Material currency, int price, ItemMeta meta, int defaultAmountGetter, Map<Enchantment, Integer> enchancements) {
-        super(item, currency, price, meta, defaultAmountGetter);
-        this.enchantments = enchancements;
+    public PricetagItemsArmorWeapon(@Nonnull Material item, @Nonnull Material currency, @Nonnull String itemName,
+                                    int price, int defaultAmountGetter, @Nullable List<String> lore,
+                                    Map<Enchantment, Integer> enhancements) {
+        super(item, currency, itemName, price, defaultAmountGetter, lore);
+        this.enchantments = enhancements;
     }
 
     @Override
     public ItemStack createItem() {
-        ItemStack thisItem = super.createItem(defaultAmountGetter);
+        ItemStack thisItem = super.createItem();
         thisItem.addEnchantments(enchantments);
         return thisItem;
     }
@@ -33,5 +38,4 @@ public class PricetagItemsArmorWeapon extends PricetagItems {
     public Map<Enchantment, Integer> getListEnchant() {
         return enchantments;
     }
-
 }

@@ -25,7 +25,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class BedwarsUpgradeMenus {
+public class BedwarsUpgradeMenu {
+
+    public static final String VILLAGER_NAME_TAG = ChatColor.GOLD + String.format(
+            "BW %sUpgrade", ChatColor.LIGHT_PURPLE + "");
 
     public static final String SHARPER_BLADE = "Sharper Blade";
     public static final String MINE_A_HOLIC = "Mine-A-Holic";
@@ -34,6 +37,7 @@ public class BedwarsUpgradeMenus {
     public static final String TOUGH_SKIN = "Tough Skin";
     public static final String EYE_FOR_AN_EYE = "Eye for an Eye";
     public static final String GIFT_FOR_THE_POOR = "Gift for the Poor";
+
     public static final String MENU_NAME = "Upgrade Menu";
 
     // Attributes
@@ -42,62 +46,41 @@ public class BedwarsUpgradeMenus {
     // Maps and Lists
     private final Map<String, PricetagItems> pricedItems = new HashMap<>();
 
-    public BedwarsUpgradeMenus(TeamGroupMaker team) {
+    public BedwarsUpgradeMenu(TeamGroupMaker team) {
         //#region Upgrades
         // Sharper Blade Entity
-        ItemMeta sharperBladeMeta = new ItemStack(Material.DIAMOND_SWORD, 1).getItemMeta();
-        assert sharperBladeMeta != null;
-        sharperBladeMeta.setDisplayName(ChatColor.AQUA + SHARPER_BLADE);
-        sharperBladeMeta.setLore(Arrays.asList("Permanently upgrade weapon", "Sharpness by 1 for team."));
-        sharperBladeMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        pricedItems.put(SHARPER_BLADE, new PricetagItems(Material.DIAMOND_SWORD, Material.DIAMOND, 4,
-                sharperBladeMeta, 1));
+        pricedItems.put(SHARPER_BLADE, new PricetagItems(Material.DIAMOND_SWORD, Material.DIAMOND, SHARPER_BLADE,
+                4, 1, Arrays.asList("Permanently upgrade weapon", "Sharpness by 1 for team.")));
+        pricedItems.get(SHARPER_BLADE).addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
+        pricedItems.get(SHARPER_BLADE).setDisplayColor(ChatColor.AQUA);
         // Mine-A-Holic Entity
-        ItemMeta mineAHolicMeta = new ItemStack(Material.GOLDEN_PICKAXE, 1).getItemMeta();
-        assert mineAHolicMeta != null;
-        mineAHolicMeta.setDisplayName(ChatColor.AQUA + MINE_A_HOLIC);
-        mineAHolicMeta.setLore(Arrays.asList("Permanently upgrade weapon", "Efficiency by 1 for team."));
-        mineAHolicMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        pricedItems.put(MINE_A_HOLIC, new PricetagItems(Material.GOLDEN_PICKAXE, Material.DIAMOND, 4,
-                mineAHolicMeta, 1));
+        pricedItems.put(MINE_A_HOLIC, new PricetagItems(Material.GOLDEN_PICKAXE, Material.DIAMOND, MINE_A_HOLIC, 4,
+                1, Arrays.asList("Permanently upgrade weapon", "Efficiency by 1 for team.")));
+        pricedItems.get(MINE_A_HOLIC).addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
+        pricedItems.get(MINE_A_HOLIC).setDisplayColor(ChatColor.AQUA);
         // Make It Rain! Entity
-        ItemMeta makeItRainMeta = new ItemStack(Material.GHAST_TEAR, 1).getItemMeta();
-        assert makeItRainMeta != null;
-        makeItRainMeta.setDisplayName(ChatColor.AQUA + MAKE_IT_RAIN);
-        makeItRainMeta.setLore(Collections.singletonList("Permanently upgrade base generators"));
-        pricedItems.put(MAKE_IT_RAIN, new PricetagItems(Material.GHAST_TEAR, Material.DIAMOND, 8,
-                makeItRainMeta, 1));
+        pricedItems.put(MAKE_IT_RAIN, new PricetagItems(Material.GHAST_TEAR, Material.DIAMOND, MAKE_IT_RAIN,
+                8, 1, Collections.singletonList("Permanently upgrade base generators")));
+        pricedItems.get(MAKE_IT_RAIN).setDisplayColor(ChatColor.AQUA);
         // Holy Light Entity
-        ItemMeta holyLightMeta = new ItemStack(Material.EXPERIENCE_BOTTLE, 1).getItemMeta();
-        assert holyLightMeta != null;
-        holyLightMeta.setDisplayName(ChatColor.AQUA + HOLY_LIGHT);
-        holyLightMeta.setLore(Arrays.asList("Permanent health regeneration", "at your team base."));
-        pricedItems.put(HOLY_LIGHT, new PricetagItems(Material.EXPERIENCE_BOTTLE, Material.DIAMOND, 8,
-                holyLightMeta, 1));
+        pricedItems.put(HOLY_LIGHT, new PricetagItems(Material.EXPERIENCE_BOTTLE, Material.DIAMOND, HOLY_LIGHT,
+                8, 1, Arrays.asList("Permanent health regeneration", "at your team base.")));
+        pricedItems.get(HOLY_LIGHT).setDisplayColor(ChatColor.AQUA);
         // Tough Skin Entity
-        ItemMeta toughSkinMeta = new ItemStack(Material.LEATHER, 1).getItemMeta();
-        assert toughSkinMeta != null;
-        toughSkinMeta.setDisplayName(ChatColor.AQUA + TOUGH_SKIN);
-        toughSkinMeta.setLore(Arrays.asList("Permanent upgrade armor", "Protection by 1 for team."));
-        pricedItems.put(TOUGH_SKIN, new PricetagItems(Material.LEATHER, Material.DIAMOND, 4,
-                toughSkinMeta, 1));
+        pricedItems.put(TOUGH_SKIN, new PricetagItems(Material.LEATHER, Material.DIAMOND, TOUGH_SKIN,
+                4, 1, Arrays.asList("Permanent upgrade armor", "Protection by 1 for team.")));
+        pricedItems.get(TOUGH_SKIN).setDisplayColor(ChatColor.AQUA);
         // Eye for an eye Entity
-        ItemMeta eyeForEyeMeta = new ItemStack(Material.ENDER_EYE, 1).getItemMeta();
-        assert eyeForEyeMeta != null;
-        eyeForEyeMeta.setDisplayName(ChatColor.AQUA + EYE_FOR_AN_EYE);
-        eyeForEyeMeta.setLore(Arrays.asList("Permanent upgrade armor", "Thorns by 1 for team."));
-        pricedItems.put(EYE_FOR_AN_EYE, new PricetagItems(Material.ENDER_EYE, Material.DIAMOND, 8,
-                eyeForEyeMeta, 1));
+        pricedItems.put(EYE_FOR_AN_EYE, new PricetagItems(Material.ENDER_EYE, Material.DIAMOND, EYE_FOR_AN_EYE,
+                8, 1, Arrays.asList("Permanent upgrade armor", "Thorns by 1 for team.")));
+        pricedItems.get(EYE_FOR_AN_EYE).setDisplayColor(ChatColor.AQUA);
         // Gift for the Poor Entity
-        ItemMeta giftPoorMeta = new ItemStack(Material.DEAD_BUSH, 1).getItemMeta();
-        assert giftPoorMeta != null;
-        giftPoorMeta.setDisplayName(ChatColor.AQUA + GIFT_FOR_THE_POOR);
-        giftPoorMeta.setLore(Collections.singletonList("Something special is coming."));
-        pricedItems.put(GIFT_FOR_THE_POOR, new PricetagItems(Material.DEAD_BUSH, Material.DIAMOND, 4,
-                giftPoorMeta, 1));
+        pricedItems.put(GIFT_FOR_THE_POOR, new PricetagItems(Material.DEAD_BUSH, Material.DIAMOND, GIFT_FOR_THE_POOR,
+                4, 1, Collections.singletonList("Something special is coming.")));
+        pricedItems.get(GIFT_FOR_THE_POOR).setDisplayColor(ChatColor.AQUA);
         //#endregion
 
-        // Initialize perma-level upgrades, set all to level 1
+        // Initialize permanent level upgrades, set all to level 1
         for (Map.Entry<String, PricetagItems> listUpgradeEntry : pricedItems.entrySet())
             team.getPermLevels().put(listUpgradeEntry.getKey(), 1);
         // Initialize upgrade inventory menu
@@ -141,7 +124,7 @@ public class BedwarsUpgradeMenus {
     public boolean chooseUpgrade(@Nonnull Player player, @Nonnull PricetagItems pricedItemTag,
                                  @Nonnull ItemStack reference, @Nullable TeamGroupMaker team) {
         if (team != null) {
-            String upgradeName = ChatColor.stripColor(pricedItemTag.getMeta().getDisplayName());
+            String upgradeName = ChatColor.stripColor(pricedItemTag.getName());
             if (getUpgradeMaxLevel(upgradeName) <= team.getPermLevels().get(upgradeName)) {
                 player.sendMessage(ChatColor.LIGHT_PURPLE + "You have already reach its max level");
             } else {
@@ -174,15 +157,15 @@ public class BedwarsUpgradeMenus {
                     // If reach max level then edit lore without price
                     if (team.getPermLevels().get(upgradeName) >= getUpgradeMaxLevel(upgradeName)) {
                         pricedItemTag.setPrice(0);
-                        ItemMeta upPriceMeta = pricedItemTag.getMeta();
-                        List<String> c_lore = new ArrayList<>();
-                        if (upPriceMeta.hasLore())
-                            c_lore.addAll(upPriceMeta.getLore());
+                        List<String> c_lore = pricedItemTag.getLore();
+                        c_lore.remove(c_lore.size() - 1);
+                        c_lore.remove(c_lore.size() - 1);
+                        c_lore.add(" ");
                         c_lore.add(ChatColor.RED + "MAX LEVEL REACHED");
-                        upPriceMeta.setLore(c_lore);
-                        pricedItemTag.setMeta(upPriceMeta);
+                        pricedItemTag.refreshMeta(reference, false);
                     } else {
                         pricedItemTag.setPrice(currentPrice + (currentPrice * 50/100));
+                        pricedItemTag.refreshMeta(reference, true);
                     }
                     reference.setItemMeta(pricedItemTag.getMeta());
                     reference.setAmount(reference.getAmount() + 1);
@@ -203,7 +186,7 @@ public class BedwarsUpgradeMenus {
 
     /**
      * Check if player has the required items to buy something. Must include a slot indexes references by the list.
-     * @param playerInv Refered player inventory
+     * @param playerInv Referred player inventory
      * @param required Required item type
      * @param targetSlots List of slot index that has the same item type
      * @return True if player has the requirement, else then false

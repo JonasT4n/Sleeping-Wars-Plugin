@@ -13,14 +13,17 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.WorldBorder;
 import org.bukkit.block.Block;
 
 
 public class TimelineTimer extends StopwatchTimer {
 
     private final SleepingRoom room;
+    // TODO: Make it one object for all events
     private final BedwarsTimelineEvent event;
     private final List<ResourceSpawner> publicSpawners;
+    private int shrunkBorderSize = 24;
 
     public TimelineTimer(float duration, SleepingRoom room, BedwarsTimelineEvent event,
                          List<ResourceSpawner> publicSpawners) {
@@ -56,6 +59,9 @@ public class TimelineTimer extends StopwatchTimer {
                     b.breakNaturally();
                 }
             }
+        } else if (eType == TimelineEventType.WORLD_SHRINKING) {
+            WorldBorder border = room.getWorld().getWorldBorder();
+            border.setSize(shrunkBorderSize, 180L);
         }
         // Update timeline
         room.gotoNextTimelineEvent();
@@ -72,4 +78,7 @@ public class TimelineTimer extends StopwatchTimer {
         return counter;
     }
 
+    public void setShrunkBorderSize(int size) {
+        shrunkBorderSize = size;
+    }
 }
