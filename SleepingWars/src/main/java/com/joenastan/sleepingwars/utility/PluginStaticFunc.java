@@ -10,7 +10,7 @@ public class PluginStaticFunc {
     /**
      * Remove items in any inventory by specific item type.
      *
-     * @param inv      Inventory referenced
+     * @param inv      Inventory reference
      * @param itemType Material type
      * @param amount   amount to be remove
      */
@@ -35,11 +35,11 @@ public class PluginStaticFunc {
     /**
      * Add items into inventory.
      *
-     * @param inv      Inventory referenced
+     * @param inv      Inventory reference
      * @param itemType Material type
      * @param amount   amount to be remove
      */
-    public static void addItemInventory(Inventory inv, Material itemType, int amount) {
+    public static void addItemIntoInventory(Inventory inv, Material itemType, int amount) {
         int maxStack = (amount / 64) + 1;
         for (int i = 0; i < maxStack; i++) {
             if (i == maxStack - 1) {
@@ -49,6 +49,25 @@ public class PluginStaticFunc {
                 amount -= 64;
             }
         }
+    }
+
+    /**
+     * Search an item in inventory.
+     *
+     * @param inv Inventory reference
+     * @param itemType Material type
+     * @return First Inventory slot when found, else then it returns -1
+     */
+    public static int searchItemInventory(Inventory inv, Material itemType) {
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack stack = inv.getItem(i);
+            if (stack == null)
+                continue;
+
+            if (stack.getType() == itemType)
+                return i;
+        }
+        return -1;
     }
 
     public static boolean isSword(Material mat) {
@@ -95,8 +114,26 @@ public class PluginStaticFunc {
         }
     }
 
-    public static boolean isMaterialBed(Material material) {
-        switch (material) {
+    public static boolean isButton(Material mat) {
+        switch (mat) {
+            case OAK_BUTTON:
+            case ACACIA_BUTTON:
+            case BIRCH_BUTTON:
+            case CRIMSON_BUTTON:
+            case DARK_OAK_BUTTON:
+            case JUNGLE_BUTTON:
+            case POLISHED_BLACKSTONE_BUTTON:
+            case SPRUCE_BUTTON:
+            case STONE_BUTTON:
+            case WARPED_BUTTON:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isBed(Material mat) {
+        switch (mat) {
             case BLACK_BED:
             case BLUE_BED:
             case BROWN_BED:

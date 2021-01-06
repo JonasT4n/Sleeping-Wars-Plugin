@@ -43,4 +43,9 @@ public abstract class AbstractFile {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Load worlds and config
+     */
+    public abstract void Load();
 }

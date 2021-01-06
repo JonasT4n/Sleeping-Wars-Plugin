@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PricetagItems implements Pricetag {
+public class PricesItems implements Prices {
 
     protected Material item;
     protected Material currency;
@@ -24,10 +24,9 @@ public class PricetagItems implements Pricetag {
     private final String itemName;
 
     private int price;
-    private ChatColor displayColor = ChatColor.WHITE;
 
-    public PricetagItems(@Nonnull Material item, @Nonnull Material currency, @Nonnull String itemName,
-                         int price, int defaultAmountGetter, @Nullable List<String> lore) {
+    public PricesItems(@Nonnull Material item, @Nonnull Material currency, @Nonnull String itemName,
+                       int price, int defaultAmountGetter, @Nullable List<String> lore) {
         this.item = item;
         this.currency = currency;
         this.price = price;
@@ -60,8 +59,15 @@ public class PricetagItems implements Pricetag {
     public void refreshMeta(ItemStack itemSample, boolean showPrice) {
         // Add price tag to the lore
         meta = itemSample.getItemMeta();
-        meta.setDisplayName(displayColor + "" + itemName);
+        meta.setDisplayName(itemName);
         lore.clear();
+        if (meta.getLore() != null) {
+            for (String s : meta.getLore()) {
+                if (s.equalsIgnoreCase(" "))
+                    break;
+                lore.add(s);
+            }
+        }
         if (showPrice) {
             lore.add(" ");
             lore.add(getPriceTag());
@@ -74,10 +80,6 @@ public class PricetagItems implements Pricetag {
     public void addItemFlag(ItemFlag flag) {
         if (!flags.contains(flag))
             flags.add(flag);
-    }
-
-    public void setDisplayColor(ChatColor color) {
-        displayColor = color;
     }
 
     protected String getPriceTag() {

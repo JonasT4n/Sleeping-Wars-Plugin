@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.joenastan.sleepingwars.game.ItemPrice.PricetagItems;
+import com.joenastan.sleepingwars.game.ItemPrice.PricesItems;
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
 
 import net.md_5.bungee.api.ChatColor;
@@ -44,44 +44,44 @@ public class BedwarsUpgradeMenu {
     private final Inventory upgradeInvMenu;
 
     // Maps and Lists
-    private final Map<String, PricetagItems> pricedItems = new HashMap<>();
+    private final Map<String, PricesItems> pricedItems = new HashMap<>();
 
     public BedwarsUpgradeMenu(TeamGroupMaker team) {
         //#region Upgrades
         // Sharper Blade Entity
-        pricedItems.put(SHARPER_BLADE, new PricetagItems(Material.DIAMOND_SWORD, Material.DIAMOND, SHARPER_BLADE,
-                4, 1, Arrays.asList("Permanently upgrade weapon", "Sharpness by 1 for team.")));
+        pricedItems.put(SHARPER_BLADE, new PricesItems(Material.DIAMOND_SWORD, Material.DIAMOND,
+                ChatColor.AQUA + SHARPER_BLADE, 4, 1,
+                Arrays.asList("Permanently upgrade weapon", "Sharpness by 1 for team.")));
         pricedItems.get(SHARPER_BLADE).addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
-        pricedItems.get(SHARPER_BLADE).setDisplayColor(ChatColor.AQUA);
         // Mine-A-Holic Entity
-        pricedItems.put(MINE_A_HOLIC, new PricetagItems(Material.GOLDEN_PICKAXE, Material.DIAMOND, MINE_A_HOLIC, 4,
-                1, Arrays.asList("Permanently upgrade weapon", "Efficiency by 1 for team.")));
+        pricedItems.put(MINE_A_HOLIC, new PricesItems(Material.GOLDEN_PICKAXE, Material.DIAMOND,
+                ChatColor.AQUA + MINE_A_HOLIC, 4, 1,
+                Arrays.asList("Permanently upgrade weapon", "Efficiency by 1 for team.")));
         pricedItems.get(MINE_A_HOLIC).addItemFlag(ItemFlag.HIDE_ATTRIBUTES);
-        pricedItems.get(MINE_A_HOLIC).setDisplayColor(ChatColor.AQUA);
         // Make It Rain! Entity
-        pricedItems.put(MAKE_IT_RAIN, new PricetagItems(Material.GHAST_TEAR, Material.DIAMOND, MAKE_IT_RAIN,
-                8, 1, Collections.singletonList("Permanently upgrade base generators")));
-        pricedItems.get(MAKE_IT_RAIN).setDisplayColor(ChatColor.AQUA);
+        pricedItems.put(MAKE_IT_RAIN, new PricesItems(Material.GHAST_TEAR, Material.DIAMOND,
+                ChatColor.AQUA + MAKE_IT_RAIN, 8, 1,
+                Collections.singletonList("Permanently upgrade base generators")));
         // Holy Light Entity
-        pricedItems.put(HOLY_LIGHT, new PricetagItems(Material.EXPERIENCE_BOTTLE, Material.DIAMOND, HOLY_LIGHT,
-                8, 1, Arrays.asList("Permanent health regeneration", "at your team base.")));
-        pricedItems.get(HOLY_LIGHT).setDisplayColor(ChatColor.AQUA);
+        pricedItems.put(HOLY_LIGHT, new PricesItems(Material.EXPERIENCE_BOTTLE, Material.DIAMOND,
+                ChatColor.AQUA + HOLY_LIGHT, 8, 1,
+                Arrays.asList("Permanent health regeneration", "at your team base.")));
         // Tough Skin Entity
-        pricedItems.put(TOUGH_SKIN, new PricetagItems(Material.LEATHER, Material.DIAMOND, TOUGH_SKIN,
-                4, 1, Arrays.asList("Permanent upgrade armor", "Protection by 1 for team.")));
-        pricedItems.get(TOUGH_SKIN).setDisplayColor(ChatColor.AQUA);
+        pricedItems.put(TOUGH_SKIN, new PricesItems(Material.LEATHER, Material.DIAMOND,
+                ChatColor.AQUA + TOUGH_SKIN, 4, 1,
+                Arrays.asList("Permanent upgrade armor", "Protection by 1 for team.")));
         // Eye for an eye Entity
-        pricedItems.put(EYE_FOR_AN_EYE, new PricetagItems(Material.ENDER_EYE, Material.DIAMOND, EYE_FOR_AN_EYE,
-                8, 1, Arrays.asList("Permanent upgrade armor", "Thorns by 1 for team.")));
-        pricedItems.get(EYE_FOR_AN_EYE).setDisplayColor(ChatColor.AQUA);
+        pricedItems.put(EYE_FOR_AN_EYE, new PricesItems(Material.ENDER_EYE, Material.DIAMOND,
+                ChatColor.AQUA + EYE_FOR_AN_EYE, 8, 1,
+                Arrays.asList("Permanent upgrade armor", "Thorns by 1 for team.")));
         // Gift for the Poor Entity
-        pricedItems.put(GIFT_FOR_THE_POOR, new PricetagItems(Material.DEAD_BUSH, Material.DIAMOND, GIFT_FOR_THE_POOR,
-                4, 1, Collections.singletonList("Something special is coming.")));
-        pricedItems.get(GIFT_FOR_THE_POOR).setDisplayColor(ChatColor.AQUA);
+        pricedItems.put(GIFT_FOR_THE_POOR, new PricesItems(Material.DEAD_BUSH, Material.DIAMOND,
+                ChatColor.AQUA + GIFT_FOR_THE_POOR, 4, 1,
+                Collections.singletonList("Something special is coming.")));
         //#endregion
 
         // Initialize permanent level upgrades, set all to level 1
-        for (Map.Entry<String, PricetagItems> listUpgradeEntry : pricedItems.entrySet())
+        for (Map.Entry<String, PricesItems> listUpgradeEntry : pricedItems.entrySet())
             team.getPermLevels().put(listUpgradeEntry.getKey(), 1);
         // Initialize upgrade inventory menu
         upgradeInvMenu = Bukkit.getServer().createInventory(null,
@@ -110,18 +110,17 @@ public class BedwarsUpgradeMenu {
         }
     }
 
-    public PricetagItems selectedSlot(Inventory inv, int slot) {
+    public PricesItems selectedSlot(@Nonnull Inventory inv, int slot) {
         // Get information
         ItemStack upgradeItem = inv.getItem(slot);
         if (upgradeItem != null) {
             ItemMeta upgradeMeta = upgradeItem.getItemMeta();
-            assert upgradeMeta != null;
             return pricedItems.get(ChatColor.stripColor(upgradeMeta.getDisplayName()));
         }
         return null;
     }
 
-    public boolean chooseUpgrade(@Nonnull Player player, @Nonnull PricetagItems pricedItemTag,
+    public boolean chooseUpgrade(@Nonnull Player player, @Nonnull PricesItems pricedItemTag,
                                  @Nonnull ItemStack reference, @Nullable TeamGroupMaker team) {
         if (team != null) {
             String upgradeName = ChatColor.stripColor(pricedItemTag.getName());

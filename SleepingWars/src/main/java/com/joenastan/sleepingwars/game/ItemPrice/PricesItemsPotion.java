@@ -1,6 +1,7 @@
 package com.joenastan.sleepingwars.game.ItemPrice;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
@@ -11,13 +12,13 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PricetagItemsPotion extends PricetagItems {
+public class PricesItemsPotion extends PricesItems {
 
     private PotionData potionBaseData;
     private final List<PotionEffect> effects = new ArrayList<>();
 
-    public PricetagItemsPotion(@Nonnull Material item, @Nonnull Material currency, @Nonnull String itemName, int price,
-                               int defaultAmountGetter, @Nullable List<String> lore, PotionData potionBaseData) {
+    public PricesItemsPotion(@Nonnull Material item, @Nonnull Material currency, @Nonnull String itemName, int price,
+                             int defaultAmountGetter, @Nullable List<String> lore, PotionData potionBaseData) {
         super(item, currency, itemName, price, defaultAmountGetter, lore);
         try {
             if (item == Material.POTION || item == Material.TIPPED_ARROW) {
@@ -39,11 +40,7 @@ public class PricetagItemsPotion extends PricetagItems {
         ItemStack thisItem = new ItemStack(item, defaultAmountGetter);
         if (meta == null)
             refreshMeta(thisItem, true);
-        PotionMeta potionMeta = (PotionMeta) meta;
-        potionMeta.setBasePotionData(potionBaseData);
-        for (PotionEffect effect : effects)
-            potionMeta.addCustomEffect(effect, true);
-        thisItem.setItemMeta(potionMeta);
+        thisItem.setItemMeta(meta);
         return thisItem;
     }
 
@@ -55,12 +52,18 @@ public class PricetagItemsPotion extends PricetagItems {
         ItemStack thisItem = new ItemStack(item, amount);
         if (meta == null)
             refreshMeta(thisItem, true);
-        PotionMeta potionMeta = (PotionMeta) meta;
-        potionMeta.setBasePotionData(potionBaseData);
-        for (PotionEffect effect : effects)
-            potionMeta.addCustomEffect(effect, true);
-        thisItem.setItemMeta(potionMeta);
+        thisItem.setItemMeta(meta);
         return thisItem;
+    }
+
+    @Override
+    public void refreshMeta(ItemStack itemSample, boolean showPrice) {
+        super.refreshMeta(itemSample, showPrice);
+        PotionMeta potionMeta = (PotionMeta) meta;
+        potionMeta.clearCustomEffects();
+        for (PotionEffect ef : effects)
+            potionMeta.addCustomEffect(ef, true);
+        itemSample.setItemMeta(potionMeta);
     }
 
     // Potion only
@@ -68,8 +71,12 @@ public class PricetagItemsPotion extends PricetagItems {
         potionBaseData = data;
     }
 
-    public PotionData getPotionEffect() {
+    public PotionData getPotionBaseData() {
         return potionBaseData;
+    }
+
+    public List<PotionEffect> getDrinkEffects() {
+        return effects;
     }
 
     public void addPotionEffect(PotionEffect potionEffect) {

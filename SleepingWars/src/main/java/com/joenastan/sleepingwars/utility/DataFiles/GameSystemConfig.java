@@ -6,12 +6,12 @@ import com.joenastan.sleepingwars.events.CustomEvents.BedwarsTimelineEvent;
 import com.joenastan.sleepingwars.enumtypes.BedwarsShopType;
 import com.joenastan.sleepingwars.enumtypes.LockedEntityType;
 import com.joenastan.sleepingwars.game.ResourceSpawner;
+import com.joenastan.sleepingwars.game.SleepingRoom;
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
 import com.joenastan.sleepingwars.game.CustomEntity.LockedNormalEntity;
 import com.joenastan.sleepingwars.game.CustomEntity.LockedResourceSpawner;
 import com.joenastan.sleepingwars.timercoro.AreaEffectTimer;
 
-import com.joenastan.sleepingwars.timercoro.TimelineTimer;
 import com.joenastan.sleepingwars.utility.VoidGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
@@ -36,7 +36,7 @@ public class GameSystemConfig extends AbstractFile {
     // Constructor
     public GameSystemConfig(JavaPlugin main, String filename) {
         super(main, filename);
-        load();
+        Load();
     }
 
     //#region Getter Methods
@@ -394,7 +394,7 @@ public class GameSystemConfig extends AbstractFile {
      * @param mapName Original map name
      * @return List of events in timeline
      */
-    public List<BedwarsTimelineEvent> getTimelineEvents(String mapName) {
+    public List<BedwarsTimelineEvent> getTimelineEvents(String mapName, @Nullable SleepingRoom room) {
         String path = String.format("worlds.%s.timeline", mapName);
         List<BedwarsTimelineEvent> timelineEvents = new ArrayList<>();
         if (!fileConfig.contains(path)) {
@@ -410,7 +410,7 @@ public class GameSystemConfig extends AbstractFile {
             TimelineEventType typeEvent = TimelineEventType.fromString(fileConfig.getString(tPath + ".type"));
             String eventMsg = fileConfig.getString(tPath + ".message");
             BedwarsTimelineEvent bent = new BedwarsTimelineEvent(typeEvent, secondsToTrigger,
-                    eventNameString, order, eventMsg);
+                    eventNameString, order, eventMsg, room);
             timelineEvents.add(bent);
         }
         // Selection sort
@@ -831,7 +831,7 @@ public class GameSystemConfig extends AbstractFile {
      * @param colorPrefix Raw color for team prefix color
      * @return True if successfully added, if team already exists the it returns false
      */
-    public boolean addTeam(String mapName, String teamName, String colorPrefix) {
+    public boolean addTeam(String mapName, String teamName, @Nullable String colorPrefix) {
         // Check existing team
         List<String> team = getTeamNames(mapName);
         if (team.contains(teamName))
@@ -839,7 +839,10 @@ public class GameSystemConfig extends AbstractFile {
         // Proceed Insertion
         String path = String.format("worlds.%s.teams.%s", mapName, teamName);
         fileConfig.createSection(path, new HashMap<>());
-        fileConfig.set(path + ".color", colorPrefix);
+        if (colorPrefix != null)
+            fileConfig.set(path + ".color", colorPrefix);
+        else
+            fileConfig.set(path + ".color", "white");
         String bufferZonePath = String.format("worlds.%s.buffer-zone", mapName);
         fileConfig.createSection(bufferZonePath + "." + teamName, new HashMap<>());
         fileConfig.createSection(bufferZonePath + "-effects." + teamName, new HashMap<>());
@@ -1168,10 +1171,8 @@ public class GameSystemConfig extends AbstractFile {
         return cs.getKeys(false).size();
     }
 
-    /**
-     * Load worlds and config
-     */
-    public void load() {
+    @Override
+    public void Load() {
         System.out.println("Contains Worlds path: " + fileConfig.contains("worlds"));
         if (!fileConfig.contains("worlds")) {
             fileConfig.set("worlds", new HashMap<>());

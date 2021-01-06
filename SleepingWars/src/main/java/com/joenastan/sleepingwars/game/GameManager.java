@@ -10,6 +10,7 @@ import java.util.*;
 
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +34,7 @@ public class GameManager {
      * @param player Player who used command
      * @param useMap Map that will be used
      */
-    public void createRoom(Player player, World useMap) {
+    public void createRoom(Player player, World useMap, @Nullable String roomName) {
         // Check if player is a host
         String inWorldCurrentName = player.getWorld().getName();
         SleepingRoom currentRoom = createdRooms.get(inWorldCurrentName);
@@ -49,7 +50,12 @@ public class GameManager {
                 return;
             }
         }
-        String createdRoomID = bedwarsWorldID();
+
+        String createdRoomID;
+        if (roomName == null)
+            createdRoomID = bedwarsWorldID();
+        else
+            createdRoomID = roomName;
 
         // Copy World
         File folderLoc = new File(useMap.getWorldFolder().getAbsolutePath());

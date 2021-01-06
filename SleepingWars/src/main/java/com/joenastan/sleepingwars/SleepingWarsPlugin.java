@@ -9,8 +9,8 @@ import com.joenastan.sleepingwars.events.OnBuilderModeEvents;
 import com.joenastan.sleepingwars.events.OnGameEvent;
 import com.joenastan.sleepingwars.game.GameManager;
 import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsShopMenu;
+import com.joenastan.sleepingwars.utility.DataFiles.GameButtonHolder;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
-import com.joenastan.sleepingwars.utility.Hologram.HologramManager;
 
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,16 +21,12 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
     private static JavaPlugin instance;
     private static GameSystemConfig gameSystemConfig;
-    private static HologramManager hologramManager;
+    private static GameButtonHolder buttonHolderCollection;
     private static GameManager gameManager;
 
     // Private Variable Getter
     public static JavaPlugin getPlugin() {
         return instance;
-    }
-
-    public static HologramManager getHologramManager() {
-        return hologramManager;
     }
 
     public static GameSystemConfig getGameSystemConfig() {
@@ -39,6 +35,10 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
     public static GameManager getGameManager() {
         return gameManager;
+    }
+
+    public static GameButtonHolder getButtonHolder() {
+        return buttonHolderCollection;
     }
 
     @Override
@@ -66,8 +66,8 @@ public class SleepingWarsPlugin extends JavaPlugin {
         gameSystemConfig = null;
         gameManager.cleanManager();
         gameManager = null;
-        hologramManager.shutdown();
-        hologramManager = null;
+        buttonHolderCollection.Save();
+        buttonHolderCollection = null;
         OnBuilderModeEvents.clearStatic();
         HandlerList.unregisterAll(this);
         BedwarsShopMenu.destroy();
@@ -88,7 +88,7 @@ public class SleepingWarsPlugin extends JavaPlugin {
                 System.out.println("[SleepingWars] world_backup Directory has been created.");
         // Create Configuration Files
         gameSystemConfig = new GameSystemConfig(instance, "worlds.yml");
-        hologramManager = new HologramManager(instance);
+        buttonHolderCollection = new GameButtonHolder(instance, "buttons.yml");
         gameManager = new GameManager();
         BedwarsShopMenu.init();
     }

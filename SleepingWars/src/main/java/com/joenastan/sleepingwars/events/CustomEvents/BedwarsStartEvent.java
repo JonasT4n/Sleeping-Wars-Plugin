@@ -20,6 +20,7 @@ public class BedwarsStartEvent extends Event {
         return handlers;
     }
 
+    @Nonnull
     @Override
     public HandlerList getHandlers() {
         return handlers;

@@ -26,7 +26,6 @@ public class ResourceSpawner {
         this.codename = codename;
         isActive = false;
         spawnAmount = 1;
-
         // Defaults values
         switch (typeSpawnResource) {
             case GOLD:

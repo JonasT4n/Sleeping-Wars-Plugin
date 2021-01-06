@@ -3,7 +3,7 @@ package com.joenastan.sleepingwars.game;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsTeamUpgradeEvent;
 import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsUpgradeMenu;
-import com.joenastan.sleepingwars.game.ItemPrice.PricetagItems;
+import com.joenastan.sleepingwars.game.ItemPrice.PricesItems;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import com.joenastan.sleepingwars.timercoro.AreaEffectTimer;
 import com.joenastan.sleepingwars.utility.PluginStaticColor;
@@ -246,7 +246,7 @@ public class TeamGroupMaker {
      */
     public void selectUpgrade(@Nonnull Player player, @Nonnull Inventory menu,
                               ItemStack selectedItem, int slotIndex) {
-        PricetagItems selectedUpgradeTag = upgradeMenu.selectedSlot(menu, slotIndex);
+        PricesItems selectedUpgradeTag = upgradeMenu.selectedSlot(menu, slotIndex);
         if (selectedUpgradeTag != null) {
             if (upgradeMenu.chooseUpgrade(player, selectedUpgradeTag, selectedItem, this)) {
                 BedwarsTeamUpgradeEvent event = new BedwarsTeamUpgradeEvent(this, player,
@@ -444,6 +444,6 @@ public class TeamGroupMaker {
      */
     public boolean isBedBroken() {
         Block block = teamBedLocation.getBlock();
-        return !PluginStaticFunc.isMaterialBed(block.getType());
+        return !PluginStaticFunc.isBed(block.getType());
     }
 }

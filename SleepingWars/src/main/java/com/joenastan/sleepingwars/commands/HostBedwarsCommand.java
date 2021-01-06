@@ -17,16 +17,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 import javax.annotation.Nonnull;
+import java.io.File;
 
 public class HostBedwarsCommand implements Listener, CommandExecutor {
 
     private final GameSystemConfig systemConf = SleepingWarsPlugin.getGameSystemConfig();
     private final GameManager gameManager = SleepingWarsPlugin.getGameManager();
-    private static final String HOST_CMD = "host"; // Host the game
-    private static final String JOIN_CMD = "join"; // Join the game
-    private static final String START_CMD = "start"; // Start the game, if user who use the command is a host
-    private static final String EXIT_CMD = "leave"; // Leave the game
-    private static final String CHANGE_MAP_CMD = "cmap"; // Change map on game, if user who use the command is a host
+
+    public static final String HOST_CMD = "host"; // Host the game
+    public static final String JOIN_CMD = "join"; // Join the game
+    public static final String START_CMD = "start"; // Start the game, if user who use the command is a host
+    public static final String EXIT_CMD = "leave"; // Leave the game
+    public static final String CHANGE_MAP_CMD = "cmap"; // Change map on game, if user who use the command is a host
 
     @Override
     public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command,
@@ -105,22 +107,33 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
     }
 
     private void hostBedwars(Player player, String[] args) {
-        if (args.length < 2) {
-            player.sendMessage(ChatColor.GOLD + "Include a world name (/bedwars " + HOST_CMD + " <worldname>), " +
-                    "use one of the map that you have made.");
-        } else {
+        if (args.length >= 2) {
             if (systemConf.getWorldNames().contains(args[1])) {
+                boolean folderExists = false;
+                if (args.length >= 3)
+                    folderExists = isFolderWorldExists(args[2]);
+                // Check world folder exists
+                if (folderExists) {
+                    player.sendMessage(ChatColor.YELLOW + "Cannot use that name as room name.");
+                    return;
+                }
                 // Check if world still contains Player
                 if (Bukkit.getWorld(args[1]).getPlayers().size() == 0) {
                     World useMap = Bukkit.getWorld(args[1]);
-                    gameManager.createRoom(player, useMap);
+                    if (args.length < 3)
+                        gameManager.createRoom(player, useMap, null);
+                    else
+                        gameManager.createRoom(player, useMap, args[2]);
                     return;
                 }
-                player.sendMessage(ChatColor.YELLOW + "Currently under construction, you cannot play this map yet.");
-            } else {
-                player.sendMessage(ChatColor.GOLD + "World not available.");
+                player.sendMessage(ChatColor.YELLOW + "Currently under construction.");
+                return;
             }
+            player.sendMessage(ChatColor.GOLD + "World not available.");
+            return;
         }
+        player.sendMessage(ChatColor.GOLD + "Invalid input, do /bedwars " + HOST_CMD + " <map-name> " +
+                "[room-name], use one of the map that you have made.");
     }
 
     private void leaveBedwars(Player player) {
@@ -142,5 +155,17 @@ public class HostBedwarsCommand implements Listener, CommandExecutor {
         } else {
             player.sendMessage(ChatColor.YELLOW + "You are not in bedwars.");
         }
+    }
+
+    /**
+     * Check if world is already exists in server folder.
+     *
+     * @param roomName Name of room
+     * @return True if exists, else then false
+     */
+    private boolean isFolderWorldExists(String roomName) {
+        File f = new File(Bukkit.getWorldContainer().getParentFile(), roomName);
+        System.out.println(f.getAbsolutePath());
+        return f.exists();
     }
 }

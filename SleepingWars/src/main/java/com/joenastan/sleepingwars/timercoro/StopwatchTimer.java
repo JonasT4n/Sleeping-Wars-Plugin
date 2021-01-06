@@ -4,7 +4,7 @@ import com.joenastan.sleepingwars.SleepingWarsPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class StopwatchTimer {
+public abstract class StopwatchTimer {
 
     protected final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
     protected float counter;
@@ -12,8 +12,7 @@ public class StopwatchTimer {
     private float duration;
 
     public StopwatchTimer(float duration) {
-        this.duration = duration;
-        counter = duration;
+        setDuration(duration);
     }
 
     public void start() {
@@ -43,13 +42,12 @@ public class StopwatchTimer {
 
     public void setDuration(float duration) {
         this.duration = duration;
+        counter = duration;
     }
 
     protected void setTaskID(int taskID) {
         this.taskID = taskID;
     }
 
-    protected void runEvent() {
-        // Do Nothing
-    }
+    protected abstract void runEvent();
 }

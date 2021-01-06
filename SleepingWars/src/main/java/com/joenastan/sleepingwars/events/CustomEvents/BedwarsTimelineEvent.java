@@ -6,6 +6,7 @@ import com.joenastan.sleepingwars.game.SleepingRoom;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class BedwarsTimelineEvent extends Event {
@@ -16,23 +17,24 @@ public class BedwarsTimelineEvent extends Event {
     private final TimelineEventType type;
     private final float secondsToTrigger;
     private final int order;
-    private final String eventmsg;
-
-    private SleepingRoom room;
+    private final String eventMsg;
+    private final SleepingRoom room;
 
     public BedwarsTimelineEvent(TimelineEventType type, float secondsToTrigger, String eventName, int order,
-                                @Nullable String eventMsg) {
+                                @Nullable String eventMsg, @Nullable SleepingRoom room) {
         this.type = type;
         this.secondsToTrigger = secondsToTrigger;
         this.eventName = eventName;
         this.order = order;
-        this.eventmsg = eventMsg;
+        this.eventMsg = eventMsg;
+        this.room = room;
     }
 
     public static HandlerList getHandlerList() {
         return handlers;
     }
 
+    @Nonnull
     @Override
     public HandlerList getHandlers() {
         return handlers;
@@ -57,16 +59,12 @@ public class BedwarsTimelineEvent extends Event {
         return room;
     }
 
-    public void setRoom(SleepingRoom room) {
-        this.room = room;
-    }
-
     public int getTimelineOrder() {
         return order;
     }
 
     public String getEventMessage() {
-        return eventmsg;
+        return eventMsg;
     }
 
 }

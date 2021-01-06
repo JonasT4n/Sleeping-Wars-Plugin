@@ -7,7 +7,6 @@ import java.util.Map;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsBuilderEntity;
-import com.joenastan.sleepingwars.utility.Hologram.HologramManager;
 import com.joenastan.sleepingwars.utility.PluginStaticFunc;
 
 import net.md_5.bungee.api.ChatColor;
@@ -33,7 +32,6 @@ public class OnBuilderModeEvents implements Listener {
 
     private static Map<Player, PlayerBedwarsBuilderEntity> customBuilderEntity = new HashMap<>();
     private final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
-    private static final HologramManager holoManager = SleepingWarsPlugin.getHologramManager();
 
     public static Map<Player, PlayerBedwarsBuilderEntity> getCustomBuilderEntity() {
         return customBuilderEntity;
@@ -45,7 +43,6 @@ public class OnBuilderModeEvents implements Listener {
         }
         customBuilderEntity.clear();
         customBuilderEntity = null;
-        holoManager.shutdown();
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -123,7 +120,7 @@ public class OnBuilderModeEvents implements Listener {
                         // Check required location buffer amount
                         if (playerBE.getRequiredAmountLoc() == 0) {
                             // Check if player put bed in world
-                            if (PluginStaticFunc.isMaterialBed(block.getType()) && !teamName.equals("PUBLIC")) {
+                            if (PluginStaticFunc.isBed(block.getType()) && !teamName.equals("PUBLIC")) {
                                 Location onPlacedLoc = block.getLocation();
                                 if (systemConfig.setBedLocation(inWorldName, teamName, onPlacedLoc)) {
                                     player.sendMessage(String.format("%sBed for team %s has been settled on (X/Y/Z): %d/%d/%d",
@@ -134,21 +131,20 @@ public class OnBuilderModeEvents implements Listener {
                             }
                             // Check if player put any kind of doors
                             else if (teamName.equals("PUBLIC") && playerBE.countCodenameHolder() > 0 &&
-                                    (PluginStaticFunc.isFenceGate(block.getType()) || PluginStaticFunc
-                                            .isTrapDoor(block.getType()) || PluginStaticFunc
-                                            .isStandardDoor(block.getType()))) {
+                                    (PluginStaticFunc.isGateOrDoor(block.getType()) || PluginStaticFunc
+                                            .isButton(block.getType()) || block.getType() == Material.LEVER)) {
                                 Location onPlacedLoc = block.getLocation();
                                 if (playerBE.countCodenameHolder() == 1) {
                                     if (systemConfig.setLockedRequest(inWorldName, playerBE.removeCodename(),
                                             onPlacedLoc)) {
-                                        player.sendMessage(String.format("%sLocking the door on (X/Y/Z): %d/%d/%d",
+                                        player.sendMessage(String.format("%sLocked on (X/Y/Z): %d/%d/%d",
                                                 ChatColor.AQUA + "", onPlacedLoc.getBlockX(),
                                                 onPlacedLoc.getBlockY(), onPlacedLoc.getBlockZ()));
                                     }
                                 } else if (playerBE.countCodenameHolder() == 2) {
                                     if (systemConfig.setLockedRequest(inWorldName, playerBE.removeCodename(),
                                             playerBE.removeCodename(), onPlacedLoc)) {
-                                        player.sendMessage(String.format("%sLocking the Resource Spawner on (X/Y/Z): %d/%d/%d",
+                                        player.sendMessage(String.format("%sLocked the Resource Spawner on (X/Y/Z): %d/%d/%d",
                                                 ChatColor.AQUA + "", onPlacedLoc.getBlockX(),
                                                 onPlacedLoc.getBlockY(), onPlacedLoc.getBlockZ()));
                                     }

@@ -86,7 +86,8 @@ public class SWorldCommands implements TabCompleter {
                 else if (args[0].equalsIgnoreCase(WorldMakerCommand.SET_TEAM_SPAWN_LOCATION_CMD) ||
                         args[0].equalsIgnoreCase(WorldMakerCommand.TEAM_INFO_CMD) ||
                         args[0].equalsIgnoreCase(WorldMakerCommand.SET_BED_LOCATION_CMD) ||
-                        args[0].equalsIgnoreCase(WorldMakerCommand.SET_TEAM_RAW_COLOR_CMD)) {
+                        args[0].equalsIgnoreCase(WorldMakerCommand.SET_TEAM_RAW_COLOR_CMD) ||
+                        args[0].equalsIgnoreCase(WorldMakerCommand.REMOVE_TEAM_CMD)) {
                     String worldName = player.getWorld().getName();
                     if (systemConf.getWorldNames().contains(worldName))
                         return systemConf.getTeamNames(worldName);

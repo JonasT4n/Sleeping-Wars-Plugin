@@ -3,7 +3,7 @@ package com.joenastan.sleepingwars.events;
 import com.joenastan.sleepingwars.events.CustomEvents.*;
 import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsShopMenu;
 import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsUpgradeMenu;
-import com.joenastan.sleepingwars.game.ItemPrice.PricetagItems;
+import com.joenastan.sleepingwars.game.ItemPrice.PricesItems;
 import com.joenastan.sleepingwars.game.SleepingRoom;
 import com.joenastan.sleepingwars.game.GameManager;
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
@@ -35,6 +35,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -113,12 +114,11 @@ public class OnGameEvent implements Listener {
                     ItemMeta i_clickedMeta = clickedItem.getItemMeta();
                     if (BedwarsShopMenu.openMenu(player, i_clickedMeta.getDisplayName()))
                         return;
-                    PricetagItems tag = BedwarsShopMenu.selectedSlot(onInv, slot);
+                    PricesItems tag = BedwarsShopMenu.selectedSlot(onInv, slot);
                     if (tag != null)
                         BedwarsShopMenu.buyItem(player, tag, team);
                     event.setCancelled(true);
-                } else if (BedwarsUpgradeMenu.MENU_NAME.equals(ChatColor.stripColor(event
-                        .getView().getTitle()))) {
+                } else if (BedwarsUpgradeMenu.MENU_NAME.equals(event.getView().getTitle())) {
                     switch (action) {
                         case MOVE_TO_OTHER_INVENTORY:
                         case HOTBAR_MOVE_AND_READD:
@@ -158,11 +158,11 @@ public class OnGameEvent implements Listener {
             if (!room.isGameProcessing()) {
                 event.setCancelled(true);
             } else {
-                if (PluginStaticFunc.isMaterialBed(block.getType())) {
+                if (PluginStaticFunc.isBed(block.getType())) {
                     TeamGroupMaker bedTeamDestroyed = null;
                     for (TeamGroupMaker t : room.getTeams()) {
                         Block bedBlockTeam = t.getTeamBedLocation().getBlock();
-                        Bed thisTeamBed = PluginStaticFunc.isMaterialBed(bedBlockTeam.getType()) ?
+                        Bed thisTeamBed = PluginStaticFunc.isBed(bedBlockTeam.getType()) ?
                                 (Bed) bedBlockTeam.getBlockData() : null;
                         if (thisTeamBed == null)
                             continue;
@@ -204,7 +204,7 @@ public class OnGameEvent implements Listener {
         Item it = event.getEntity();
         SleepingRoom room = gameManager.getRoom(event.getLocation().getWorld().getName());
         if (room != null) {
-            if (PluginStaticFunc.isMaterialBed(it.getItemStack().getType()))
+            if (PluginStaticFunc.isBed(it.getItemStack().getType()))
                 event.setCancelled(true);
         }
     }
@@ -273,21 +273,36 @@ public class OnGameEvent implements Listener {
             Player player = (Player) ent;
             SleepingRoom room = gameManager.getRoom(player.getWorld().getName());
             if (room != null) {
+                // Check if player have Totem Undying
                 DamageCause cause = event.getCause();
+                // Check if player going to die after hit
                 if (player.getHealth() - event.getDamage() < 1) {
                     if (room.isGameEnded()) {
                         player.teleport(room.getQueueLocation());
                         player.setGameMode(GameMode.SPECTATOR);
                         event.setCancelled(true);
-                    }
-                    if (room.reviving(player)) {
-                        PlayerBedwarsEntity playerEnt = room.findPlayer(player);
-                        if (playerEnt != null) {
-                            BedwarsPlayerDeathEvent e = new BedwarsPlayerDeathEvent(room, playerEnt,
-                                    playerEnt.getLastHitBy());
-                            Bukkit.getPluginManager().callEvent(e);
+                    } else {
+                        ItemStack handHold = player.getInventory().getItemInOffHand();
+                        if (handHold.getType() == Material.TOTEM_OF_UNDYING) {
+                            handHold.setAmount(handHold.getAmount() - 1);
+                            TeamGroupMaker team = room.findTeam(player);
+                            if (cause.equals(DamageCause.VOID) && team != null) {
+                                player.teleport(team.getTeamSpawnLocation());
+                            } else {
+                                player.playEffect(EntityEffect.TOTEM_RESURRECT);
+                                player.setHealth(10d);
+                            }
+                        } else {
+                            if (room.reviving(player)) {
+                                PlayerBedwarsEntity playerEnt = room.findPlayer(player);
+                                if (playerEnt != null) {
+                                    BedwarsPlayerDeathEvent e = new BedwarsPlayerDeathEvent(room, playerEnt,
+                                            playerEnt.getLastHitBy());
+                                    Bukkit.getPluginManager().callEvent(e);
+                                }
+                                event.setCancelled(true);
+                            }
                         }
-                        event.setCancelled(true);
                     }
                 }
                 // Instant death on hitting the void
@@ -390,7 +405,8 @@ public class OnGameEvent implements Listener {
         SleepingRoom room = gameManager.getRoom(event.getPlayer().getWorld().getName());
         if (room != null && blockInteract != null && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Material blockMat = blockInteract.getType();
-            if (PluginStaticFunc.isGateOrDoor(blockMat)) {
+            if (PluginStaticFunc.isGateOrDoor(blockMat) || PluginStaticFunc.isButton(blockMat) ||
+                    blockMat == Material.LEVER) {
                 if (!room.checkInteraction(event.getPlayer(), blockInteract) || !room.isGameProcessing())
                     event.setCancelled(true);
             }

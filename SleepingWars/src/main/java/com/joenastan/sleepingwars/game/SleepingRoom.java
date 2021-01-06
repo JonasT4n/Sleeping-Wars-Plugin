@@ -3,7 +3,6 @@ package com.joenastan.sleepingwars.game;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsEndedEvent;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsLockUnlocked;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsPlayerEliminatedEvent;
-import com.joenastan.sleepingwars.events.CustomEvents.BedwarsTimelineEvent;
 import com.joenastan.sleepingwars.game.CustomEntity.LockedNormalEntity;
 import com.joenastan.sleepingwars.tasks.DeleteWorldDelayed;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
@@ -38,19 +37,19 @@ public class SleepingRoom {
     private final Location worldQueueSpawn;
     private final String mapName;
     private final float respawnTime;
+    private final TimelineTimer inGameEvent;
     private Player hostedBy;
     private boolean isResSpawn = false;
     private boolean isInGameOn = false;
     private boolean isGEnded = false;
     private boolean isGStarting = false;
-    private TimelineTimer currentlyRunningTimer = null;
     // Maps and Lists
     private final Map<String, TeamGroupMaker> createdTeams = new HashMap<>();
     private final Map<UUID, PlayerBedwarsEntity> playerEntities = new HashMap<>();
     private final Map<PlayerBedwarsEntity, PlayerReviveTimer> playersNTimer = new HashMap<>();
     private final List<ResourceSpawner> publicRSpawners = new ArrayList<>();
     private final LinkedList<Block> putBlock = new LinkedList<>();
-    private final List<TimelineTimer> inGameEvents = new ArrayList<>();
+
     private final List<AreaEffectTimer> publicBufferZone;
     private final List<LockedNormalEntity> eLockedList;
     // Scoreboard
@@ -87,13 +86,8 @@ public class SleepingRoom {
         hostedBy.sendMessage(ChatColor.GOLD + "Room Created, World name to enter the game: " +
                 ChatColor.GREEN + bedwarsWorld.getName());
         // Register all events in room
-        for (BedwarsTimelineEvent eventEntry : systemConfig.getTimelineEvents(mapName)) {
-            eventEntry.setRoom(this);
-            TimelineTimer t = new TimelineTimer(eventEntry.getSecTrigger(), this, eventEntry, publicRSpawners);
-            int shrunkSize = systemConfig.getBorderData(mapName, true);
-            t.setShrunkBorderSize(shrunkSize);
-            inGameEvents.add(t);
-        }
+        inGameEvent = new TimelineTimer(this, systemConfig.getTimelineEvents(mapName, this), publicRSpawners);
+        inGameEvent.setShrunkBorderSize(systemConfig.getBorderData(mapName, true));
         // Get list of locked entity
         eLockedList = systemConfig.getLockedEntities(gameWorld, mapName, publicRSpawners);
         // Get all buffer zones
@@ -113,8 +107,7 @@ public class SleepingRoom {
         createTeam();
         setResourceSpawning(true);
         checkRemainingTeam();
-        currentlyRunningTimer = inGameEvents.get(0);
-        currentlyRunningTimer.start();
+        inGameEvent.start();
         isInGameOn = true;
         hostedBy = null;
         // Activate all buffer zones
@@ -158,8 +151,7 @@ public class SleepingRoom {
         updater.destroyUpdater();
         setResourceSpawning(false);
         // Make sure every timeline event is stopped
-        for (TimelineTimer tm : inGameEvents)
-            tm.stop();
+        inGameEvent.stop();
         for (TeamGroupMaker tm : createdTeams.values())
             tm.setRunningEffectBZ(false);
         // Stop all running effects in all buffer zone
@@ -171,7 +163,6 @@ public class SleepingRoom {
         publicRSpawners.clear();
         playerEntities.clear();
         putBlock.clear();
-        inGameEvents.clear();
         publicBufferZone.clear();
         createdTeams.clear();
         eLockedList.clear();
@@ -216,7 +207,7 @@ public class SleepingRoom {
     /**
      * Player leave the room
      *
-     * @param player Refered player
+     * @param player Referred player
      * @return Bedwars entity data of player
      */
     public PlayerBedwarsEntity playerLeave(Player player) {
@@ -322,9 +313,12 @@ public class SleepingRoom {
                 emptyLine1.setScore(scoreLineCount);
                 scoreLineCount--;
                 // Events line
-                if (currentlyRunningTimer != null) {
+                if (inGameEvent.isEventExceeded()) {
+                    eventTitle = objectiveLocalSB.getScore(ChatColor.ITALIC + "   Next Event in [0:00] ");
+                    scevent = objectiveLocalSB.getScore(ChatColor.GRAY + "[No Upcoming Events]");
+                } else {
                     // Time display
-                    float rawSeconds = currentlyRunningTimer.getCounter();
+                    float rawSeconds = inGameEvent.getCounter();
                     int minutes = (int) rawSeconds / 60;
                     int prevMin = ((int) rawSeconds + 1) / 60;
                     int seconds = (int) rawSeconds % 60;
@@ -340,10 +334,7 @@ public class SleepingRoom {
                     localScoreBoard.resetScores(prevFormattedTS);
                     eventTitle = objectiveLocalSB.getScore(formattedTimeString);
                     // Event name display
-                    scevent = objectiveLocalSB.getScore(ChatColor.GRAY + currentlyRunningTimer.getBedwarsEventName());
-                } else {
-                    eventTitle = objectiveLocalSB.getScore(ChatColor.ITALIC + "   Next Event in [0:00] ");
-                    scevent = objectiveLocalSB.getScore(ChatColor.GRAY + "[No Upcoming Events]");
+                    scevent = objectiveLocalSB.getScore(ChatColor.GRAY + inGameEvent.getNextEvent().getName());
                 }
                 eventTitle.setScore(scoreLineCount);
                 scoreLineCount--;
@@ -433,6 +424,12 @@ public class SleepingRoom {
             } else if (PluginStaticFunc.isTrapDoor(mat) && PluginStaticFunc.isTrapDoor(matOnLockedLoc)) {
                 if (lockedLoc.getBlock().equals(blockLocation.getBlock()))
                     return unlockTheDoor(i, playerEnt);
+            } else if (PluginStaticFunc.isButton(mat) && PluginStaticFunc.isButton(matOnLockedLoc)) {
+                if (lockedLoc.getBlock().equals(blockLocation.getBlock()))
+                    return unlockTheDoor(i, playerEnt);
+            } else if (mat == Material.LEVER && matOnLockedLoc == Material.LEVER) {
+                if (lockedLoc.getBlock().equals(blockLocation.getBlock()))
+                    return unlockTheDoor(i, playerEnt);
             }
         }
         return true;
@@ -455,23 +452,6 @@ public class SleepingRoom {
         } else {
             playerEnt.getPlayer().sendMessage(ChatColor.RED + "You can't open this.");
             return false;
-        }
-    }
-
-    /**
-     * Update timeline event to next index.
-     */
-    public void gotoNextTimelineEvent() {
-        // Remove score name from sidebar scoreboard
-        localScoreBoard.resetScores(ChatColor.ITALIC + "   Next Event in [0:00] ");
-        localScoreBoard.resetScores(ChatColor.GRAY + currentlyRunningTimer.getBedwarsEventName());
-        // Go to next update
-        int timelineIndex = inGameEvents.indexOf(currentlyRunningTimer);
-        if (timelineIndex + 1 < inGameEvents.size()) {
-            currentlyRunningTimer = inGameEvents.get(timelineIndex + 1);
-            currentlyRunningTimer.start();
-        } else {
-            currentlyRunningTimer = null;
         }
     }
 

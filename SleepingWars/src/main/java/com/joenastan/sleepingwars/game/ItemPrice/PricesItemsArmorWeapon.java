@@ -3,20 +3,19 @@ package com.joenastan.sleepingwars.game.ItemPrice;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class PricetagItemsArmorWeapon extends PricetagItems {
+public class PricesItemsArmorWeapon extends PricesItems {
 
     private final Map<Enchantment, Integer> enchantments;
 
-    public PricetagItemsArmorWeapon(@Nonnull Material item, @Nonnull Material currency, @Nonnull String itemName,
-                                    int price, int defaultAmountGetter, @Nullable List<String> lore,
-                                    Map<Enchantment, Integer> enhancements) {
+    public PricesItemsArmorWeapon(@Nonnull Material item, @Nonnull Material currency, @Nonnull String itemName,
+                                  int price, int defaultAmountGetter, @Nullable List<String> lore,
+                                  Map<Enchantment, Integer> enhancements) {
         super(item, currency, itemName, price, defaultAmountGetter, lore);
         this.enchantments = enhancements;
     }
