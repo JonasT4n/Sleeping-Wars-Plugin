@@ -1,18 +1,20 @@
 package com.joenastan.sleepingwars.game;
 
+import com.joenastan.sleepingwars.enumtypes.InGameFlags;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsEndedEvent;
-import com.joenastan.sleepingwars.events.CustomEvents.BedwarsLockUnlocked;
+import com.joenastan.sleepingwars.events.CustomEvents.BedwarsLockUnlockedEvent;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsPlayerEliminatedEvent;
 import com.joenastan.sleepingwars.game.CustomEntity.LockedNormalEntity;
+import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsShopMenu;
 import com.joenastan.sleepingwars.tasks.DeleteWorldDelayed;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
+import com.joenastan.sleepingwars.utility.DataFiles.GameButtonHolder;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import com.joenastan.sleepingwars.timercoro.AreaEffectTimer;
 import com.joenastan.sleepingwars.timercoro.PlayerReviveTimer;
 import com.joenastan.sleepingwars.timercoro.TimelineTimer;
-import com.joenastan.sleepingwars.utility.PluginStaticColor;
 import com.joenastan.sleepingwars.utility.PluginStaticFunc;
-import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+import com.joenastan.sleepingwars.utility.CustomEntity.PlayerBedwarsEntity;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
@@ -31,27 +33,31 @@ public class SleepingRoom {
 
     // Constants References
     private final JavaPlugin plugin = SleepingWarsPlugin.getPlugin();
-    private final GameManager gameManager = SleepingWarsPlugin.getGameManager();
+
     // Attributes
     private final World gameWorld;
     private final Location worldQueueSpawn;
     private final String mapName;
     private final float respawnTime;
     private final TimelineTimer inGameEvent;
+    private final BedwarsShopMenu shopMenu;
+    private final int maxPlayer;
     private Player hostedBy;
-    private boolean isResSpawn = false;
-    private boolean isInGameOn = false;
+    private boolean isRSpawning = false;
+    private boolean isGProgressing = false;
     private boolean isGEnded = false;
     private boolean isGStarting = false;
+
     // Maps and Lists
     private final Map<String, TeamGroupMaker> createdTeams = new HashMap<>();
     private final Map<UUID, PlayerBedwarsEntity> playerEntities = new HashMap<>();
-    private final Map<PlayerBedwarsEntity, PlayerReviveTimer> playersNTimer = new HashMap<>();
+    private final Map<PlayerBedwarsEntity, PlayerReviveTimer> playersRevivalTimer = new HashMap<>();
+    private final Map<InGameFlags, Boolean> flags = new HashMap<>();
     private final List<ResourceSpawner> publicRSpawners = new ArrayList<>();
     private final LinkedList<Block> putBlock = new LinkedList<>();
-
     private final List<AreaEffectTimer> publicBufferZone;
     private final List<LockedNormalEntity> eLockedList;
+
     // Scoreboard
     private final RoomUpdater updater;
     private final Scoreboard localScoreBoard;
@@ -75,26 +81,39 @@ public class SleepingRoom {
         worldQueueSpawn = locSpawn;
         this.mapName = mapName;
         respawnTime = 5f;
-        // Create scoreboard
-        localScoreBoard = Bukkit.getScoreboardManager().getNewScoreboard();
-        objectiveLocalSB = localScoreBoard.registerNewObjective("queue", "counter",
-                ChatColor.YELLOW + "Queueing");
-        objectiveLocalSB.setDisplaySlot(DisplaySlot.SIDEBAR);
-        updater = new RoomUpdater();
+        shopMenu = new BedwarsShopMenu();
+
         // Get all public resource spawners
         publicRSpawners.addAll(systemConfig.getWorldRS(bedwarsWorld, mapName, "PUBLIC"));
         hostedBy.sendMessage(ChatColor.GOLD + "Room Created, World name to enter the game: " +
                 ChatColor.GREEN + bedwarsWorld.getName());
+
         // Register all events in room
-        inGameEvent = new TimelineTimer(this, systemConfig.getTimelineEvents(mapName, this), publicRSpawners);
+        inGameEvent = new TimelineTimer(this, systemConfig.getTimelineEvents(mapName, this),
+                publicRSpawners);
         inGameEvent.setShrunkBorderSize(systemConfig.getBorderData(mapName, true));
+
         // Get list of locked entity
         eLockedList = systemConfig.getLockedEntities(gameWorld, mapName, publicRSpawners);
+
         // Get all buffer zones
         publicBufferZone = systemConfig.getAreaBuffPublic(gameWorld, mapName);
+
         // Initialize Team raw data
-        for (String teamName : systemConfig.getTeamNames(mapName))
+        for (String teamName : systemConfig.getTeamNames(mapName, false))
             createdTeams.put(teamName, new TeamGroupMaker(this, teamName));
+        maxPlayer = systemConfig.getMaxPlayerInTeam(mapName) * createdTeams.size();
+
+        // Create scoreboard
+        localScoreBoard = Bukkit.getScoreboardManager().getNewScoreboard();
+        objectiveLocalSB = localScoreBoard.registerNewObjective("queue", "counter",
+                ChatColor.YELLOW + "Queueing [MAX:" + maxPlayer + "]");
+        objectiveLocalSB.setDisplaySlot(DisplaySlot.SIDEBAR);
+        updater = new RoomUpdater();
+
+        // Get all flags
+        systemConfig.getFlags(mapName, flags);
+
         // Host entered the room
         playerEnter(host, hostEnt);
     }
@@ -108,11 +127,13 @@ public class SleepingRoom {
         setResourceSpawning(true);
         checkRemainingTeam();
         inGameEvent.start();
-        isInGameOn = true;
+        isGProgressing = true;
         hostedBy = null;
+
         // Activate all buffer zones
         for (AreaEffectTimer bzt : publicBufferZone)
             bzt.start();
+
         // Init Scoreboard
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () ->
                 localScoreBoard.resetScores(ChatColor.GREEN + "Player Count: "), 20L);
@@ -127,6 +148,10 @@ public class SleepingRoom {
      * Destroy room when the game ended or nobody in the room
      */
     public void destroyRoom() {
+        // Destroy attributes
+        shopMenu.destroy();
+        GameButtonHolder.buttons.remove(gameWorld.getName());
+
         // Teleport Players back to where they were
         for (PlayerBedwarsEntity peEntity : playerEntities.values()) {
             try {
@@ -141,24 +166,22 @@ public class SleepingRoom {
                         " to return the player to where it was. You can ignore this error message.");
             }
         }
-        // Clear all resource spawners if the game is still on
-        for (TeamGroupMaker t : createdTeams.values())
-            t.activateRS(false);
-        for (ResourceSpawner rsp : publicRSpawners)
-            if (rsp.isRunning())
-                rsp.setRunning(false);
+
         // Stop timeline and all schedules
         updater.destroyUpdater();
         setResourceSpawning(false);
+
         // Make sure every timeline event is stopped
         inGameEvent.stop();
         for (TeamGroupMaker tm : createdTeams.values())
-            tm.setRunningEffectBZ(false);
+            tm.setAreaFXActive(false);
+
         // Stop all running effects in all buffer zone
         for (AreaEffectTimer bzt : publicBufferZone)
             bzt.stop();
         for (TeamGroupMaker tMaker : createdTeams.values())
-            tMaker.setRunningEffectBZ(false);
+            tMaker.setAreaFXActive(false);
+
         // Clear lists and maps
         publicRSpawners.clear();
         playerEntities.clear();
@@ -166,11 +189,13 @@ public class SleepingRoom {
         publicBufferZone.clear();
         createdTeams.clear();
         eLockedList.clear();
+
         // Unregister room in game manager and delete world file
-        gameManager.getRoomMap().remove(gameWorld.getName());
         File worldDir = gameWorld.getWorldFolder();
         Bukkit.unloadWorld(gameWorld, true);
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new DeleteWorldDelayed(worldDir), 60L);
+        if (!GameManager.isGameShuttingDown)
+            plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+                    new DeleteWorldDelayed(worldDir), 100L);
     }
 
     /**
@@ -184,8 +209,9 @@ public class SleepingRoom {
         if (entity == null)
             entity = new PlayerBedwarsEntity(player, player.getLocation(), player.getGameMode());
         playerEntities.put(player.getUniqueId(), entity);
+
         // Check if the game is ongoing
-        if (!isInGameOn) {
+        if (!isGProgressing) {
             // Teleport to queue spawner
             player.teleport(worldQueueSpawn);
             roomBroadcast(String.format("%s joined the game. [%d player(s) in room]", ChatColor.GOLD +
@@ -212,15 +238,18 @@ public class SleepingRoom {
      */
     public PlayerBedwarsEntity playerLeave(Player player) {
         PlayerBedwarsEntity bent = playerEntities.remove(player.getUniqueId());
+
         // Destruct a player from team and game if it is exists
         if (bent != null) {
-            Player p = bent.getPlayer();
             // Set Empty Scoreboard
+            Player p = bent.getPlayer();
             p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+
             // Check if game in progress
-            if (!isInGameOn) {
+            if (!isGProgressing) {
                 roomBroadcast(String.format("%s left the game. [%d player(s) in room]",
                         ChatColor.YELLOW + player.getName(), playerEntities.size()));
+
                 // Change host if the host leave the room
                 List<PlayerBedwarsEntity> listPEnt = new ArrayList<>(playerEntities.values());
                 if (hostedBy.equals(player) && playerEntities.size() > 0) {
@@ -233,6 +262,7 @@ public class SleepingRoom {
                 team.playerDisconnectedHandler(bent);
             }
         }
+
         // Check if world or game is empty
         if (playerEntities.size() == 0) {
             if (bent != null)
@@ -255,6 +285,7 @@ public class SleepingRoom {
         // Get list of players
         List<PlayerBedwarsEntity> listOfPlayerEnt = new ArrayList<>(playerEntities.values());
         Random rand = new Random();
+
         // Insert player into team randomly
         List<String> teamNameKey = new ArrayList<>(createdTeams.keySet());
         int indexOfTeam = 0;
@@ -263,19 +294,22 @@ public class SleepingRoom {
             int playerPickedIndex = rand.nextInt(listOfPlayerEnt.size());
             PlayerBedwarsEntity playerEntPicked = listOfPlayerEnt.remove(playerPickedIndex);
             TeamGroupMaker onTeam = createdTeams.get(teamNameKey.get(indexOfTeam));
+
             // Assign all
-            playersNTimer.put(playerEntPicked, new PlayerReviveTimer(respawnTime, playerEntPicked, onTeam));
+            playersRevivalTimer.put(playerEntPicked, new PlayerReviveTimer(respawnTime, playerEntPicked, onTeam));
             onTeam.insertPlayer(playerEntPicked);
             playerEntPicked.setTeamChoice(onTeam.getName());
+
             // Set colorized team ui properties and scoreboard
             Team tOnScoreboard = localScoreBoard.getTeam(onTeam.getName());
             if (tOnScoreboard == null)
                 tOnScoreboard = localScoreBoard.registerNewTeam(onTeam.getName());
-            tOnScoreboard.setPrefix(String.format("%s[%s] %s", PluginStaticColor.getColorString(onTeam.getRawColor()),
+            tOnScoreboard.setPrefix(String.format("%s[%s] %s", PluginStaticFunc.stringToChatColor(onTeam.getRawColor()),
                     onTeam.getName(), ChatColor.WHITE + " "));
             tOnScoreboard.setCanSeeFriendlyInvisibles(false);
             tOnScoreboard.setAllowFriendlyFire(false);
             tOnScoreboard.addEntry(playerEntPicked.getPlayer().getName());
+
             // Next index of team
             indexOfTeam = indexOfTeam + 1 >= teamNameKey.size() ? 0 : indexOfTeam + 1;
         }
@@ -290,32 +324,36 @@ public class SleepingRoom {
             if (Bukkit.getPlayer(player.getName()) == null)
                 continue;
             // Check if the game is in progress
-            if (isInGameOn) {
+            if (isGProgressing) {
                 // Next Event, timer currently running
                 // Row start from up to bottom
                 // Show up team remaining survivor
-                Score scevent, eventTitle, emptyLine0, emptyLine1;
+                Score scEvent, eventTitle, emptyLine0, emptyLine1;
                 int scoreLineCount = createdTeams.size() + 4; // Size of team added with 4 lines of score
+
                 // Add Empty Line
                 emptyLine0 = objectiveLocalSB.getScore(" ");
                 emptyLine0.setScore(scoreLineCount);
                 scoreLineCount--;
+
                 // Add teams on line
                 for (TeamGroupMaker t : createdTeams.values()) {
-                    String teamFormat = String.format("%s%d %s", PluginStaticColor
-                            .getColorString(t.getRawColor()), t.getRemainingPlayers(), t.getName());
+                    String teamFormat = String.format("%s%d %s", PluginStaticFunc
+                            .stringToChatColor(t.getRawColor()), t.getRemainingPlayers(), t.getName());
                     Score steam = objectiveLocalSB.getScore(teamFormat);
                     steam.setScore(scoreLineCount);
                     scoreLineCount--;
                 }
+
                 // Add another empty line
                 emptyLine1 = objectiveLocalSB.getScore("  ");
                 emptyLine1.setScore(scoreLineCount);
                 scoreLineCount--;
+
                 // Events line
                 if (inGameEvent.isEventExceeded()) {
                     eventTitle = objectiveLocalSB.getScore(ChatColor.ITALIC + "   Next Event in [0:00] ");
-                    scevent = objectiveLocalSB.getScore(ChatColor.GRAY + "[No Upcoming Events]");
+                    scEvent = objectiveLocalSB.getScore(ChatColor.GRAY + "[No Upcoming Events]");
                 } else {
                     // Time display
                     float rawSeconds = inGameEvent.getCounter();
@@ -333,12 +371,13 @@ public class SleepingRoom {
                             ChatColor.ITALIC + "", prevTimeString);
                     localScoreBoard.resetScores(prevFormattedTS);
                     eventTitle = objectiveLocalSB.getScore(formattedTimeString);
+
                     // Event name display
-                    scevent = objectiveLocalSB.getScore(ChatColor.GRAY + inGameEvent.getNextEvent().getName());
+                    scEvent = objectiveLocalSB.getScore(ChatColor.GRAY + inGameEvent.getNextEvent().getName());
                 }
                 eventTitle.setScore(scoreLineCount);
                 scoreLineCount--;
-                scevent.setScore(scoreLineCount);
+                scEvent.setScore(scoreLineCount);
             } else {
                 String formatPlayerCount = String.format("%sPlayer Count: ", ChatColor.GREEN + "");
                 Score sc = objectiveLocalSB.getScore(formatPlayerCount);
@@ -364,9 +403,9 @@ public class SleepingRoom {
             // Check if bed is already broken, then the person has been eliminated
             TeamGroupMaker team = createdTeams.get(playerEnt.getTeamChoice());
             if (!team.isBedBroken()) {
-                for (PlayerBedwarsEntity pbent : playersNTimer.keySet()) {
+                for (PlayerBedwarsEntity pbent : playersRevivalTimer.keySet()) {
                     if (pbent.getPlayer().equals(player))
-                        playersNTimer.get(pbent).start();
+                        playersRevivalTimer.get(pbent).start();
                 }
             } else {
                 // Player eliminated handling
@@ -446,7 +485,7 @@ public class SleepingRoom {
         LockedNormalEntity ent = eLockedList.get(listIndex);
         if (ent.unlockEntity(playerEnt)) {
             playerEnt.getPlayer().sendMessage(ChatColor.GREEN + "Access granted!");
-            BedwarsLockUnlocked event = new BedwarsLockUnlocked(eLockedList.remove(listIndex), playerEnt);
+            BedwarsLockUnlockedEvent event = new BedwarsLockUnlockedEvent(eLockedList.remove(listIndex), playerEnt);
             Bukkit.getPluginManager().callEvent(event);
             return true;
         } else {
@@ -471,6 +510,7 @@ public class SleepingRoom {
         // if last one standing then game ended
         if (remainingCount <= 1 && lastStanding != null) {
             isGEnded = true;
+            setResourceSpawning(false);
             BedwarsEndedEvent gameEndedEvent = new BedwarsEndedEvent(this, lastStanding);
             Bukkit.getPluginManager().callEvent(gameEndedEvent);
             // Wait for 10 seconds to automatically return all players to where they were
@@ -538,16 +578,34 @@ public class SleepingRoom {
      */
     public List<Player> getPlayersInRoom() {
         List<Player> ppl = new ArrayList<>();
-        for (PlayerBedwarsEntity pbent : playerEntities.values())
-            ppl.add(pbent.getPlayer());
+        for (PlayerBedwarsEntity bent : playerEntities.values())
+            ppl.add(bent.getPlayer());
         return ppl;
     }
 
     /**
-     * Get map name
+     * Get map name.
      */
     public String getMapName() {
         return mapName;
+    }
+
+    /**
+     * Get in game shop menu.
+     */
+    public BedwarsShopMenu getShopMenu() {
+        return shopMenu;
+    }
+
+    /**
+     * Get flag whether it is set to true or false.
+     * Used for a certain information.
+     *
+     * @param flag Request flag
+     * @return True if the flag itself is true, else then false
+     */
+    public boolean getFlag(InGameFlags flag) {
+        return flags.get(flag);
     }
 
     /**
@@ -628,11 +686,12 @@ public class SleepingRoom {
      * @return True if it is ongoing, else then false
      */
     public boolean isGameProcessing() {
-        return isInGameOn;
+        return isGProgressing;
     }
     
     /**
      * Check if the game ended.
+     *
      * @return True if game is at ended state, else then false
      */
     public boolean isGameEnded() {
@@ -640,12 +699,12 @@ public class SleepingRoom {
     }
 
     /**
-     * Check if resource spawners in room active.
+     * Check if current room is already full with amount fo players.
      *
-     * @return True if resource spawners are active, else then false
+     * @return True if it is full, else then false
      */
-    public boolean isResourceSpawning() {
-        return isResSpawn;
+    public boolean isRoomFull() {
+        return playerEntities.size() >= maxPlayer;
     }
 
     /**
@@ -654,16 +713,14 @@ public class SleepingRoom {
      * @param active Set active
      */
     public void setResourceSpawning(boolean active) {
-        if (isResSpawn != active) {
-            isResSpawn = active;
+        if (isRSpawning != active) {
+            isRSpawning = active;
             // Running public resource spawner
-            for (ResourceSpawner spawner : publicRSpawners) {
-                spawner.setRunning(isResSpawn);
-            }
+            for (ResourceSpawner spawner : publicRSpawners)
+                spawner.setRunning(isRSpawning);
             // Running all team resource spawner
-            for (TeamGroupMaker t : createdTeams.values()) {
-                t.activateRS(isResSpawn);
-            }
+            for (TeamGroupMaker t : createdTeams.values())
+                t.activateRS(isRSpawning);
         }
     }
 

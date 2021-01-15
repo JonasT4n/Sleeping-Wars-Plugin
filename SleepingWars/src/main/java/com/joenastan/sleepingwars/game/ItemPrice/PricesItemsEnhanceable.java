@@ -9,11 +9,11 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class PricesItemsArmorWeapon extends PricesItems {
+public class PricesItemsEnhanceable extends PricesItems {
 
     private final Map<Enchantment, Integer> enchantments;
 
-    public PricesItemsArmorWeapon(@Nonnull Material item, @Nonnull Material currency, @Nonnull String itemName,
+    public PricesItemsEnhanceable(@Nonnull Material item, @Nonnull Material currency, @Nonnull String itemName,
                                   int price, int defaultAmountGetter, @Nullable List<String> lore,
                                   Map<Enchantment, Integer> enhancements) {
         super(item, currency, itemName, price, defaultAmountGetter, lore);

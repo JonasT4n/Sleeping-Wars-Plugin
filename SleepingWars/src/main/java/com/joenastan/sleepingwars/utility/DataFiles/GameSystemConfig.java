@@ -1,17 +1,17 @@
 package com.joenastan.sleepingwars.utility.DataFiles;
 
-import com.joenastan.sleepingwars.enumtypes.ResourcesType;
-import com.joenastan.sleepingwars.enumtypes.TimelineEventType;
+import com.joenastan.sleepingwars.SleepingWarsPlugin;
+import com.joenastan.sleepingwars.enumtypes.*;
 import com.joenastan.sleepingwars.events.CustomEvents.BedwarsTimelineEvent;
-import com.joenastan.sleepingwars.enumtypes.BedwarsShopType;
-import com.joenastan.sleepingwars.enumtypes.LockedEntityType;
 import com.joenastan.sleepingwars.game.ResourceSpawner;
 import com.joenastan.sleepingwars.game.SleepingRoom;
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
 import com.joenastan.sleepingwars.game.CustomEntity.LockedNormalEntity;
 import com.joenastan.sleepingwars.game.CustomEntity.LockedResourceSpawner;
+import com.joenastan.sleepingwars.tasks.DeleteWorldDelayed;
 import com.joenastan.sleepingwars.timercoro.AreaEffectTimer;
 
+import com.joenastan.sleepingwars.utility.PluginStaticFunc;
 import com.joenastan.sleepingwars.utility.VoidGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
@@ -29,14 +29,36 @@ import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.File;
 import java.util.*;
 
 public class GameSystemConfig extends AbstractFile {
 
+    // Constant paths
+    private static final String WORLD_BORDER_PATH = "worlds.%s.border";
+    private static final String RESOURCE_SPAWNER_PATH = "worlds.%s.resource-spawners";
+    private static final String TEAM_PATH = "worlds.%s.teams";
+    private static final String FLAG_PATH = "worlds.%s.flag";
+    private static final String TIMELINE_EVENT_PATH = "worlds.%s.timeline";
+    private static final String DEFAULT_VALUE_PATH = "worlds.%s.default-values";
+    private static final String LOCKED_ENTITY_PATH = "worlds.%s.locked-entity";
+
+    // Other Attributes
+    // TODO: remove temporary usage
+    public static final HashSet<String> DEFAULT_KEYS = new HashSet<>();
+
     // Constructor
     public GameSystemConfig(JavaPlugin main, String filename) {
         super(main, filename);
-        Load();
+        load();
+    }
+
+    static {
+        // TODO: remove temporary usage
+        DEFAULT_KEYS.add("iron_ingot-spawner-freq");
+        DEFAULT_KEYS.add("gold_ingot-spawner-freq");
+        DEFAULT_KEYS.add("diamond-spawner-freq");
+        DEFAULT_KEYS.add("emerald-spawner-freq");
     }
 
     //#region Getter Methods
@@ -46,50 +68,124 @@ public class GameSystemConfig extends AbstractFile {
      * @return List of world names or map names
      */
     public List<String> getWorldNames() {
-        return new ArrayList<>(fileConfig.getConfigurationSection("worlds").getKeys(false));
+        ConfigurationSection cs = fileConfig.getConfigurationSection("worlds");
+        List<String> worldList = new ArrayList<>();
+        if (cs != null)
+            worldList.addAll(cs.getKeys(false));
+        return worldList;
     }
 
     /**
-     * Get all resource spawners that has been registered. All resource spawners including public and teams.
+     * Get all resource spawners that has been registered.
+     * All resource spawners including public, locked resource spawner, and team owned resource spawner.
      *
      * @param inWorld Current game or builder world
      * @param mapName Original map name
      * @return List of resource spawners
      */
     public List<ResourceSpawner> getWorldRS(World inWorld, String mapName) {
-        String path = String.format("worlds.%s.resource-spawners", mapName);
+        String path = String.format(RESOURCE_SPAWNER_PATH, mapName);
         List<ResourceSpawner> rSpawner = new ArrayList<>();
         if (!fileConfig.contains(path)) {
             fileConfig.createSection(path, new HashMap<>());
             return rSpawner;
         }
+
         // Get all Resource spawners
-        for (String t : fileConfig.getConfigurationSection(path).getKeys(false)) {
-            for (String rs : fileConfig.getConfigurationSection(path + "." + t).getKeys(false)) {
-                // Get all resource spawners real information
-                String rsPath = path + "." + t + "." + rs;
-                if (!fileConfig.contains(rsPath + ".type"))
-                    fileConfig.set(rsPath + ".type", 0);
-                if (!fileConfig.contains(rsPath + ".spawnloc.x"))
-                    fileConfig.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
-                if (!fileConfig.contains(rsPath + ".spawnloc.y"))
-                    fileConfig.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
-                if (!fileConfig.contains(rsPath + ".spawnloc.z"))
-                    fileConfig.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
-                if (!fileConfig.contains(rsPath + ".duration-spawn"))
-                    fileConfig.set(rsPath + ".duration-spawn", 10f);
-                ResourcesType typeSpawnResource = ResourcesType.values()[fileConfig.getInt(rsPath + ".type")];
-                Location spawnLoc = new Location(inWorld, fileConfig.getDouble(rsPath + ".spawnloc.x"),
-                        fileConfig.getDouble(rsPath + ".spawnloc.y"),
-                        fileConfig.getDouble(rsPath + ".spawnloc.z"));
-                float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
-                // Create resource spawner instance
-                ResourceSpawner rsp;
-                if (spawnDur < 0f)
-                    rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource);
-                else
-                    rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource, spawnDur);
-                rSpawner.add(rsp);
+        ConfigurationSection csPath = fileConfig.getConfigurationSection(path);
+        if (csPath != null) {
+            for (String t : csPath.getKeys(false)) {
+                ConfigurationSection rsCS = fileConfig.getConfigurationSection(path + "." + t);
+                if (rsCS != null) {
+                    for (String rs : rsCS.getKeys(false)) {
+                        // Get all resource spawners real information
+                        String rsPath = String.format("%s.%s.%s", path, t, rs);
+                        if (!fileConfig.contains(rsPath + ".type"))
+                            fileConfig.set(rsPath + ".type", "iron_ingot");
+                        if (!fileConfig.contains(rsPath + ".spawnloc.x"))
+                            fileConfig.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
+                        if (!fileConfig.contains(rsPath + ".spawnloc.y"))
+                            fileConfig.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
+                        if (!fileConfig.contains(rsPath + ".spawnloc.z"))
+                            fileConfig.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
+                        if (!fileConfig.contains(rsPath + ".duration-spawn"))
+                            fileConfig.set(rsPath + ".duration-spawn", 10f);
+                        String typeString = fileConfig.getString(rsPath + ".type");
+                        if (typeString == null)
+                            typeString = "";
+                        Material typeSpawnResource = Material.getMaterial(typeString.toUpperCase());
+                        Location spawnLoc = new Location(inWorld, fileConfig.getDouble(rsPath + ".spawnloc.x"),
+                                fileConfig.getDouble(rsPath + ".spawnloc.y"),
+                                fileConfig.getDouble(rsPath + ".spawnloc.z"));
+                        float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
+
+                        // Check if it is a valid currency type
+                        if (typeSpawnResource == null)
+                            continue;
+                        if (!PluginStaticFunc.isCurrencyInGame(typeSpawnResource))
+                            continue;
+
+                        // Create resource spawner instance
+                        ResourceSpawner rsp;
+                        if (spawnDur < 0f)
+                            rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource);
+                        else
+                            rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource, spawnDur);
+                        rSpawner.add(rsp);
+                    }
+                }
+            }
+        }
+
+        // Get all locked resource spawner
+        String lockedEntPath = String.format(LOCKED_ENTITY_PATH, mapName);
+        ConfigurationSection entLockPath = fileConfig.getConfigurationSection(lockedEntPath);
+        if (entLockPath != null) {
+            for (String le : entLockPath.getKeys(false)) {
+                LockedEntityType lockType = LockedEntityType.values()[fileConfig.getInt(lockedEntPath +
+                        "." + le + ".type-lock")];
+                if (lockType == LockedEntityType.RESOURCE_SPAWNER_LOCK) {
+                    String rsLockPath = String.format("%s.%s.rs-lock", lockedEntPath, le);
+                    ConfigurationSection rsCS = fileConfig.getConfigurationSection(rsLockPath);
+                    if (rsCS != null) {
+                        for (String lrs : rsCS.getKeys(false)) {
+                            // Get all resource spawners real information
+                            String rsPath = String.format("%s.%s", rsLockPath, le);
+                            if (!fileConfig.contains(rsPath + ".type"))
+                                fileConfig.set(rsPath + ".type", "iron_ingot");
+                            if (!fileConfig.contains(rsPath + ".spawnloc.x"))
+                                fileConfig.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
+                            if (!fileConfig.contains(rsPath + ".spawnloc.y"))
+                                fileConfig.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
+                            if (!fileConfig.contains(rsPath + ".spawnloc.z"))
+                                fileConfig.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
+                            if (!fileConfig.contains(rsPath + ".duration-spawn"))
+                                fileConfig.set(rsPath + ".duration-spawn", 10f);
+                            String typeString = fileConfig.getString(rsPath + ".type");
+                            if (typeString == null)
+                                typeString = "";
+                            Material typeSpawnResource = Material.getMaterial(typeString.toUpperCase());
+                            Location spawnLoc = new Location(inWorld, fileConfig.getDouble(rsPath + ".spawnloc.x"),
+                                    fileConfig.getDouble(rsPath + ".spawnloc.y"),
+                                    fileConfig.getDouble(rsPath + ".spawnloc.z"));
+                            float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
+
+                            // Check if it is a valid currency type
+                            if (typeSpawnResource == null)
+                                continue;
+                            if (!PluginStaticFunc.isCurrencyInGame(typeSpawnResource))
+                                continue;
+
+                            // Create resource spawner instance
+                            ResourceSpawner rsp;
+                            if (spawnDur < 0f)
+                                rsp = new ResourceSpawner(lrs, spawnLoc, typeSpawnResource);
+                            else
+                                rsp = new ResourceSpawner(lrs, spawnLoc, typeSpawnResource, spawnDur);
+                            rSpawner.add(rsp);
+                        }
+                    }
+                }
             }
         }
         return rSpawner;
@@ -101,7 +197,7 @@ public class GameSystemConfig extends AbstractFile {
      * @param mapName Original map name
      */
     public int getBorderData(String mapName, boolean shrunkBorder) {
-        String path = String.format("worlds.%s.border", mapName);
+        String path = String.format(WORLD_BORDER_PATH, mapName);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         // Check if path exists, if not then create default
@@ -117,6 +213,27 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
+     * Get in game flags.
+     * Only usable after the room constructed.
+     *
+     * @param mapName Original map name
+     * @param mapRef Referenced collection
+     */
+    public void getFlags(String mapName, @Nonnull Map<InGameFlags, Boolean> mapRef) {
+        String path = String.format(FLAG_PATH, mapName);
+        if (!fileConfig.contains(path))
+            fileConfig.createSection(path);
+        ConfigurationSection cs = fileConfig.getConfigurationSection(path);
+        if (cs != null) {
+            for (String f : cs.getKeys(false)) {
+                InGameFlags fl = InGameFlags.fromString(f);
+                if (fl != null)
+                    mapRef.put(fl, fileConfig.getBoolean(path + "." + fl));
+            }
+        }
+    }
+
+    /**
      * Get all resource spawners that has been registered by specific class.
      *
      * @param inWorld  Current game or builder world
@@ -125,53 +242,68 @@ public class GameSystemConfig extends AbstractFile {
      * @return List of resource spawners
      */
     public List<ResourceSpawner> getWorldRS(World inWorld, String mapName, String teamName) {
-        String tPath = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        String tPath = String.format(RESOURCE_SPAWNER_PATH + ".%s", mapName, teamName);
         List<ResourceSpawner> rSpawner = new ArrayList<>();
+
         // Check team existence
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!fileConfig.contains(tPath) && team.contains(teamName)) {
             fileConfig.createSection(tPath, new HashMap<>());
             return rSpawner;
         } else if (!team.contains(teamName)) {
-            tPath = String.format("worlds.%s.resource-spawners.PUBLIC", mapName);
+            tPath = String.format(RESOURCE_SPAWNER_PATH + ".PUBLIC", mapName);
         }
+
         // Get all Resource spawners
-        for (String rs : fileConfig.getConfigurationSection(tPath).getKeys(false)) {
-            String rsPath = tPath + "." + rs;
-            if (!fileConfig.contains(rsPath + ".type"))
-                fileConfig.set(rsPath + ".type", 0);
-            if (!fileConfig.contains(rsPath + ".spawnloc.x"))
-                fileConfig.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
-            if (!fileConfig.contains(rsPath + ".spawnloc.y"))
-                fileConfig.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
-            if (!fileConfig.contains(rsPath + ".spawnloc.z"))
-                fileConfig.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
-            if (!fileConfig.contains(rsPath + ".duration-spawn"))
-                fileConfig.set(rsPath + ".duration-spawn", 10f);
-            ResourcesType typeSpawnResource = ResourcesType.values()[fileConfig.getInt(rsPath + ".type")];
-            Location spawnLoc = new Location(inWorld, fileConfig.getDouble(rsPath + ".spawnloc.x"),
-                    fileConfig.getDouble(rsPath + ".spawnloc.y"),
-                    fileConfig.getDouble(rsPath + ".spawnloc.z"));
-            float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
-            // Create resource spawner instance
-            ResourceSpawner rsp;
-            if (spawnDur < 0f)
-                rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource);
-            else
-                rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource, spawnDur);
-            rSpawner.add(rsp);
+        ConfigurationSection tcs = fileConfig.getConfigurationSection(tPath);
+        if (tcs != null) {
+            for (String rs : tcs.getKeys(false)) {
+                String rsPath = tPath + "." + rs;
+                if (!fileConfig.contains(rsPath + ".type"))
+                    fileConfig.set(rsPath + ".type", "iron_ingot");
+                if (!fileConfig.contains(rsPath + ".spawnloc.x"))
+                    fileConfig.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
+                if (!fileConfig.contains(rsPath + ".spawnloc.y"))
+                    fileConfig.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
+                if (!fileConfig.contains(rsPath + ".spawnloc.z"))
+                    fileConfig.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
+                if (!fileConfig.contains(rsPath + ".duration-spawn"))
+                    fileConfig.set(rsPath + ".duration-spawn", 10f);
+                String typeString = fileConfig.getString(rsPath + ".type");
+                if (typeString == null)
+                    typeString = "";
+                Material typeSpawnResource = Material.getMaterial(typeString.toUpperCase());
+                Location spawnLoc = new Location(inWorld, fileConfig.getDouble(rsPath + ".spawnloc.x"),
+                        fileConfig.getDouble(rsPath + ".spawnloc.y"),
+                        fileConfig.getDouble(rsPath + ".spawnloc.z"));
+                float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
+
+                // Check if it is a valid currency type
+                if (typeSpawnResource == null)
+                    continue;
+                if (!PluginStaticFunc.isCurrencyInGame(typeSpawnResource))
+                    continue;
+
+                // Create resource spawner instance
+                ResourceSpawner rsp;
+                if (spawnDur < 0f)
+                    rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource);
+                else
+                    rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource, spawnDur);
+                rSpawner.add(rsp);
+            }
         }
         return rSpawner;
     }
 
     /**
-     * All teams that registered in curent world or map.
+     * All teams that registered in current world or map.
      *
      * @param world Original map name
      * @return List of team names in map
      */
-    public List<String> getTeamNames(String world) {
-        String path = String.format("worlds.%s.teams", world);
+    public List<String> getTeamNames(String world, boolean withRemoved) {
+        String path = String.format(TEAM_PATH, world);
         if (!fileConfig.contains(path)) {
             fileConfig.createSection(path, new HashMap<>());
             fileConfig.set(String.format("%s.Yellow", path), new HashMap<>());
@@ -179,7 +311,20 @@ public class GameSystemConfig extends AbstractFile {
             fileConfig.set(String.format("%s.Blue", path), new HashMap<>());
             fileConfig.set(String.format("%s.Green", path), new HashMap<>());
         }
-        return new ArrayList<String>(fileConfig.getConfigurationSection(path).getKeys(false));
+        ConfigurationSection cs = fileConfig.getConfigurationSection(path);
+        List<String> teamList = new ArrayList<>();
+        if (cs != null)
+            teamList.addAll(cs.getKeys(false));
+        if (!withRemoved) {
+            for (String teamName : teamList) {
+                String pathRemove = String.format("%s.%s.is-removed", path, teamName);
+                if (!fileConfig.contains(pathRemove))
+                    fileConfig.set(pathRemove, false);
+                if (fileConfig.getBoolean(pathRemove))
+                    teamList.remove(teamName);
+            }
+        }
+        return new ArrayList<>(teamList);
     }
 
     /**
@@ -191,8 +336,8 @@ public class GameSystemConfig extends AbstractFile {
      * @return Team location spawn
      */
     public Location getTeamSpawner(World inWorld, String mapName, String teamName) {
-        String path = String.format("worlds.%s.teams.%s.spawner", mapName, teamName);
-        List<String> team = getTeamNames(mapName);
+        String path = String.format(TEAM_PATH + ".%s.spawner", mapName, teamName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             return null;
         if (!fileConfig.contains(path))
@@ -208,6 +353,18 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
+     * Get max player in team configuration.
+     *
+     * @param mapName Original map name
+     */
+    public int getMaxPlayerInTeam(String mapName) {
+        String path = String.format("worlds.%s.max-player-per-team", mapName);
+        if (!fileConfig.contains(path))
+            fileConfig.set(path, 4);
+        return fileConfig.getInt(path);
+    }
+
+    /**
      * Get team's bed location. User need to check if a bed on that location has been put.
      *
      * @param mapName  Original map name
@@ -216,10 +373,10 @@ public class GameSystemConfig extends AbstractFile {
      */
     public Location getBedLocation(World inWorld, String mapName, String teamName) {
         // Check if team is exists
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             return null;
-        String path = String.format("worlds.%s.teams.%s.bed-location", mapName, teamName);
+        String path = String.format(TEAM_PATH + ".%s.bed-location", mapName, teamName);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         if (!fileConfig.contains(path + ".x"))
@@ -240,10 +397,10 @@ public class GameSystemConfig extends AbstractFile {
      * @return Raw string data, if team is not exists then null
      */
     public String getRawColor(String mapName, String teamName) {
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             return null;
-        String path = String.format("worlds.%s.teams.%s.color", mapName, teamName);
+        String path = String.format(TEAM_PATH + ".%s.color", mapName, teamName);
         if (!fileConfig.contains(path))
             fileConfig.set(path, "white");
         return fileConfig.getString(path);
@@ -258,7 +415,7 @@ public class GameSystemConfig extends AbstractFile {
      */
     public Location getMinimumAreaBuff(World inWorld, String mapName, String teamName) {
         // Check team exists
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             teamName = "PUBLIC";
         // Check path in config exists
@@ -284,7 +441,7 @@ public class GameSystemConfig extends AbstractFile {
      */
     public Location getMaximumAreaBuff(World inWorld, String mapName, String teamName) {
         // Check team exists
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             teamName = "PUBLIC";
         // Check path in config exists
@@ -310,8 +467,7 @@ public class GameSystemConfig extends AbstractFile {
      */
     public AreaEffectTimer getAreaBuffRoutine(World inWorld, String mapName, TeamGroupMaker team) {
         // Check team exists
-        List<String> teamNames = getTeamNames(mapName);
-        if (!teamNames.contains(team.getName()))
+        if (!getTeamNames(mapName, true).contains(team.getName()))
             return null;
         return new AreaEffectTimer(5f, getMinimumAreaBuff(inWorld, mapName, team.getName()),
                 getMaximumAreaBuff(inWorld, mapName, team.getName()), team);
@@ -343,7 +499,8 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
-     * Get codenames that owned by a team. if there's no existing team then it consider as public resource spawners.
+     * Get codename that owned by a team.
+     * If there's no existing team then it consider as public resource spawners.
      *
      * @param mapName  Original map name
      * @param teamName On team with name
@@ -351,18 +508,34 @@ public class GameSystemConfig extends AbstractFile {
      */
     public List<String> getRSCodename(String mapName, String teamName) {
         // Check existing team
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             teamName = "PUBLIC";
+
         // Check existence in config file
-        String path = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        String path = String.format(RESOURCE_SPAWNER_PATH + ".%s", mapName, teamName);
         List<String> codenameList = new ArrayList<>();
         if (!fileConfig.contains(path)) {
             fileConfig.createSection(path);
             return codenameList;
         }
+
         // Include all codename in team
         codenameList.addAll(fileConfig.getConfigurationSection(path).getKeys(false));
+
+        // Check if it is public, then get all locked resource spawner list
+        if (teamName.equals("PUBLIC")) {
+            // Get all locked resource spawner codename
+            String lockedEntPath = String.format(LOCKED_ENTITY_PATH, mapName);
+            for (String le : fileConfig.getConfigurationSection(lockedEntPath).getKeys(false)) {
+                LockedEntityType lockType = LockedEntityType.values()[fileConfig.getInt(lockedEntPath +
+                        "." + le + ".type-lock")];
+                if (lockType == LockedEntityType.RESOURCE_SPAWNER_LOCK) {
+                    String rsLockPath = String.format("%s.%s.rs-lock", lockedEntPath, le);
+                    codenameList.addAll(fileConfig.getConfigurationSection(rsLockPath).getKeys(false));
+                }
+            }
+        }
         return codenameList;
     }
 
@@ -395,24 +568,29 @@ public class GameSystemConfig extends AbstractFile {
      * @return List of events in timeline
      */
     public List<BedwarsTimelineEvent> getTimelineEvents(String mapName, @Nullable SleepingRoom room) {
-        String path = String.format("worlds.%s.timeline", mapName);
+        String path = String.format(TIMELINE_EVENT_PATH, mapName);
         List<BedwarsTimelineEvent> timelineEvents = new ArrayList<>();
         if (!fileConfig.contains(path)) {
             fileConfig.createSection(path, new HashMap<>());
             return timelineEvents; // Empty timeline
         }
+
         // Get and create object event
         for (String eventNameString : fileConfig.getConfigurationSection(path).getKeys(false)) {
             // Set Defaults
             String tPath = String.format("%s.%s", path, eventNameString);
             int order = fileConfig.getInt(tPath + ".order");
             float secondsToTrigger = (float) fileConfig.getDouble(tPath + ".trigger-in-seconds");
-            TimelineEventType typeEvent = TimelineEventType.fromString(fileConfig.getString(tPath + ".type"));
-            String eventMsg = fileConfig.getString(tPath + ".message");
-            BedwarsTimelineEvent bent = new BedwarsTimelineEvent(typeEvent, secondsToTrigger,
-                    eventNameString, order, eventMsg, room);
-            timelineEvents.add(bent);
+            String typeString = fileConfig.getString(tPath + ".type");
+            if (typeString != null) {
+                TimelineEventType typeEvent = TimelineEventType.fromString(typeString);
+                String eventMsg = fileConfig.getString(tPath + ".message");
+                BedwarsTimelineEvent bent = new BedwarsTimelineEvent(typeEvent, secondsToTrigger,
+                        eventNameString, order, eventMsg, room);
+                timelineEvents.add(bent);
+            }
         }
+
         // Selection sort
         for (int i = 0; i < timelineEvents.size() - 1; i++) {
             int lowestValueIndex = i;
@@ -436,10 +614,14 @@ public class GameSystemConfig extends AbstractFile {
      * @return List of event names in timeline
      */
     public List<String> getTimelineEventNames(String mapName) {
-        String path = String.format("worlds.%s.timeline", mapName);
+        String path = String.format(TIMELINE_EVENT_PATH, mapName);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path, new HashMap<>());
-        return new ArrayList<>(fileConfig.getConfigurationSection(path).getKeys(false));
+        ConfigurationSection cs = fileConfig.getConfigurationSection(path);
+        List<String> eventNames = new ArrayList<>();
+        if (cs != null)
+            eventNames.addAll(cs.getKeys(false));
+        return eventNames;
     }
 
     /**
@@ -454,19 +636,24 @@ public class GameSystemConfig extends AbstractFile {
         Map<BedwarsShopType, List<Location>> shopMapLoc = new HashMap<>();
         if (!fileConfig.contains(path))
             fileConfig.createSection(path, new HashMap<>());
-        for (String shopTypeString : fileConfig.getConfigurationSection(path).getKeys(false)) {
-            BedwarsShopType shopType = BedwarsShopType.fromString(shopTypeString);
-            Set<String> indexStringSet = fileConfig.getConfigurationSection(path + "." + shopTypeString)
-                    .getKeys(false);
-            if (shopType != null && !indexStringSet.isEmpty()) {
-                List<Location> locationList = new ArrayList<>();
-                for (String shopLocString : indexStringSet) {
-                    String locPath = path + "." + shopTypeString + "." + shopLocString;
-                    Location loc = new Location(inWorld, fileConfig.getDouble(locPath + ".x"),
-                            fileConfig.getDouble(locPath + ".y"), fileConfig.getDouble(locPath + ".z"));
-                    locationList.add(loc);
+        ConfigurationSection csPath = fileConfig.getConfigurationSection(path);
+        if (csPath != null) {
+            for (String shopTypeString : csPath.getKeys(false)) {
+                BedwarsShopType shopType = BedwarsShopType.fromString(shopTypeString);
+                ConfigurationSection cs = fileConfig.getConfigurationSection(path + "." + shopTypeString);
+                if (cs != null) {
+                    Set<String> indexStringSet = cs.getKeys(false);
+                    if (shopType != null && !indexStringSet.isEmpty()) {
+                        List<Location> locationList = new ArrayList<>();
+                        for (String shopLocString : indexStringSet) {
+                            String locPath = path + "." + shopTypeString + "." + shopLocString;
+                            Location loc = new Location(inWorld, fileConfig.getDouble(locPath + ".x"),
+                                    fileConfig.getDouble(locPath + ".y"), fileConfig.getDouble(locPath + ".z"));
+                            locationList.add(loc);
+                        }
+                        shopMapLoc.put(shopType, locationList);
+                    }
                 }
-                shopMapLoc.put(shopType, locationList);
             }
         }
         return shopMapLoc;
@@ -484,59 +671,79 @@ public class GameSystemConfig extends AbstractFile {
         if (!fileConfig.contains(path))
             fileConfig.createSection(path, new HashMap<>());
         List<LockedNormalEntity> listOfLocked = new ArrayList<>();
-        for (String cn : fileConfig.getConfigurationSection(path).getKeys(false)) {
-            LockedEntityType typeLock = LockedEntityType.values()[fileConfig.getInt(
-                    path + "." + cn + ".type-lock")];
-            // Get requirements to unlock
-            String tPath = path + "." + cn + ".request";
-            Map<ResourcesType, Integer> requirements = new HashMap<>();
-            if (!fileConfig.contains(tPath))
-                fileConfig.createSection(tPath);
-            for (String req : fileConfig.getConfigurationSection(tPath).getKeys(false)) {
-                ResourcesType typeRequest = ResourcesType.fromString(req);
-                requirements.put(typeRequest, fileConfig.getInt(tPath + "." + req));
-            }
-            // Check lock type
-            if (typeLock == LockedEntityType.NORMAL_LOCK) {
-                listOfLocked.add(new LockedNormalEntity(new Location(inWorld,
-                        fileConfig.getDouble(path + "." + cn + ".loc.x"),
-                        fileConfig.getDouble(path + "." + cn + ".loc.y"),
-                        fileConfig.getDouble(path + "." + cn + ".loc.z")), requirements));
-            } else if (typeLock == LockedEntityType.RESOURCE_SPAWNER_LOCK) {
-                String lockedRSPath = String.format("%s.%s.rs-lock", path, cn);
-                List<ResourceSpawner> rsList = new ArrayList<>();
-                for (String rs : fileConfig.getConfigurationSection(lockedRSPath).getKeys(false)) {
-                    String rsPath = lockedRSPath + "." + rs;
-                    if (!fileConfig.contains(rsPath + ".type"))
-                        fileConfig.set(rsPath + ".type", 0);
-                    if (!fileConfig.contains(rsPath + ".spawnloc.x"))
-                        fileConfig.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
-                    if (!fileConfig.contains(rsPath + ".spawnloc.y"))
-                        fileConfig.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
-                    if (!fileConfig.contains(rsPath + ".spawnloc.z"))
-                        fileConfig.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
-                    if (!fileConfig.contains(rsPath + ".duration-spawn"))
-                        fileConfig.set(rsPath + ".duration-spawn", 10f);
-                    ResourcesType typeSpawnResource = ResourcesType.values()[fileConfig.getInt(rsPath + ".type")];
-                    Location spawnLoc = new Location(inWorld, fileConfig.getDouble(rsPath + ".spawnloc.x"),
-                            fileConfig.getDouble(rsPath + ".spawnloc.y"),
-                            fileConfig.getDouble(rsPath + ".spawnloc.z"));
-                    float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
-                    // Create resource spawner instance
-                    ResourceSpawner rsp;
-                    if (spawnDur <= 0f)
-                        rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource);
-                    else
-                        rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource, spawnDur);
-                    rsp.getCoroutine().setLocked(true);
-                    rsList.add(rsp);
+        ConfigurationSection csPath = fileConfig.getConfigurationSection(path);
+        if (csPath != null) {
+            for (String cn : csPath.getKeys(false)) {
+                LockedEntityType typeLock = LockedEntityType.values()[fileConfig.getInt(path + "." + cn + ".type-lock")];
+
+                // Get requirements to unlock
+                String tPath = path + "." + cn + ".request";
+                Map<Material, Integer> requirements = new HashMap<>();
+                if (!fileConfig.contains(tPath))
+                    fileConfig.createSection(tPath);
+                ConfigurationSection tcs = fileConfig.getConfigurationSection(tPath);
+                if (tcs != null) {
+                    for (String req : tcs.getKeys(false)) {
+                        Material typeRequest = Material.getMaterial(req.toUpperCase());
+                        requirements.put(typeRequest, fileConfig.getInt(tPath + "." + req));
+                    }
                 }
-                refHolder.addAll(rsList);
-                listOfLocked.add(new LockedResourceSpawner(new Location(inWorld,
-                        fileConfig.getDouble(path + "." + cn + ".loc.x"),
-                        fileConfig.getDouble(path + "." + cn + ".loc.y"),
-                        fileConfig.getDouble(path + "." + cn + ".loc.z")),
-                        requirements, rsList));
+
+                // Check lock type
+                if (typeLock == LockedEntityType.NORMAL_LOCK) {
+                    listOfLocked.add(new LockedNormalEntity(new Location(inWorld,
+                            fileConfig.getDouble(path + "." + cn + ".loc.x"),
+                            fileConfig.getDouble(path + "." + cn + ".loc.y"),
+                            fileConfig.getDouble(path + "." + cn + ".loc.z")), requirements));
+                } else if (typeLock == LockedEntityType.RESOURCE_SPAWNER_LOCK) {
+                    String lockedRSPath = String.format("%s.%s.rs-lock", path, cn);
+                    List<ResourceSpawner> rsList = new ArrayList<>();
+                    ConfigurationSection rsCS = fileConfig.getConfigurationSection(lockedRSPath);
+                    if (rsCS != null) {
+                        for (String rs : rsCS.getKeys(false)) {
+                            String rsPath = lockedRSPath + "." + rs;
+                            if (!fileConfig.contains(rsPath + ".type"))
+                                fileConfig.set(rsPath + ".type", "IRON_INGOT");
+                            if (!fileConfig.contains(rsPath + ".spawnloc.x"))
+                                fileConfig.set(rsPath + ".spawnloc.x", inWorld.getSpawnLocation().getX());
+                            if (!fileConfig.contains(rsPath + ".spawnloc.y"))
+                                fileConfig.set(rsPath + ".spawnloc.y", inWorld.getSpawnLocation().getY());
+                            if (!fileConfig.contains(rsPath + ".spawnloc.z"))
+                                fileConfig.set(rsPath + ".spawnloc.z", inWorld.getSpawnLocation().getZ());
+                            if (!fileConfig.contains(rsPath + ".duration-spawn"))
+                                fileConfig.set(rsPath + ".duration-spawn", 10f);
+                            String typeInString = fileConfig.getString(rsPath + ".type");
+                            if (typeInString == null)
+                                typeInString = "";
+                            Material typeSpawnResource = Material.getMaterial(typeInString.toUpperCase());
+
+                            // Check if it is a valid currency type
+                            if (typeSpawnResource == null)
+                                continue;
+                            if (!PluginStaticFunc.isCurrencyInGame(typeSpawnResource))
+                                continue;
+
+                            Location spawnLoc = new Location(inWorld, fileConfig.getDouble(rsPath + ".spawnloc.x"),
+                                    fileConfig.getDouble(rsPath + ".spawnloc.y"),
+                                    fileConfig.getDouble(rsPath + ".spawnloc.z"));
+                            float spawnDur = (float) fileConfig.getDouble(rsPath + ".duration-spawn");
+                            // Create resource spawner instance
+                            ResourceSpawner rsp;
+                            if (spawnDur <= 0f)
+                                rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource);
+                            else
+                                rsp = new ResourceSpawner(rs, spawnLoc, typeSpawnResource, spawnDur);
+                            rsp.getLooper().setLocked(true);
+                            rsList.add(rsp);
+                        }
+                    }
+                    refHolder.addAll(rsList);
+                    listOfLocked.add(new LockedResourceSpawner(new Location(inWorld,
+                            fileConfig.getDouble(path + "." + cn + ".loc.x"),
+                            fileConfig.getDouble(path + "." + cn + ".loc.y"),
+                            fileConfig.getDouble(path + "." + cn + ".loc.z")),
+                            requirements, rsList));
+                }
             }
         }
         return listOfLocked;
@@ -550,11 +757,29 @@ public class GameSystemConfig extends AbstractFile {
      */
     public List<String> getPublicRSCodename(String mapName) {
         List<String> listRSCodename = new ArrayList<>();
-        String path = String.format("worlds.%s.resource-spawners.PUBLIC", mapName);
+        String path = String.format(RESOURCE_SPAWNER_PATH + ".PUBLIC", mapName);
         if (getWorldNames().contains(mapName)) {
             if (!fileConfig.contains(path))
                 fileConfig.createSection(path, new HashMap<>());
-            listRSCodename.addAll(fileConfig.getConfigurationSection(path).getKeys(false));
+            ConfigurationSection csPath = fileConfig.getConfigurationSection(path);
+            if (csPath != null)
+                listRSCodename.addAll(csPath.getKeys(false));
+
+            // Get all locked resource spawner codename
+            String lockedEntPath = String.format(LOCKED_ENTITY_PATH, mapName);
+            ConfigurationSection lockedCS = fileConfig.getConfigurationSection(lockedEntPath);
+            if (lockedCS != null) {
+                for (String le : lockedCS.getKeys(false)) {
+                    LockedEntityType lockType = LockedEntityType.values()[fileConfig.getInt(lockedEntPath +
+                            "." + le + ".type-lock")];
+                    if (lockType == LockedEntityType.RESOURCE_SPAWNER_LOCK) {
+                        String rsLockPath = String.format("%s.%s.rs-lock", lockedEntPath, le);
+                        ConfigurationSection rsLockCS = fileConfig.getConfigurationSection(rsLockPath);
+                        if (rsLockCS != null)
+                            listRSCodename.addAll(rsLockCS.getKeys(false));
+                    }
+                }
+            }
         }
         return listRSCodename;
     }
@@ -566,10 +791,14 @@ public class GameSystemConfig extends AbstractFile {
      * @return List of locked entity codename
      */
     public List<String> getLockedCodename(String mapName) {
-        String path = String.format("worlds.%s.locked-entity", mapName);
+        String path = String.format(LOCKED_ENTITY_PATH, mapName);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path, new HashMap<>());
-        return new ArrayList<>(fileConfig.getConfigurationSection(path).getKeys(false));
+        ConfigurationSection cs = fileConfig.getConfigurationSection(path);
+        List<String> lockedCL = new ArrayList<>();
+        if (cs != null)
+            lockedCL.addAll(cs.getKeys(false));
+        return lockedCL;
     }
     //#endregion
 
@@ -583,11 +812,12 @@ public class GameSystemConfig extends AbstractFile {
      */
     public void setRawColor(String mapName, String teamName, String colorPrefix) {
         // Check available team
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             return;
+
         // Set configuration
-        String path = String.format("worlds.%s.teams.%s.color", mapName, teamName);
+        String path = String.format(TEAM_PATH + ".%s.color", mapName, teamName);
         fileConfig.set(path, colorPrefix);
     }
 
@@ -616,7 +846,7 @@ public class GameSystemConfig extends AbstractFile {
      * @param shrunkBorder Set true to set how wide border after shrunk
      */
     public void setBorderData(String mapName, int blockSize, boolean shrunkBorder) {
-        String path = String.format("worlds.%s.border", mapName);
+        String path = String.format(WORLD_BORDER_PATH, mapName);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         if (shrunkBorder)
@@ -634,10 +864,10 @@ public class GameSystemConfig extends AbstractFile {
      * @return true if successfully set, else then false;
      */
     public boolean setTeamSpawner(String mapName, String teamName, Location setLoc) {
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             return false;
-        String path = String.format("worlds.%s.teams.%s.spawner", mapName, teamName);
+        String path = String.format(TEAM_PATH + ".%s.spawner", mapName, teamName);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         fileConfig.set(path + ".x", setLoc.getX());
@@ -655,10 +885,10 @@ public class GameSystemConfig extends AbstractFile {
      * @return true if the set is done, if team not exists then false
      */
     public boolean setBedLocation(String mapName, String teamName, Location bedLoc) {
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             return false;
-        String path = String.format("worlds.%s.teams.%s.bed-location", mapName, teamName);
+        String path = String.format(TEAM_PATH + ".%s.bed-location", mapName, teamName);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         fileConfig.set(path + ".x", bedLoc.getBlockX());
@@ -678,11 +908,12 @@ public class GameSystemConfig extends AbstractFile {
      * @param maxLoc   Location maximum value
      */
     public void setAreaBuff(String mapName, String teamName, Location minLoc, Location maxLoc) {
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             teamName = "PUBLIC";
+
+        // Comparing Minimal and Maximal value correction
         double temp;
-        // Minimal and Maximal value correction
         if (minLoc.getX() > maxLoc.getX()) {
             temp = minLoc.getX();
             minLoc.setX(maxLoc.getX());
@@ -698,6 +929,7 @@ public class GameSystemConfig extends AbstractFile {
             minLoc.setZ(maxLoc.getZ());
             maxLoc.setZ(temp);
         }
+
         // Check if exists in config file
         String path = String.format("worlds.%s.buffer-zone.%s", mapName, teamName);
         if (!fileConfig.contains(path))
@@ -728,6 +960,51 @@ public class GameSystemConfig extends AbstractFile {
     }
 
     /**
+     * Set game default values for current map.
+     *
+     * @param mapName Original map name
+     * @param key Key to be set
+     * @param x Set value
+     */
+    public boolean setDefaultValue(String mapName, String key, double x) {
+        String path = String.format(DEFAULT_VALUE_PATH + ".%s", mapName, key);
+        if (!DEFAULT_KEYS.contains(key))
+            return false;
+        fileConfig.set(path, x);
+        return true;
+    }
+
+    /**
+     * Set game default values for current map.
+     *
+     * @param mapName Original map name
+     * @param key Key to be set
+     * @param x Set value
+     */
+    public boolean setDefaultValue(String mapName, String key, int x) {
+        String path = String.format(DEFAULT_VALUE_PATH + ".%s", mapName, key);
+        if (!DEFAULT_KEYS.contains(key))
+            return false;
+        fileConfig.set(path, x);
+        return true;
+    }
+
+    /**
+     * Set game default values for current map.
+     *
+     * @param mapName Original map name
+     * @param key Key to be set
+     * @param x Set value
+     */
+    public boolean setDefaultValue(String mapName, String key, float x) {
+        String path = String.format(DEFAULT_VALUE_PATH + ".%s", mapName, key);
+        if (!DEFAULT_KEYS.contains(key))
+            return false;
+        fileConfig.set(path, x);
+        return true;
+    }
+
+    /**
      * Set locked placeable entity, which player cannot interact with.
      *
      * @param mapName    Original map name
@@ -739,7 +1016,7 @@ public class GameSystemConfig extends AbstractFile {
         if (!getWorldNames().contains(mapName))
             return false;
         // Check if locked entity already exists
-        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
+        String path = String.format(LOCKED_ENTITY_PATH + ".%s", mapName, codename);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         fileConfig.set(path + ".loc.x", onLocation.getX());
@@ -762,12 +1039,14 @@ public class GameSystemConfig extends AbstractFile {
                                     @Nullable Location onLocation) {
         if (!getWorldNames().contains(mapName))
             return false;
+
         // Move resource spawner's classification into Locked section
-        String tPath = String.format("worlds.%s.resource-spawners.PUBLIC.%s", mapName, codenameRS);
+        String tPath = String.format(RESOURCE_SPAWNER_PATH + ".PUBLIC.%s", mapName, codenameRS);
         if (!fileConfig.contains(tPath))
             return false;
+
         // Check if locked entity already exists
-        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
+        String path = String.format(LOCKED_ENTITY_PATH + ".%s", mapName, codename);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         if (onLocation != null) {
@@ -779,7 +1058,7 @@ public class GameSystemConfig extends AbstractFile {
         String ttPath = path + ".rs-lock." + codenameRS;
         if (!fileConfig.contains(ttPath))
             fileConfig.createSection(ttPath);
-        fileConfig.set(ttPath + ".type", fileConfig.getInt(tPath + ".type"));
+        fileConfig.set(ttPath + ".type", fileConfig.getString(tPath + ".type"));
         fileConfig.set(ttPath + ".spawnloc.x", fileConfig.getDouble(tPath + ".spawnloc.x"));
         fileConfig.set(ttPath + ".spawnloc.y", fileConfig.getDouble(tPath + ".spawnloc.y"));
         fileConfig.set(ttPath + ".spawnloc.z", fileConfig.getDouble(tPath + ".spawnloc.z"));
@@ -794,14 +1073,84 @@ public class GameSystemConfig extends AbstractFile {
      * @param mapName  Original map name
      * @param teamName On team with name
      * @param codename Resource spawner has their own unique codename
-     * @param duration Seconds per spawn duration
+     * @param interval Seconds per spawn duration
      * @return true if successfully changed, else then false
      */
-    public boolean setRSDuration(String mapName, String teamName, String codename, float duration) {
-        String path = String.format("worlds.%s.resource-spawners.%s.%s", mapName, teamName, codename);
-        if (!fileConfig.contains(path))
+    public boolean setRSInterval(String mapName, String teamName, String codename, float interval) {
+        // If team name not exists then consider it as public
+        if (!getTeamNames(mapName, true).contains(teamName))
+            teamName = "PUBLIC";
+
+        // Check if the resource spawner is exists
+        String path = String.format(RESOURCE_SPAWNER_PATH + ".%s.%s", mapName, teamName, codename);
+        if (!fileConfig.contains(path)) {
+            // Get all locked resource spawners
+            String lockedEntPath = String.format(LOCKED_ENTITY_PATH, mapName);
+            ConfigurationSection lockCS = fileConfig.getConfigurationSection(lockedEntPath);
+            if (lockCS != null) {
+                for (String le : lockCS.getKeys(false)) {
+                    LockedEntityType lockType = LockedEntityType.values()[fileConfig.getInt(lockedEntPath +
+                            "." + le + ".type-lock")];
+                    if (lockType == LockedEntityType.RESOURCE_SPAWNER_LOCK) {
+                        String rsLockPath = String.format("%s.%s.rs-lock", lockedEntPath, le);
+                        ConfigurationSection rsLockCS = fileConfig.getConfigurationSection(rsLockPath);
+                        if (rsLockCS != null) {
+                            for (String rs : rsLockCS.getKeys(false)) {
+                                if (codename.equals(rs)) {
+                                    fileConfig.set(String.format("%s.%s.duration-spawn", rsLockPath, rs), interval);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             return false;
-        fileConfig.set(path + ".duration-spawn", duration);
+        }
+
+        fileConfig.set(path + ".duration-spawn", interval);
+        return true;
+    }
+
+    /**
+     * Set resource spawner resource type spawner.
+     *
+     * @param mapName Original map name
+     * @param teamName Team owned resource spawner
+     * @param codename Resource spawner codename
+     * @param type Material spawn type
+     * @return True if successfully set, if codename not exists then it returns false
+     */
+    public boolean setRSTypeSpawner(String mapName, String teamName, String codename, Material type) {
+        if (!getTeamNames(mapName, true).contains(teamName))
+            teamName = "PUBLIC";
+
+        String path = String.format(RESOURCE_SPAWNER_PATH + ".%s.%s", mapName, teamName, codename);
+        if (!fileConfig.contains(path)) {
+            // Get all locked resource spawners
+            String lockedEntPath = String.format(LOCKED_ENTITY_PATH, mapName);
+            ConfigurationSection lockCS = fileConfig.getConfigurationSection(lockedEntPath);
+            if (lockCS != null) {
+                for (String le : lockCS.getKeys(false)) {
+                    LockedEntityType lockType = LockedEntityType.values()[fileConfig.getInt(lockedEntPath + "." + le + ".type-lock")];
+                    if (lockType == LockedEntityType.RESOURCE_SPAWNER_LOCK) {
+                        String rsLockPath = String.format("%s.%s.rs-lock", lockedEntPath, le);
+                        ConfigurationSection rsLockCS = fileConfig.getConfigurationSection(rsLockPath);
+                        if (rsLockCS != null) {
+                            for (String rs : rsLockCS.getKeys(false)) {
+                                if (codename.equals(rs)) {
+                                    fileConfig.set(String.format("%s.%s.type", rsLockPath, rs), type.toString().toLowerCase());
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        fileConfig.set(path + ".type", type.toString().toLowerCase());
         return true;
     }
 
@@ -814,11 +1163,36 @@ public class GameSystemConfig extends AbstractFile {
      * @return True if successfully set, if event not exists then it returns false
      */
     public boolean setEventOrder(String mapName, String eventName, int order) {
-        String path = String.format("worlds.%s.timeline.%s", mapName, eventName);
+        String path = String.format(TIMELINE_EVENT_PATH + ".%s", mapName, eventName);
         if (!fileConfig.contains(path))
             return false;
         fileConfig.set(path + ".order", order);
         return true;
+    }
+
+    /**
+     * Set max player for each team.
+     *
+     * @param mapName Original map name
+     * @param count Player max count
+     */
+    public void setMaxPlayerInTeam(String mapName, int count) {
+        String path = String.format("worlds.%s.max-player-per-team", mapName);
+        fileConfig.set(path, count);
+    }
+
+    /**
+     * Set available flag.
+     *
+     * @param mapName Original map name
+     * @param flag Flag
+     * @param val True or False
+     */
+    public void setFlag(String mapName, @Nonnull InGameFlags flag, boolean val) {
+        String path = String.format(FLAG_PATH, mapName);
+        if (!fileConfig.contains(path))
+            fileConfig.createSection(path);
+        fileConfig.set(path + "." + flag.toString(), val);
     }
     //#endregion
 
@@ -829,15 +1203,17 @@ public class GameSystemConfig extends AbstractFile {
      * @param mapName     Original map name
      * @param teamName    Name of new team
      * @param colorPrefix Raw color for team prefix color
-     * @return True if successfully added, if team already exists the it returns false
      */
-    public boolean addTeam(String mapName, String teamName, @Nullable String colorPrefix) {
+    public void addTeam(String mapName, String teamName, @Nullable String colorPrefix) {
         // Check existing team
-        List<String> team = getTeamNames(mapName);
-        if (team.contains(teamName))
-            return false;
+        String path = String.format(TEAM_PATH + ".%s", mapName, teamName);
+        List<String> team = getTeamNames(mapName, true);
+        if (team.contains(teamName)) {
+            fileConfig.set(path + ".is-removed", false);
+            return;
+        }
+
         // Proceed Insertion
-        String path = String.format("worlds.%s.teams.%s", mapName, teamName);
         fileConfig.createSection(path, new HashMap<>());
         if (colorPrefix != null)
             fileConfig.set(path + ".color", colorPrefix);
@@ -846,9 +1222,8 @@ public class GameSystemConfig extends AbstractFile {
         String bufferZonePath = String.format("worlds.%s.buffer-zone", mapName);
         fileConfig.createSection(bufferZonePath + "." + teamName, new HashMap<>());
         fileConfig.createSection(bufferZonePath + "-effects." + teamName, new HashMap<>());
-        String resourceSpawnerPath = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        String resourceSpawnerPath = String.format(RESOURCE_SPAWNER_PATH + ".%s", mapName, teamName);
         fileConfig.createSection(resourceSpawnerPath, new HashMap<>());
-        return true;
     }
 
     /**
@@ -859,7 +1234,7 @@ public class GameSystemConfig extends AbstractFile {
     public void addEventTimeline(String mapName, @Nonnull BedwarsTimelineEvent eventSample) {
         if (!getWorldNames().contains(mapName))
             return;
-        String path = String.format("worlds.%s.timeline.%s", mapName, eventSample.getName());
+        String path = String.format(TIMELINE_EVENT_PATH + ".%s", mapName, eventSample.getName());
         if (!fileConfig.contains(path))
             fileConfig.createSection(path);
         fileConfig.set(path + ".order", eventSample.getTimelineOrder());
@@ -876,16 +1251,17 @@ public class GameSystemConfig extends AbstractFile {
      */
     public void addResourceSpawner(String mapName, String teamName, @Nonnull ResourceSpawner spawner) {
         // Check available team
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             teamName = "PUBLIC";
-        String path = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
+        String path = String.format(RESOURCE_SPAWNER_PATH + ".%s", mapName, teamName);
         if (!fileConfig.contains(path))
             fileConfig.createSection(path, new HashMap<>());
+
         // Add into config file
         String rsPath = path + "." + spawner.getCodename();
         fileConfig.set(rsPath, new HashMap<>());
-        fileConfig.set(rsPath + ".type", spawner.getTypeSpawner().ordinal());
+        fileConfig.set(rsPath + ".type", spawner.getCurrency().toString().toLowerCase());
         fileConfig.set(rsPath + ".spawnloc.x", spawner.getSpawnLocation().getX());
         fileConfig.set(rsPath + ".spawnloc.y", spawner.getSpawnLocation().getY());
         fileConfig.set(rsPath + ".spawnloc.z", spawner.getSpawnLocation().getZ());
@@ -906,6 +1282,7 @@ public class GameSystemConfig extends AbstractFile {
             return false;
         if (!fileConfig.contains(path))
             fileConfig.createSection(path, new HashMap<>());
+
         // Add shop spawn location into config file
         String newPath = String.format("%s.shop%d", path, fileConfig.getConfigurationSection(path)
                 .getKeys(false).size());
@@ -925,7 +1302,7 @@ public class GameSystemConfig extends AbstractFile {
      */
     public boolean addTeamAreaPotionEffect(String mapName, String teamName, PotionEffectType effectType) {
         // Check available team
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             teamName = "PUBLIC";
         // Add into config file
@@ -947,17 +1324,21 @@ public class GameSystemConfig extends AbstractFile {
      *
      * @param mapName  Original map name
      * @param codename Locked entity has their own codename
-     * @param typeRes  Resource type which required
+     * @param currency  Currency type needed
      * @return True if successfully set, if the locked entity not exists then it returns false
      */
-    public boolean addLockedRequest(String mapName, String codename, ResourcesType typeRes, int amount) {
-        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
+    public boolean addLockedRequest(String mapName, String codename, Material currency, int amount) {
+        String path = String.format(LOCKED_ENTITY_PATH + ".%s", mapName, codename);
         if (!fileConfig.contains(path))
             return false;
         if (!fileConfig.contains(path + ".request"))
             fileConfig.createSection(path + ".request");
-        path = path + ".request." + typeRes.toString();
-        fileConfig.set(path, amount);
+        path = path + ".request." + currency.toString().toLowerCase();
+        if (amount == 0) {
+            fileConfig.set(path, null);
+        } else {
+            fileConfig.set(path, amount);
+        }
         return true;
     }
     //#endregion
@@ -970,19 +1351,24 @@ public class GameSystemConfig extends AbstractFile {
      * @param teamName On team with name
      * @return true if successfully deleted, if team not exists then false
      */
-    public boolean deleteTeam(String mapName, String teamName) {
+    public boolean deleteTeam(String mapName, String teamName, boolean permanentDelete) {
         // Check if team exists
-        List<String> team = getTeamNames(mapName);
+        List<String> team = getTeamNames(mapName, true);
         if (!team.contains(teamName))
             return false;
+
         // Proceed Deletion
-        String path = String.format("worlds.%s.teams.%s", mapName, teamName);
-        fileConfig.set(path, null);
-        String bufferZonePath = String.format("worlds.%s.buffer-zone", mapName);
-        fileConfig.set(bufferZonePath + "." + teamName, null);
-        fileConfig.set(bufferZonePath + "-effects." + teamName, null);
-        String resourceSpawnerPath = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
-        fileConfig.set(resourceSpawnerPath, null);
+        String path = String.format(TEAM_PATH + ".%s", mapName, teamName);
+        if (permanentDelete) {
+            fileConfig.set(path, null);
+            String bufferZonePath = String.format("worlds.%s.buffer-zone", mapName);
+            fileConfig.set(bufferZonePath + "." + teamName, null);
+            fileConfig.set(bufferZonePath + "-effects." + teamName, null);
+            String resourceSpawnerPath = String.format(RESOURCE_SPAWNER_PATH + ".%s", mapName, teamName);
+            fileConfig.set(resourceSpawnerPath, null);
+        } else {
+            fileConfig.set(path + ".is-removed", true);
+        }
         return true;
     }
 
@@ -996,16 +1382,18 @@ public class GameSystemConfig extends AbstractFile {
      * @return True if successfully deleted, else then false
      */
     public boolean deleteResourceSpawner(String mapName, String teamName, String codeName) {
-        String path = String.format("worlds.%s.resource-spawners.%s", mapName, teamName);
-        List<String> teams = getTeamNames(mapName);
+        String path = String.format(RESOURCE_SPAWNER_PATH + ".%s", mapName, teamName);
+        List<String> teams = getTeamNames(mapName, true);
+
         // Check if team is exists but resource spawner is not
         if (teams.contains(teamName) && !fileConfig.contains(path)) {
             fileConfig.createSection(path, new HashMap<>());
             return false;
         }
+
         // Consider a public resource spawner if the team not exists
         if (!fileConfig.contains(path)) {
-            path = String.format("worlds.%s.resource-spawners.PUBLIC", mapName);
+            path = String.format(RESOURCE_SPAWNER_PATH + ".PUBLIC", mapName);
             // Check PUBLIC section exists
             if (!fileConfig.contains(path)) {
                 // Consider create a public section if not exists
@@ -1013,6 +1401,7 @@ public class GameSystemConfig extends AbstractFile {
                 return false;
             }
         }
+
         // Check team resource spawner by codename
         if (!fileConfig.contains(path + "." + codeName))
             return false;
@@ -1067,7 +1456,7 @@ public class GameSystemConfig extends AbstractFile {
      * @return True if it is successfully deleted, else then false
      */
     public boolean deleteTimelineEvent(String mapName, String eventName) {
-        String path = String.format("worlds.%s.timeline.%s", mapName, eventName);
+        String path = String.format(TIMELINE_EVENT_PATH + ".%s", mapName, eventName);
         if (!fileConfig.contains(path))
             return false;
         fileConfig.set(path, null);
@@ -1086,7 +1475,10 @@ public class GameSystemConfig extends AbstractFile {
             return false;
         // Overwrite list of buffer area
         String path = String.format("worlds.%s.buffer-zone.PUBLIC", mapName);
-        Set<String> setListBuffer = fileConfig.getConfigurationSection(path).getKeys(false);
+        ConfigurationSection cs = fileConfig.getConfigurationSection(path);
+        Set<String> setListBuffer = new HashSet<>();
+        if (cs != null)
+            setListBuffer.addAll(cs.getKeys(false));
         if (index >= setListBuffer.size())
             return false;
         List<Vector> minVec = new ArrayList<>(), maxVec = new ArrayList<>();
@@ -1110,21 +1502,25 @@ public class GameSystemConfig extends AbstractFile {
      * @return True if successfully deleted, if codename does not exists then it returns false
      */
     public boolean deleteLockedKey(String mapName, String codename) {
-        String path = String.format("worlds.%s.locked-entity.%s", mapName, codename);
+        String path = String.format(LOCKED_ENTITY_PATH + ".%s", mapName, codename);
         if (!fileConfig.contains(path))
             return false;
+
         // Move from locked Resource spawner to the public
         if (fileConfig.contains(path + ".rs-lock")) {
-            for (String rsName : fileConfig.getConfigurationSection(path + ".rs-lock").getKeys(false)) {
-                String rsPath = path + ".rs-lock." + rsName;
-                String rsPublicPath = String.format("worlds.%s.resource-spawners.PUBLIC.%s", mapName, rsName);
-                if (!fileConfig.contains(rsPublicPath))
-                    fileConfig.createSection(rsPublicPath);
-                fileConfig.set(rsPublicPath + ".type", fileConfig.getInt(rsPath + ".type"));
-                fileConfig.set(rsPublicPath + ".spawnloc.x", fileConfig.getDouble(rsPath + ".spawnloc.x"));
-                fileConfig.set(rsPublicPath + ".spawnloc.y", fileConfig.getDouble(rsPath + ".spawnloc.y"));
-                fileConfig.set(rsPublicPath + ".spawnloc.z", fileConfig.getDouble(rsPath + ".spawnloc.z"));
-                fileConfig.set(rsPublicPath + ".duration-spawn", fileConfig.getDouble(rsPath + ".duration-spawn"));
+            ConfigurationSection cs = fileConfig.getConfigurationSection(path + ".rs-lock");
+            if (cs != null) {
+                for (String rsName : cs.getKeys(false)) {
+                    String rsPath = path + ".rs-lock." + rsName;
+                    String rsPublicPath = String.format(RESOURCE_SPAWNER_PATH + ".PUBLIC.%s", mapName, rsName);
+                    if (!fileConfig.contains(rsPublicPath))
+                        fileConfig.createSection(rsPublicPath);
+                    fileConfig.set(rsPublicPath + ".type", fileConfig.getString(rsPath + ".type"));
+                    fileConfig.set(rsPublicPath + ".spawnloc.x", fileConfig.getDouble(rsPath + ".spawnloc.x"));
+                    fileConfig.set(rsPublicPath + ".spawnloc.y", fileConfig.getDouble(rsPath + ".spawnloc.y"));
+                    fileConfig.set(rsPublicPath + ".spawnloc.z", fileConfig.getDouble(rsPath + ".spawnloc.z"));
+                    fileConfig.set(rsPublicPath + ".duration-spawn", fileConfig.getDouble(rsPath + ".duration-spawn"));
+                }
             }
         }
         fileConfig.set(path, null);
@@ -1134,18 +1530,51 @@ public class GameSystemConfig extends AbstractFile {
 
     //#region Utility and Other Methods
     /**
+     * This will delete all room folder from last time server was shutdown.
+     */
+    public void roomDeletionHandle() {
+        String path = "room-folders-will-be-deleted";
+        if (fileConfig.contains(path)) {
+            // Get all world folders
+            File[] f = Bukkit.getWorldContainer().listFiles();
+            Map<String, File> nameFile = new HashMap<>();
+            if (f == null)
+                return;
+            for (File fi : f) {
+                if (fi.isDirectory())
+                    nameFile.put(fi.getName(), fi);
+            }
+
+            // Delete each room
+            List<String> deleteRooms = fileConfig.getStringList(path);
+            for (String r : deleteRooms)
+                if (nameFile.containsKey(r))
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(SleepingWarsPlugin.getPlugin(),
+                            new DeleteWorldDelayed(nameFile.get(r)), 100L);
+        }
+        fileConfig.set(path, null);
+    }
+
+    public void insertRoomNames(List<String> roomNameList) {
+        String path = "room-folders-will-be-deleted";
+        fileConfig.set(path, roomNameList);
+    }
+
+    /**
      * Count overall resource spawners in this map
      *
      * @param mapName Original map name
      * @return amount of existing resource spawners
      */
     public int countOverallRS(String mapName) {
-        String path = String.format("worlds.%s.resource-spawners", mapName);
+        String path = String.format(RESOURCE_SPAWNER_PATH, mapName);
+
         // Consider a public resource spawner if the team not exists
         if (!fileConfig.contains(path)) {
             fileConfig.createSection(path, new HashMap<>());
             return 0;
         }
+
         // Count all resource spawners
         int amountSet = 0;
         for (String rsp : fileConfig.getConfigurationSection(path).getKeys(false))
@@ -1160,24 +1589,25 @@ public class GameSystemConfig extends AbstractFile {
      * @return Amount of events in timeline
      */
     public int countEventsInTimeline(String mapName) {
-        String path = String.format("worlds.%s.timeline", mapName);
+        String path = String.format(TIMELINE_EVENT_PATH, mapName);
+
         // Consider if the timeline section is not exists
         if (!fileConfig.contains(path)) {
             fileConfig.createSection(path, new HashMap<>());
             return 0;
         }
+
         ConfigurationSection cs = fileConfig.getConfigurationSection(path);
-        assert cs != null;
-        return cs.getKeys(false).size();
+        if (cs != null)
+            return cs.getKeys(false).size();
+        return 0;
     }
 
     @Override
-    public void Load() {
-        System.out.println("Contains Worlds path: " + fileConfig.contains("worlds"));
-        if (!fileConfig.contains("worlds")) {
+    public void load() {
+        if (!fileConfig.contains("worlds"))
             fileConfig.set("worlds", new HashMap<>());
-            System.out.println("Contains Worlds path: " + fileConfig.contains("worlds"));
-        }
+
         // Loop by World Name
         ConfigurationSection cs = fileConfig.getConfigurationSection("worlds");
         if (cs != null) {
@@ -1200,11 +1630,12 @@ public class GameSystemConfig extends AbstractFile {
      */
     public void saveWorldConfig(WorldCreator creator) {
         World worldSample = Bukkit.createWorld(creator);
-        assert worldSample != null;
+
         // Set world border
         WorldBorder border = worldSample.getWorldBorder();
         border.setCenter(new Location(worldSample, 0, 0, 0));
         border.setSize(1024d);
+
         // Set world config
         worldSample.setAutoSave(false);
         worldSample.setKeepSpawnInMemory(false);
@@ -1212,45 +1643,64 @@ public class GameSystemConfig extends AbstractFile {
         worldSample.setAnimalSpawnLimit(0);
         worldSample.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         worldSample.setTime(0);
+
         // Add initial blocks of bedrocks on mid point
         for (int x = -3; x < 4; x++) {
             for (int z = -3; z < 4; z++)
                 worldSample.getBlockAt(new Location(worldSample, x, 45, z)).setType(Material.BEDROCK);
         }
+
         // Get world Attributes
         String worldName = worldSample.getName();
         Location defaultSpawnLoc = worldSample.getSpawnLocation();
-        // Create Sections
+
         // Generic world path
         String worldPathName = String.format("worlds.%s", worldName);
+
         // Name of world and World Creator Config
         fileConfig.createSection(worldPathName, new HashMap<>());
         fileConfig.set(worldPathName + ".env", creator.environment().ordinal());
         fileConfig.set(worldPathName + ".structure", creator.generateStructures());
         fileConfig.set(worldPathName + ".hardcore", creator.hardcore());
+
         // Initial Teams in game
         fileConfig.createSection(worldPathName + ".teams", new HashMap<>());
         fileConfig.set(String.format("%s.teams.Yellow", worldPathName), new HashMap<>());
         fileConfig.set(String.format("%s.teams.Red", worldPathName), new HashMap<>());
         fileConfig.set(String.format("%s.teams.Blue", worldPathName), new HashMap<>());
         fileConfig.set(String.format("%s.teams.Green", worldPathName), new HashMap<>());
+
         // Set color prefixes
         fileConfig.set(String.format("%s.teams.Yellow.color", worldPathName), "yellow");
         fileConfig.set(String.format("%s.teams.Red.color", worldPathName), "red");
         fileConfig.set(String.format("%s.teams.Blue.color", worldPathName), "blue");
         fileConfig.set(String.format("%s.teams.Green.color", worldPathName), "green");
+
         // Queue Location of Game
         fileConfig.createSection(worldPathName + ".queueloc", new HashMap<>());
         fileConfig.set(worldPathName + ".queueloc.x", defaultSpawnLoc.getX());
         fileConfig.set(worldPathName + ".queueloc.y", defaultSpawnLoc.getX());
         fileConfig.set(worldPathName + ".queueloc.z", defaultSpawnLoc.getX());
+
         // Empty Resource Spawners
         fileConfig.createSection(worldPathName + ".resource-spawners", new HashMap<>());
         fileConfig.createSection(worldPathName + ".resource-spawners.PUBLIC", new HashMap<>());
+
         // Empty Timeline Event
         fileConfig.createSection(worldPathName + ".timeline", new HashMap<>());
+
         // Empty Shop Location
         fileConfig.createSection(worldPathName + ".shop-location", new HashMap<>());
+
+        // Empty Flags
+        fileConfig.createSection(worldPathName + ".flag", new HashMap<>());
+
+        // Empty Default Values
+        fileConfig.createSection(worldPathName + ".default-values", new HashMap<>());
+        fileConfig.set(worldPathName + ".default-values.iron_ingot-spawner-freq", 1f);
+        fileConfig.set(worldPathName + ".default-values.gold_ingot-spawner-freq", 4f);
+        fileConfig.set(worldPathName + ".default-values.diamond-spawner-freq", 30f);
+        fileConfig.set(worldPathName + ".default-values.emerald-spawner-freq", 60f);
     }
 
     /**

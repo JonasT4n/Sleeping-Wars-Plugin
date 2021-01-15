@@ -4,9 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.joenastan.sleepingwars.game.SleepingRoom;
-import com.joenastan.sleepingwars.game.TeamGroupMaker;
-import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
-import org.bukkit.entity.Player;
+import com.joenastan.sleepingwars.utility.CustomEntity.PlayerBedwarsEntity;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 

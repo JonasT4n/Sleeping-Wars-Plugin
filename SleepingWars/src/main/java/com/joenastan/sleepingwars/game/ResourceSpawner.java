@@ -1,6 +1,5 @@
 package com.joenastan.sleepingwars.game;
 
-import com.joenastan.sleepingwars.enumtypes.ResourcesType;
 import com.joenastan.sleepingwars.timercoro.ResourceSpawnTimer;
 
 import org.bukkit.Location;
@@ -12,63 +11,44 @@ public class ResourceSpawner {
 
     private final String codename;
     private final Location spawnLoc;
-    private final ResourcesType typeSpawnResource;
     private final ResourceSpawnTimer looper;
 
     private String ownedTeam = "UNKNOWN";
     private int spawnAmount;
-    private Material mat;
+    private Material currency;
     private boolean isActive;
 
-    public ResourceSpawner(String codename, Location spawnLoc, ResourcesType typeSpawnResource) {
+    public ResourceSpawner(String codename, Location spawnLoc, Material currency) {
         this.spawnLoc = spawnLoc;
-        this.typeSpawnResource = typeSpawnResource;
         this.codename = codename;
         isActive = false;
         spawnAmount = 1;
-        // Defaults values
-        switch (typeSpawnResource) {
-            case GOLD:
-                mat = Material.GOLD_INGOT;
+        // TODO: Set Default values from config
+        this.currency = currency;
+        switch (currency) {
+            case GOLD_INGOT:
                 looper = new ResourceSpawnTimer(4f, this);
                 break;
             case DIAMOND:
-                mat = Material.DIAMOND;
                 looper = new ResourceSpawnTimer(30f, this);
                 break;
             case EMERALD:
-                mat = Material.EMERALD;
                 looper = new ResourceSpawnTimer(60f, this);
                 break;
             default: // Default is IRON
-                mat = Material.IRON_INGOT;
                 looper = new ResourceSpawnTimer(1f, this);
                 break;
         }
     }
 
-    public ResourceSpawner(String codename, Location spawnLoc, ResourcesType typeSpawnResource,
+    public ResourceSpawner(String codename, Location spawnLoc, Material currency,
                            float durationPerSpawn) {
         this.spawnLoc = spawnLoc;
-        this.typeSpawnResource = typeSpawnResource;
         this.codename = codename;
         isActive = false;
         spawnAmount = 1;
-        // Defaults values
-        switch (typeSpawnResource) {
-            case GOLD:
-                mat = Material.GOLD_INGOT;
-                break;
-            case DIAMOND:
-                mat = Material.DIAMOND;
-                break;
-            case EMERALD:
-                mat = Material.EMERALD;
-                break;
-            default: // Default is IRON
-                mat = Material.IRON_INGOT;
-                break;
-        }
+        this.currency = currency;
+
         // Create routine for spawner
         looper = new ResourceSpawnTimer(durationPerSpawn, this);
     }
@@ -76,7 +56,7 @@ public class ResourceSpawner {
     // Spawn the resource
     public void spawn() {
         World w = spawnLoc.getWorld();
-        ItemStack res = new ItemStack(mat, spawnAmount);
+        ItemStack res = new ItemStack(currency, spawnAmount);
         w.dropItemNaturally(spawnLoc, res);
     }
 
@@ -91,20 +71,16 @@ public class ResourceSpawner {
         }
     }
 
-    public String getOwner() {
-        return ownedTeam;
+    public boolean isRunning() {
+        return isActive;
     }
 
     public void setOwner(String ownerTeam) {
         this.ownedTeam = ownerTeam;
     }
 
-    public Material getMaterialSpawn() {
-        return mat;
-    }
-
-    public void setMaterialSpawn(Material mat) {
-        this.mat = mat;
+    public void setCurrency(Material mat) {
+        this.currency = mat;
     }
 
     public void setSpawnInterval(float seconds) {
@@ -119,23 +95,23 @@ public class ResourceSpawner {
         return spawnLoc;
     }
 
-    public ResourcesType getTypeSpawner() {
-        return typeSpawnResource;
-    }
-
     public String getCodename() {
         return codename;
     }
 
-    public boolean isRunning() {
-        return isActive;
+    public Material getCurrency() {
+        return currency;
     }
 
     public float getSecondsPerSpawn() {
         return looper.getDuration();
     }
 
-    public ResourceSpawnTimer getCoroutine() {
+    public String getOwner() {
+        return ownedTeam;
+    }
+
+    public ResourceSpawnTimer getLooper() {
         return looper;
     }
 }

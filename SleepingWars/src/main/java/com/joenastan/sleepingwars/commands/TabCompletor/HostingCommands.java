@@ -16,7 +16,7 @@ import java.util.List;
 public class HostingCommands implements TabCompleter {
 
     private static final GameSystemConfig systemConfig = SleepingWarsPlugin.getGameSystemConfig();
-    private static final GameManager gameManager = SleepingWarsPlugin.getGameManager();
+    private static final GameManager gameManager = GameManager.instance;
 
     @Override
     public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command command,

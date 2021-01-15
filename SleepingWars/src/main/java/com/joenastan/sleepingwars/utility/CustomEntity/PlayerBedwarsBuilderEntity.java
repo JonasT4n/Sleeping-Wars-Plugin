@@ -1,5 +1,6 @@
-package com.joenastan.sleepingwars.utility.CustomDerivedEntity;
+package com.joenastan.sleepingwars.utility.CustomEntity;
 
+import com.joenastan.sleepingwars.enumtypes.GameCommandType;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -10,18 +11,19 @@ import java.util.Queue;
 public class PlayerBedwarsBuilderEntity extends PlayerBedwarsEntity {
 
     private final Queue<Location> placedLocation = new LinkedList<>();
-    private int requiredAmountLocations = 0;
     private final Queue<String> codenameHolder = new LinkedList<>();
 
-    public PlayerBedwarsBuilderEntity(Player player, Location lastTpfrom, GameMode lastGameMode) {
-        super(player, lastTpfrom, lastGameMode);
+    private int requiredAmountLocations = 0;
+
+    public PlayerBedwarsBuilderEntity(Player player, Location lastFromLoc, GameMode lastGameMode) {
+        super(player, lastFromLoc, lastGameMode);
     }
 
     public void addLocationBuffer(Location location) {
         placedLocation.add(location);
     }
 
-    public Location removeLocationBuffer() {
+    public Location removeBufferLoc() {
         return placedLocation.remove();
     }
 

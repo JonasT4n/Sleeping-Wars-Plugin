@@ -2,7 +2,7 @@ package com.joenastan.sleepingwars.events.CustomEvents;
 
 import com.joenastan.sleepingwars.game.SleepingRoom;
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
-import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+import com.joenastan.sleepingwars.utility.CustomEntity.PlayerBedwarsEntity;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 

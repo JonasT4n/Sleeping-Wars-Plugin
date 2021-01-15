@@ -1,7 +1,7 @@
 package com.joenastan.sleepingwars.timercoro;
 
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
-import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+import com.joenastan.sleepingwars.utility.CustomEntity.PlayerBedwarsEntity;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;

@@ -1,11 +1,26 @@
 package com.joenastan.sleepingwars.utility;
 
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.File;
+import java.util.HashSet;
+
 public class PluginStaticFunc {
+
+    public static final HashSet<String> MATERIALS = new HashSet<>();
+
+    public static void InitStatics() {
+        if (MATERIALS.isEmpty()) {
+            for (Material m : Material.values())
+                MATERIALS.add(m.toString());
+
+            // TODO: Remove non item materials
+        }
+    }
 
     /**
      * Remove items in any inventory by specific item type.
@@ -49,6 +64,18 @@ public class PluginStaticFunc {
                 amount -= 64;
             }
         }
+    }
+
+    /**
+     * Check if world is already exists in server folder.
+     *
+     * @param roomName Name of room
+     * @return True if exists, else then false
+     */
+    public static boolean isFolderWorldExists(String roomName) {
+        File f = new File(Bukkit.getWorldContainer().getParentFile(), roomName);
+        System.out.println(f.getAbsolutePath());
+        return f.exists();
     }
 
     /**
@@ -239,6 +266,100 @@ public class PluginStaticFunc {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    // TODO: Remove this after generalization
+    // Temporary Function to determine a currencies in game
+    public static boolean isCurrencyInGame(Material mat) {
+        switch (mat) {
+            case IRON_INGOT:
+            case GOLD_INGOT:
+            case DIAMOND:
+            case EMERALD:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Team color string.
+     *
+     * @return returns the color code, if the color not match any, then it returns white
+     */
+    public static String stringToChatColor(String colorString) {
+        if (colorString.equalsIgnoreCase("blue")) {
+            return ChatColor.BLUE + "";
+        } else if (colorString.equalsIgnoreCase("green")) {
+            return ChatColor.GREEN + "";
+        } else if (colorString.equalsIgnoreCase("yellow")) {
+            return ChatColor.YELLOW + "";
+        } else if (colorString.equalsIgnoreCase("aqua")) {
+            return ChatColor.AQUA + "";
+        } else if (colorString.equalsIgnoreCase("red")) {
+            return ChatColor.RED + "";
+        } else if (colorString.equalsIgnoreCase("purple")) {
+            return ChatColor.LIGHT_PURPLE + "";
+        } else if (colorString.equalsIgnoreCase("gold")) {
+            return ChatColor.GOLD + "";
+        } else if (colorString.equalsIgnoreCase("gray")) {
+            return ChatColor.GRAY + "";
+        } else if (colorString.equalsIgnoreCase("cyan")) {
+            return ChatColor.AQUA + "";
+        } else { // Default is White
+            return ChatColor.WHITE + "";
+        }
+    }
+
+    /**
+     * Define wool color by string.
+     *
+     * @param color Raw string color
+     * @return Colored wool material
+     */
+    public static Material woolColor(String color) {
+        if (color.equalsIgnoreCase("blue")) {
+            return Material.BLUE_WOOL;
+        } else if (color.equalsIgnoreCase("green")) {
+            return Material.GREEN_WOOL;
+        } else if (color.equalsIgnoreCase("yellow")) {
+            return Material.YELLOW_WOOL;
+        } else if (color.equalsIgnoreCase("aqua")) {
+            return Material.CYAN_WOOL;
+        } else if (color.equalsIgnoreCase("red")) {
+            return Material.RED_WOOL;
+        } else if (color.equalsIgnoreCase("purple")) {
+            return Material.MAGENTA_WOOL;
+        } else if (color.equalsIgnoreCase("gold")) {
+            return Material.YELLOW_WOOL;
+        } else if (color.equalsIgnoreCase("gray")) {
+            return Material.GRAY_WOOL;
+        } else if (color.equalsIgnoreCase("cyan")) {
+            return Material.CYAN_WOOL;
+        } else { // Default is White
+            return Material.WHITE_WOOL;
+        }
+    }
+
+    /**
+     * Define chat color of currency in game.
+     *
+     * @param mat Material
+     * @return Chat color code in string
+     */
+    public static String currencyColor(Material mat) {
+        switch (mat) {
+            case IRON_INGOT:
+                return ChatColor.GRAY + "";
+            case GOLD_INGOT:
+                return ChatColor.GOLD + "";
+            case DIAMOND:
+                return ChatColor.AQUA + "";
+            case EMERALD:
+                return ChatColor.GREEN + "";
+            default:
+                return ChatColor.WHITE + "";
         }
     }
 }

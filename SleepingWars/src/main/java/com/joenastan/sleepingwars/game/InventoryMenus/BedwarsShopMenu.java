@@ -1,15 +1,11 @@
 package com.joenastan.sleepingwars.game.InventoryMenus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.joenastan.sleepingwars.game.TeamGroupMaker;
 import com.joenastan.sleepingwars.game.ItemPrice.PricesItems;
-import com.joenastan.sleepingwars.game.ItemPrice.PricesItemsArmorWeapon;
+import com.joenastan.sleepingwars.game.ItemPrice.PricesItemsEnhanceable;
 import com.joenastan.sleepingwars.game.ItemPrice.PricesItemsPotion;
-import com.joenastan.sleepingwars.utility.PluginStaticColor;
 import com.joenastan.sleepingwars.utility.PluginStaticFunc;
 
 import net.md_5.bungee.api.ChatColor;
@@ -20,7 +16,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -36,370 +31,362 @@ public class BedwarsShopMenu {
 
     private static final Map<String, PricesItems> PRICED_ITEMS = new HashMap<>();
     private static final Map<String, Inventory> SHOP_MENUS = new HashMap<>();
-    private static boolean initialized = false;
-
-    private BedwarsShopMenu() { }
 
     // TODO: Code Smell
-    public static void init() {
-        if (!initialized) {
-            // Set Initialized to true
-            initialized = true;
-            // Insert all default shop items
-            //#region Weapons and Bows
-            // Stone Sword
-            String wn_stoneSw = ChatColor.GRAY + "Stone Sword";
-            PRICED_ITEMS.put(wn_stoneSw, new PricesItemsArmorWeapon(Material.STONE_SWORD, Material.IRON_INGOT,
-                    wn_stoneSw, 32, 1, null, new HashMap<>()));
-            // Iron Sword
-            String wn_ironSw = ChatColor.WHITE + "Iron Sword";
-            PRICED_ITEMS.put(wn_ironSw, new PricesItemsArmorWeapon(Material.IRON_SWORD, Material.GOLD_INGOT,
-                    wn_ironSw, 16, 1, null, new HashMap<>()));
-            // Diamond Sword
-            String wn_diamondSw = ChatColor.AQUA + "Diamond Sword";
-            PRICED_ITEMS.put(wn_diamondSw, new PricesItemsArmorWeapon(Material.DIAMOND_SWORD, Material.EMERALD,
-                    wn_diamondSw, 8, 1, null, new HashMap<>()));
-            // Bow
-            String wn_bow = ChatColor.WHITE + "Bow";
-            PRICED_ITEMS.put(wn_bow, new PricesItemsArmorWeapon(Material.BOW, Material.GOLD_INGOT,
-                    wn_bow, 18, 1, null, new HashMap<>()));
-            // Bow Level 2
-            Map<Enchantment, Integer> lvl2BowEnhancement = new HashMap<>();
-            lvl2BowEnhancement.put(Enchantment.ARROW_DAMAGE, 1);
-            String wn_bow2 = ChatColor.YELLOW + "Bow II";
-            PRICED_ITEMS.put(wn_bow2, new PricesItemsArmorWeapon(Material.BOW, Material.EMERALD,
-                    wn_bow2, 6, 1, null, lvl2BowEnhancement));
-            // Bow Level 3
-            Map<Enchantment, Integer> lvl3BowEnhancement = new HashMap<>();
-            lvl3BowEnhancement.put(Enchantment.ARROW_DAMAGE, 2);
-            lvl3BowEnhancement.put(Enchantment.ARROW_KNOCKBACK, 2);
-            String wn_bow3 = ChatColor.GREEN + "Bow III";
-            PRICED_ITEMS.put(wn_bow3, new PricesItemsArmorWeapon(Material.BOW, Material.EMERALD,
-                    wn_bow3, 12, 1, null, lvl3BowEnhancement));
-            // Arrow
-            String wn_arrow = ChatColor.WHITE + "Arrow";
-            PRICED_ITEMS.put(wn_arrow, new PricesItemsArmorWeapon(Material.ARROW, Material.GOLD_INGOT,
-                    wn_arrow, 2, 8, null, new HashMap<>()));
-            //#endregion
+    public BedwarsShopMenu() {
+        // Insert all default shop items
+        //#region Weapons and Bows
+        // Stone Sword
+        String wn_stoneSw = ChatColor.GRAY + "Stone Sword";
+        PRICED_ITEMS.put(wn_stoneSw, new PricesItemsEnhanceable(Material.STONE_SWORD, Material.IRON_INGOT,
+                wn_stoneSw, 32, 1, null, new HashMap<>()));
+        // Iron Sword
+        String wn_ironSw = ChatColor.WHITE + "Iron Sword";
+        PRICED_ITEMS.put(wn_ironSw, new PricesItemsEnhanceable(Material.IRON_SWORD, Material.GOLD_INGOT,
+                wn_ironSw, 16, 1, null, new HashMap<>()));
+        // Diamond Sword
+        String wn_diamondSw = ChatColor.AQUA + "Diamond Sword";
+        PRICED_ITEMS.put(wn_diamondSw, new PricesItemsEnhanceable(Material.DIAMOND_SWORD, Material.EMERALD,
+                wn_diamondSw, 8, 1, null, new HashMap<>()));
+        // Bow
+        String wn_bow = ChatColor.WHITE + "Bow";
+        PRICED_ITEMS.put(wn_bow, new PricesItemsEnhanceable(Material.BOW, Material.GOLD_INGOT,
+                wn_bow, 18, 1, null, new HashMap<>()));
+        // Bow Level 2
+        Map<Enchantment, Integer> lvl2BowEnhancement = new HashMap<>();
+        lvl2BowEnhancement.put(Enchantment.ARROW_DAMAGE, 1);
+        String wn_bow2 = ChatColor.YELLOW + "Bow II";
+        PRICED_ITEMS.put(wn_bow2, new PricesItemsEnhanceable(Material.BOW, Material.EMERALD,
+                wn_bow2, 6, 1, null, lvl2BowEnhancement));
+        // Bow Level 3
+        Map<Enchantment, Integer> lvl3BowEnhancement = new HashMap<>();
+        lvl3BowEnhancement.put(Enchantment.ARROW_DAMAGE, 2);
+        lvl3BowEnhancement.put(Enchantment.ARROW_KNOCKBACK, 2);
+        String wn_bow3 = ChatColor.GREEN + "Bow III";
+        PRICED_ITEMS.put(wn_bow3, new PricesItemsEnhanceable(Material.BOW, Material.EMERALD,
+                wn_bow3, 12, 1, null, lvl3BowEnhancement));
+        // Arrow
+        String wn_arrow = ChatColor.WHITE + "Arrow";
+        PRICED_ITEMS.put(wn_arrow, new PricesItemsEnhanceable(Material.ARROW, Material.GOLD_INGOT,
+                wn_arrow, 2, 8, null, new HashMap<>()));
+        //#endregion
 
-            //#region Armors and Defenses
-            // Shield
-            String dn_shield = ChatColor.WHITE + "Shield";
-            PRICED_ITEMS.put(dn_shield, new PricesItemsArmorWeapon(Material.SHIELD, Material.GOLD_INGOT,
-                    dn_shield, 12, 1, null, new HashMap<>()));
-            // Chainmail Armor
-            String dn_chainMArmor = ChatColor.GRAY + "Chainmail Armor";
-            PRICED_ITEMS.put(dn_chainMArmor, new PricesItemsArmorWeapon(Material.CHAINMAIL_CHESTPLATE, Material.IRON_INGOT,
-                    dn_chainMArmor, 48, 1, null, new HashMap<>()));
-            // Iron Armor
-            String dn_ironArmor = ChatColor.WHITE + "Iron Armor";
-            PRICED_ITEMS.put(dn_ironArmor, new PricesItemsArmorWeapon(Material.IRON_CHESTPLATE, Material.GOLD_INGOT,
-                    dn_ironArmor, 16, 1, null, new HashMap<>()));
-            // Diamond Armor
-            String dn_diamondArmor = ChatColor.AQUA + "Diamond Armor";
-            PRICED_ITEMS.put(dn_diamondArmor, new PricesItemsArmorWeapon(Material.DIAMOND_CHESTPLATE, Material.EMERALD,
-                    dn_diamondArmor, 8, 1, null, new HashMap<>()));
-            //#endregion
+        //#region Armors and Defenses
+        // Shield
+        String dn_shield = ChatColor.WHITE + "Shield";
+        PRICED_ITEMS.put(dn_shield, new PricesItemsEnhanceable(Material.SHIELD, Material.GOLD_INGOT,
+                dn_shield, 12, 1, null, new HashMap<>()));
+        // Chainmail Armor
+        String dn_chainMArmor = ChatColor.GRAY + "Chainmail Armor";
+        PRICED_ITEMS.put(dn_chainMArmor, new PricesItemsEnhanceable(Material.CHAINMAIL_CHESTPLATE, Material.IRON_INGOT,
+                dn_chainMArmor, 48, 1, null, new HashMap<>()));
+        // Iron Armor
+        String dn_ironArmor = ChatColor.WHITE + "Iron Armor";
+        PRICED_ITEMS.put(dn_ironArmor, new PricesItemsEnhanceable(Material.IRON_CHESTPLATE, Material.GOLD_INGOT,
+                dn_ironArmor, 16, 1, null, new HashMap<>()));
+        // Diamond Armor
+        String dn_diamondArmor = ChatColor.AQUA + "Diamond Armor";
+        PRICED_ITEMS.put(dn_diamondArmor, new PricesItemsEnhanceable(Material.DIAMOND_CHESTPLATE, Material.EMERALD,
+                dn_diamondArmor, 8, 1, null, new HashMap<>()));
+        //#endregion
 
-            //#region Blocks
-            // Wool
-            String bn_wool = ChatColor.WHITE + "Wool";
-            PRICED_ITEMS.put(bn_wool, new PricesItems(Material.WHITE_WOOL, Material.IRON_INGOT,
-                    bn_wool, 4, 16, null));
-            // Wood
-            String bn_wood = ChatColor.GOLD + "Wood";
-            PRICED_ITEMS.put(bn_wood, new PricesItems(Material.OAK_PLANKS, Material.IRON_INGOT,
-                    bn_wood, 32, 8, null));
-            // Glass
-            String bn_glass = ChatColor.AQUA + "Glass";
-            PRICED_ITEMS.put(bn_glass, new PricesItems(Material.GLASS, Material.IRON_INGOT,
-                    bn_glass, 16, 8, null));
-            // End Stone
-            String bn_endStone = ChatColor.YELLOW + "End Stone";
-            PRICED_ITEMS.put(bn_endStone, new PricesItems(Material.END_STONE, Material.GOLD_INGOT,
-                    bn_endStone, 8,12, null));
-            // Terracotta
-            String bn_terracotta = ChatColor.GOLD + "Terracotta";
-            PRICED_ITEMS.put(bn_terracotta, new PricesItems(Material.TERRACOTTA, Material.GOLD_INGOT,
-                    bn_terracotta, 6, 8, null));
-            // Obsidian
-            String bn_obsidian = ChatColor.DARK_BLUE + "Obsidian";
-            PRICED_ITEMS.put(bn_obsidian, new PricesItems(Material.OBSIDIAN, Material.EMERALD,
-                    bn_obsidian, 6, 8, null));
-            //#endregion
+        //#region Blocks
+        // Wool
+        String bn_wool = ChatColor.WHITE + "Wool";
+        PRICED_ITEMS.put(bn_wool, new PricesItems(Material.WHITE_WOOL, Material.IRON_INGOT,
+                bn_wool, 4, 16, null));
+        // Wood
+        String bn_wood = ChatColor.GOLD + "Wood";
+        PRICED_ITEMS.put(bn_wood, new PricesItems(Material.OAK_PLANKS, Material.IRON_INGOT,
+                bn_wood, 32, 8, null));
+        // Glass
+        String bn_glass = ChatColor.AQUA + "Glass";
+        PRICED_ITEMS.put(bn_glass, new PricesItems(Material.GLASS, Material.IRON_INGOT,
+                bn_glass, 16, 8, null));
+        // End Stone
+        String bn_endStone = ChatColor.YELLOW + "End Stone";
+        PRICED_ITEMS.put(bn_endStone, new PricesItems(Material.END_STONE, Material.GOLD_INGOT,
+                bn_endStone, 8,12, null));
+        // Terracotta
+        String bn_terracotta = ChatColor.GOLD + "Terracotta";
+        PRICED_ITEMS.put(bn_terracotta, new PricesItems(Material.TERRACOTTA, Material.GOLD_INGOT,
+                bn_terracotta, 6, 8, null));
+        // Obsidian
+        String bn_obsidian = ChatColor.DARK_BLUE + "Obsidian";
+        PRICED_ITEMS.put(bn_obsidian, new PricesItems(Material.OBSIDIAN, Material.EMERALD,
+                bn_obsidian, 6, 8, null));
+        //#endregion
 
-            //#region Potions
-            // Swiftness
-            String pn_swift = ChatColor.LIGHT_PURPLE + "Swiftness III";
-            PricesItemsPotion swift3 = new PricesItemsPotion(Material.POTION, Material.EMERALD,
-                    pn_swift, 2, 1, null, new PotionData(PotionType.SPEED));
-            swift3.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 15 * 20, 2));
-            PRICED_ITEMS.put(pn_swift, swift3);
-            // Leaping
-            String pn_leap = ChatColor.GREEN + "Leaping IV";
-            PricesItemsPotion leap4 = new PricesItemsPotion(Material.POTION, Material.EMERALD,
-                    pn_leap,2, 1, null, new PotionData(PotionType.JUMP));
-            leap4.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 15 * 20, 3));
-            PRICED_ITEMS.put(pn_leap, leap4);
-            // Strength
-            String pn_strength = ChatColor.DARK_PURPLE + "Strength II";
-            PricesItemsPotion strength2 = new PricesItemsPotion(Material.POTION, Material.EMERALD,
-                    pn_strength, 6, 1, null, new PotionData(PotionType.STRENGTH));
-            strength2.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 15 * 20, 1));
-            PRICED_ITEMS.put(pn_strength, strength2);
-            // Invisibility
-            String pn_invisible = ChatColor.LIGHT_PURPLE + "Invisibility";
-            PricesItemsPotion invisibility = new PricesItemsPotion(Material.POTION, Material.EMERALD,
-                    pn_invisible, 8, 1, null, new PotionData(PotionType.INVISIBILITY));
-            invisibility.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 15 * 20, 0));
-            PRICED_ITEMS.put(pn_invisible, invisibility);
-            //#endregion
+        //#region Potions
+        // Swiftness
+        String pn_swift = ChatColor.LIGHT_PURPLE + "Swiftness III";
+        PricesItemsPotion swift3 = new PricesItemsPotion(Material.POTION, Material.EMERALD,
+                pn_swift, 2, 1, null, new PotionData(PotionType.SPEED));
+        swift3.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 15 * 20, 2));
+        PRICED_ITEMS.put(pn_swift, swift3);
+        // Leaping
+        String pn_leap = ChatColor.GREEN + "Leaping IV";
+        PricesItemsPotion leap4 = new PricesItemsPotion(Material.POTION, Material.EMERALD,
+                pn_leap,2, 1, null, new PotionData(PotionType.JUMP));
+        leap4.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 15 * 20, 3));
+        PRICED_ITEMS.put(pn_leap, leap4);
+        // Strength
+        String pn_strength = ChatColor.DARK_PURPLE + "Strength II";
+        PricesItemsPotion strength2 = new PricesItemsPotion(Material.POTION, Material.EMERALD,
+                pn_strength, 6, 1, null, new PotionData(PotionType.STRENGTH));
+        strength2.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 15 * 20, 1));
+        PRICED_ITEMS.put(pn_strength, strength2);
+        // Invisibility
+        String pn_invisible = ChatColor.LIGHT_PURPLE + "Invisibility";
+        PricesItemsPotion invisibility = new PricesItemsPotion(Material.POTION, Material.EMERALD,
+                pn_invisible, 8, 1, null, new PotionData(PotionType.INVISIBILITY));
+        invisibility.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 15 * 20, 0));
+        PRICED_ITEMS.put(pn_invisible, invisibility);
+        //#endregion
 
-            //#region Foods and Beverages
-            // Steak
-            String fn_beefSteak = ChatColor.WHITE + "Beef Steak";
-            PRICED_ITEMS.put(fn_beefSteak, new PricesItems(Material.COOKED_BEEF, Material.IRON_INGOT,
-                    fn_beefSteak, 12, 2, null));
-            // Cake
-            String fn_cake = ChatColor.WHITE + "Cake";
-            PRICED_ITEMS.put(fn_cake, new PricesItems(Material.CAKE, Material.IRON_INGOT,
-                    fn_cake, 24, 1, null));
-            // Baked Potatoes
-            String fn_bakedPotato = ChatColor.WHITE + "Baked Potato";
-            PRICED_ITEMS.put(fn_bakedPotato, new PricesItems(Material.BAKED_POTATO, Material.IRON_INGOT,
-                    fn_bakedPotato, 6, 3, null));
-            // Bread
-            String fn_bread = ChatColor.YELLOW + "Bread";
-            PRICED_ITEMS.put(fn_bread, new PricesItems(Material.BREAD, Material.IRON_INGOT,
-                    fn_bread, 8, 1, null));
-            // Golden Carrot
-            String fn_goldenCarrot = ChatColor.YELLOW + "Golden Carrot";
-            PRICED_ITEMS.put(fn_goldenCarrot, new PricesItems(Material.GOLDEN_CARROT, Material.GOLD_INGOT,
-                    fn_goldenCarrot, 2, 1, null));
-            // Golden Apple
-            String fn_goldenApple = ChatColor.YELLOW + "Golden Apple";
-            PRICED_ITEMS.put(fn_goldenApple, new PricesItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT,
-                    fn_goldenApple, 6, 1, null));
-            //#endregion
+        //#region Foods and Beverages
+        // Steak
+        String fn_beefSteak = ChatColor.WHITE + "Beef Steak";
+        PRICED_ITEMS.put(fn_beefSteak, new PricesItems(Material.COOKED_BEEF, Material.IRON_INGOT,
+                fn_beefSteak, 12, 2, null));
+        // Cake
+        String fn_cake = ChatColor.WHITE + "Cake";
+        PRICED_ITEMS.put(fn_cake, new PricesItems(Material.CAKE, Material.IRON_INGOT,
+                fn_cake, 24, 1, null));
+        // Baked Potatoes
+        String fn_bakedPotato = ChatColor.WHITE + "Baked Potato";
+        PRICED_ITEMS.put(fn_bakedPotato, new PricesItems(Material.BAKED_POTATO, Material.IRON_INGOT,
+                fn_bakedPotato, 6, 3, null));
+        // Bread
+        String fn_bread = ChatColor.YELLOW + "Bread";
+        PRICED_ITEMS.put(fn_bread, new PricesItems(Material.BREAD, Material.IRON_INGOT,
+                fn_bread, 8, 1, null));
+        // Golden Carrot
+        String fn_goldenCarrot = ChatColor.YELLOW + "Golden Carrot";
+        PRICED_ITEMS.put(fn_goldenCarrot, new PricesItems(Material.GOLDEN_CARROT, Material.GOLD_INGOT,
+                fn_goldenCarrot, 2, 1, null));
+        // Golden Apple
+        String fn_goldenApple = ChatColor.YELLOW + "Golden Apple";
+        PRICED_ITEMS.put(fn_goldenApple, new PricesItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT,
+                fn_goldenApple, 6, 1, null));
+        //#endregion
 
-            //#region Tools
-            // Shears
-            String tn_shears = ChatColor.WHITE + "Shears";
-            PRICED_ITEMS.put(tn_shears, new PricesItemsArmorWeapon(Material.SHEARS, Material.IRON_INGOT,
-                    tn_shears, 20, 1, null, new HashMap<>()));
-            // Wooden Pickaxe
-            String tn_woodPickaxe = ChatColor.WHITE + "Wooden Pickaxe";
-            PRICED_ITEMS.put(tn_woodPickaxe, new PricesItemsArmorWeapon(Material.WOODEN_PICKAXE, Material.GOLD_INGOT,
-                    tn_woodPickaxe, 6, 1, null, new HashMap<>()));
-            // Iron Axe
-            String tn_ironAxe = ChatColor.WHITE + "Iron Axe";
-            PRICED_ITEMS.put(tn_ironAxe, new PricesItemsArmorWeapon(Material.IRON_AXE, Material.GOLD_INGOT,
-                    tn_ironAxe, 12, 1, null, new HashMap<>()));
-            // Diamond Pickaxe
-            String tn_diamondPick = ChatColor.AQUA + "Diamond Pickaxe";
-            PRICED_ITEMS.put(tn_diamondPick, new PricesItemsArmorWeapon(Material.DIAMOND_PICKAXE, Material.EMERALD,
-                    tn_diamondPick, 4, 1, null, new HashMap<>()));
-            //#endregion
+        //#region Tools
+        // Shears
+        String tn_shears = ChatColor.WHITE + "Shears";
+        PRICED_ITEMS.put(tn_shears, new PricesItemsEnhanceable(Material.SHEARS, Material.IRON_INGOT,
+                tn_shears, 20, 1, null, new HashMap<>()));
+        // Wooden Pickaxe
+        String tn_woodPickaxe = ChatColor.WHITE + "Wooden Pickaxe";
+        PRICED_ITEMS.put(tn_woodPickaxe, new PricesItemsEnhanceable(Material.WOODEN_PICKAXE, Material.GOLD_INGOT,
+                tn_woodPickaxe, 6, 1, null, new HashMap<>()));
+        // Iron Axe
+        String tn_ironAxe = ChatColor.WHITE + "Iron Axe";
+        PRICED_ITEMS.put(tn_ironAxe, new PricesItemsEnhanceable(Material.IRON_AXE, Material.GOLD_INGOT,
+                tn_ironAxe, 12, 1, null, new HashMap<>()));
+        // Diamond Pickaxe
+        String tn_diamondPick = ChatColor.AQUA + "Diamond Pickaxe";
+        PRICED_ITEMS.put(tn_diamondPick, new PricesItemsEnhanceable(Material.DIAMOND_PICKAXE, Material.EMERALD,
+                tn_diamondPick, 4, 1, null, new HashMap<>()));
+        //#endregion
 
-            //#region Items and Others
-            // Ender Pearl
-            String in_endPearl = ChatColor.BLUE + "Ender Pearl";
-            PRICED_ITEMS.put(in_endPearl, new PricesItems(Material.ENDER_PEARL, Material.EMERALD,
-                    in_endPearl,8, 1, null));
-            // Water Bucket
-            String in_waterBucket = ChatColor.AQUA + "Water Bucket";
-            PRICED_ITEMS.put(in_waterBucket, new PricesItems(Material.WATER_BUCKET, Material.GOLD_INGOT,
-                    in_waterBucket, 20, 1, null));
-            // Notch Apple
-            String in_notchApple = ChatColor.GOLD + "Notch Apple";
-            PRICED_ITEMS.put(in_notchApple, new PricesItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT,
-                    in_notchApple, 12, 1, null));
-            // Arrows of Harming
-            String in_harmArrow = ChatColor.DARK_PURPLE + "Arrow of Harming";
-            PRICED_ITEMS.put(in_harmArrow, new PricesItemsPotion(Material.TIPPED_ARROW, Material.EMERALD,
-                    in_harmArrow, 2, 16, null, new PotionData(PotionType.INSTANT_DAMAGE)));
-            // Silverfish Egg
-            String in_silverFish = ChatColor.WHITE + "Silverfish Egg";
-            PRICED_ITEMS.put(in_silverFish, new PricesItems(Material.SILVERFISH_SPAWN_EGG, Material.IRON_INGOT,
-                    in_silverFish, 64, 1, null));
-            // TNT
-            String in_tnt = ChatColor.WHITE + "TNT";
-            PRICED_ITEMS.put(in_tnt, new PricesItems(Material.TNT, Material.GOLD_INGOT,
-                    in_tnt, 12, 1, null));
-            //#endregion
+        //#region Items and Others
+        // Ender Pearl
+        String in_endPearl = ChatColor.BLUE + "Ender Pearl";
+        PRICED_ITEMS.put(in_endPearl, new PricesItems(Material.ENDER_PEARL, Material.EMERALD,
+                in_endPearl,8, 1, null));
+        // Water Bucket
+        String in_waterBucket = ChatColor.AQUA + "Water Bucket";
+        PRICED_ITEMS.put(in_waterBucket, new PricesItems(Material.WATER_BUCKET, Material.GOLD_INGOT,
+                in_waterBucket, 20, 1, null));
+        // Notch Apple
+        String in_notchApple = ChatColor.GOLD + "Notch Apple";
+        PRICED_ITEMS.put(in_notchApple, new PricesItems(Material.GOLDEN_APPLE, Material.GOLD_INGOT,
+                in_notchApple, 12, 1, null));
+        // Arrows of Harming
+        String in_harmArrow = ChatColor.DARK_PURPLE + "Arrow of Harming";
+        PRICED_ITEMS.put(in_harmArrow, new PricesItemsPotion(Material.TIPPED_ARROW, Material.EMERALD,
+                in_harmArrow, 2, 16, null, new PotionData(PotionType.INSTANT_DAMAGE)));
+        // Silverfish Egg
+        String in_silverFish = ChatColor.WHITE + "Silverfish Egg";
+        PRICED_ITEMS.put(in_silverFish, new PricesItems(Material.SILVERFISH_SPAWN_EGG, Material.IRON_INGOT,
+                in_silverFish, 64, 1, null));
+        // TNT
+        String in_tnt = ChatColor.WHITE + "TNT";
+        PRICED_ITEMS.put(in_tnt, new PricesItems(Material.TNT, Material.GOLD_INGOT,
+                in_tnt, 12, 1, null));
+        //#endregion
 
-            // Create all inventory menus
-            //#region Weapon Shop Menu
-            String shopName = "Weapon Shop";
-            Inventory shopWeaponMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
-            SHOP_MENUS.put(shopName, shopWeaponMenuTemplate);
-            firstRowMenu(shopWeaponMenuTemplate);
+        // Create all inventory menus
+        //#region Weapon Shop Menu
+        String shopName = "Weapon Shop";
+        Inventory shopWeaponMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
+        SHOP_MENUS.put(shopName, shopWeaponMenuTemplate);
+        firstRowMenu(shopWeaponMenuTemplate);
 
-            ItemStack i_stoneSword = PRICED_ITEMS.get(wn_stoneSw).createItem(1);
-            ItemStack i_ironSword = PRICED_ITEMS.get(wn_ironSw).createItem(1);
-            ItemStack i_diamondSword = PRICED_ITEMS.get(wn_diamondSw).createItem(1);
-            ItemStack i_regularBow = PRICED_ITEMS.get(wn_bow).createItem(1);
-            ItemStack i_lvl2Bow = PRICED_ITEMS.get(wn_bow2).createItem(1);
-            ItemStack i_lvl3Bow = PRICED_ITEMS.get(wn_bow3).createItem(1);
-            ItemStack i_arrow = PRICED_ITEMS.get(wn_arrow).createItem(1);
+        ItemStack i_stoneSword = PRICED_ITEMS.get(wn_stoneSw).createItem(1);
+        ItemStack i_ironSword = PRICED_ITEMS.get(wn_ironSw).createItem(1);
+        ItemStack i_diamondSword = PRICED_ITEMS.get(wn_diamondSw).createItem(1);
+        ItemStack i_regularBow = PRICED_ITEMS.get(wn_bow).createItem(1);
+        ItemStack i_lvl2Bow = PRICED_ITEMS.get(wn_bow2).createItem(1);
+        ItemStack i_lvl3Bow = PRICED_ITEMS.get(wn_bow3).createItem(1);
+        ItemStack i_arrow = PRICED_ITEMS.get(wn_arrow).createItem(1);
 
-            shopWeaponMenuTemplate.setItem(19, i_stoneSword);
-            shopWeaponMenuTemplate.setItem(20, i_ironSword);
-            shopWeaponMenuTemplate.setItem(21, i_diamondSword);
-            shopWeaponMenuTemplate.setItem(22, i_regularBow);
-            shopWeaponMenuTemplate.setItem(23, i_lvl2Bow);
-            shopWeaponMenuTemplate.setItem(24, i_lvl3Bow);
-            shopWeaponMenuTemplate.setItem(25, i_arrow);
-            //#endregion
+        shopWeaponMenuTemplate.setItem(19, i_stoneSword);
+        shopWeaponMenuTemplate.setItem(20, i_ironSword);
+        shopWeaponMenuTemplate.setItem(21, i_diamondSword);
+        shopWeaponMenuTemplate.setItem(22, i_regularBow);
+        shopWeaponMenuTemplate.setItem(23, i_lvl2Bow);
+        shopWeaponMenuTemplate.setItem(24, i_lvl3Bow);
+        shopWeaponMenuTemplate.setItem(25, i_arrow);
+        //#endregion
 
-            //#region Armor Shop Menu
-            shopName = "Armor Shop";
-            Inventory shopArmorMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
-            SHOP_MENUS.put(shopName, shopArmorMenuTemplate);
-            firstRowMenu(shopArmorMenuTemplate);
+        //#region Armor Shop Menu
+        shopName = "Armor Shop";
+        Inventory shopArmorMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
+        SHOP_MENUS.put(shopName, shopArmorMenuTemplate);
+        firstRowMenu(shopArmorMenuTemplate);
 
-            ItemStack i_shield = PRICED_ITEMS.get(dn_shield).createItem(1);
-            ItemStack i_chainmail = PRICED_ITEMS.get(dn_chainMArmor).createItem(1);
-            ItemStack i_ironArmor = PRICED_ITEMS.get(dn_ironArmor).createItem(1);
-            ItemStack i_diamondArmor = PRICED_ITEMS.get(dn_diamondArmor).createItem(1);
+        ItemStack i_shield = PRICED_ITEMS.get(dn_shield).createItem(1);
+        ItemStack i_chainmail = PRICED_ITEMS.get(dn_chainMArmor).createItem(1);
+        ItemStack i_ironArmor = PRICED_ITEMS.get(dn_ironArmor).createItem(1);
+        ItemStack i_diamondArmor = PRICED_ITEMS.get(dn_diamondArmor).createItem(1);
 
-            shopArmorMenuTemplate.setItem(19, i_shield);
-            shopArmorMenuTemplate.setItem(20, i_chainmail);
-            shopArmorMenuTemplate.setItem(21, i_ironArmor);
-            shopArmorMenuTemplate.setItem(22, i_diamondArmor);
-            //#endregion
+        shopArmorMenuTemplate.setItem(19, i_shield);
+        shopArmorMenuTemplate.setItem(20, i_chainmail);
+        shopArmorMenuTemplate.setItem(21, i_ironArmor);
+        shopArmorMenuTemplate.setItem(22, i_diamondArmor);
+        //#endregion
 
-            //#region Blocks Shop Menu
-            shopName = "Block Shop";
-            Inventory shopBlockMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
-            SHOP_MENUS.put(shopName, shopBlockMenuTemplate);
-            firstRowMenu(shopBlockMenuTemplate);
+        //#region Blocks Shop Menu
+        shopName = "Block Shop";
+        Inventory shopBlockMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
+        SHOP_MENUS.put(shopName, shopBlockMenuTemplate);
+        firstRowMenu(shopBlockMenuTemplate);
 
-            ItemStack i_wool = PRICED_ITEMS.get(bn_wool).createItem(1);
-            ItemStack i_wood = PRICED_ITEMS.get(bn_wood).createItem(1);
-            ItemStack i_glass = PRICED_ITEMS.get(bn_glass).createItem(1);
-            ItemStack i_end = PRICED_ITEMS.get(bn_endStone).createItem(1);
-            ItemStack i_terracotta = PRICED_ITEMS.get(bn_terracotta).createItem(1);
-            ItemStack i_obsidian = PRICED_ITEMS.get(bn_obsidian).createItem(1);
+        ItemStack i_wool = PRICED_ITEMS.get(bn_wool).createItem(1);
+        ItemStack i_wood = PRICED_ITEMS.get(bn_wood).createItem(1);
+        ItemStack i_glass = PRICED_ITEMS.get(bn_glass).createItem(1);
+        ItemStack i_end = PRICED_ITEMS.get(bn_endStone).createItem(1);
+        ItemStack i_terracotta = PRICED_ITEMS.get(bn_terracotta).createItem(1);
+        ItemStack i_obsidian = PRICED_ITEMS.get(bn_obsidian).createItem(1);
 
-            shopBlockMenuTemplate.setItem(19, i_wool);
-            shopBlockMenuTemplate.setItem(20, i_wood);
-            shopBlockMenuTemplate.setItem(21, i_glass);
-            shopBlockMenuTemplate.setItem(22, i_end);
-            shopBlockMenuTemplate.setItem(23, i_terracotta);
-            shopBlockMenuTemplate.setItem(24, i_obsidian);
-            //#endregion
+        shopBlockMenuTemplate.setItem(19, i_wool);
+        shopBlockMenuTemplate.setItem(20, i_wood);
+        shopBlockMenuTemplate.setItem(21, i_glass);
+        shopBlockMenuTemplate.setItem(22, i_end);
+        shopBlockMenuTemplate.setItem(23, i_terracotta);
+        shopBlockMenuTemplate.setItem(24, i_obsidian);
+        //#endregion
 
-            //#region Potion Shop Menu
-            shopName = "Potion Shop";
-            Inventory shopPotionMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
-            SHOP_MENUS.put(shopName, shopPotionMenuTemplate);
-            firstRowMenu(shopPotionMenuTemplate);
+        //#region Potion Shop Menu
+        shopName = "Potion Shop";
+        Inventory shopPotionMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
+        SHOP_MENUS.put(shopName, shopPotionMenuTemplate);
+        firstRowMenu(shopPotionMenuTemplate);
 
-            ItemStack i_potionOfSwiftness = PRICED_ITEMS.get(pn_swift) == null ?
-                    new ItemStack(Material.POTION, 1) : PRICED_ITEMS.get(pn_swift).createItem(1);
-            ItemStack i_potionOfLeaping = PRICED_ITEMS.get(pn_leap) == null ?
-                    new ItemStack(Material.POTION, 1) : PRICED_ITEMS.get(pn_leap).createItem(1);
-            ItemStack i_potionOfStrength = PRICED_ITEMS.get(pn_strength) == null ?
-                    new ItemStack(Material.POTION, 1) : PRICED_ITEMS.get(pn_strength).createItem(1);
-            ItemStack i_potionOfInvisibility = PRICED_ITEMS.get(pn_invisible) == null ?
-                    new ItemStack(Material.POTION, 1) : PRICED_ITEMS.get(pn_invisible).createItem(1);
+        ItemStack i_potionOfSwiftness = PRICED_ITEMS.get(pn_swift) == null ?
+                new ItemStack(Material.POTION, 1) : PRICED_ITEMS.get(pn_swift).createItem(1);
+        ItemStack i_potionOfLeaping = PRICED_ITEMS.get(pn_leap) == null ?
+                new ItemStack(Material.POTION, 1) : PRICED_ITEMS.get(pn_leap).createItem(1);
+        ItemStack i_potionOfStrength = PRICED_ITEMS.get(pn_strength) == null ?
+                new ItemStack(Material.POTION, 1) : PRICED_ITEMS.get(pn_strength).createItem(1);
+        ItemStack i_potionOfInvisibility = PRICED_ITEMS.get(pn_invisible) == null ?
+                new ItemStack(Material.POTION, 1) : PRICED_ITEMS.get(pn_invisible).createItem(1);
 
-            shopPotionMenuTemplate.setItem(19, i_potionOfSwiftness);
-            shopPotionMenuTemplate.setItem(20, i_potionOfLeaping);
-            shopPotionMenuTemplate.setItem(21, i_potionOfStrength);
-            shopPotionMenuTemplate.setItem(22, i_potionOfInvisibility);
-            //#endregion
+        shopPotionMenuTemplate.setItem(19, i_potionOfSwiftness);
+        shopPotionMenuTemplate.setItem(20, i_potionOfLeaping);
+        shopPotionMenuTemplate.setItem(21, i_potionOfStrength);
+        shopPotionMenuTemplate.setItem(22, i_potionOfInvisibility);
+        //#endregion
 
-            //#region Food Shop Menu
-            shopName = "Food Shop";
-            Inventory shopFoodMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
-            SHOP_MENUS.put(shopName, shopFoodMenuTemplate);
-            firstRowMenu(shopFoodMenuTemplate);
+        //#region Food Shop Menu
+        shopName = "Food Shop";
+        Inventory shopFoodMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
+        SHOP_MENUS.put(shopName, shopFoodMenuTemplate);
+        firstRowMenu(shopFoodMenuTemplate);
 
-            ItemStack i_beefSteak = PRICED_ITEMS.get(fn_beefSteak).createItem(1);
-            ItemStack i_cake = PRICED_ITEMS.get(fn_cake).createItem(1);
-            ItemStack i_bakedPotatoes = PRICED_ITEMS.get(fn_bakedPotato).createItem(1);
-            ItemStack i_bread = PRICED_ITEMS.get(fn_bread).createItem(1);
-            ItemStack i_goldenCarrot = PRICED_ITEMS.get(fn_goldenCarrot).createItem(1);
-            ItemStack i_goldenApple = PRICED_ITEMS.get(fn_goldenApple).createItem(1);
+        ItemStack i_beefSteak = PRICED_ITEMS.get(fn_beefSteak).createItem(1);
+        ItemStack i_cake = PRICED_ITEMS.get(fn_cake).createItem(1);
+        ItemStack i_bakedPotatoes = PRICED_ITEMS.get(fn_bakedPotato).createItem(1);
+        ItemStack i_bread = PRICED_ITEMS.get(fn_bread).createItem(1);
+        ItemStack i_goldenCarrot = PRICED_ITEMS.get(fn_goldenCarrot).createItem(1);
+        ItemStack i_goldenApple = PRICED_ITEMS.get(fn_goldenApple).createItem(1);
 
-            shopFoodMenuTemplate.setItem(19, i_beefSteak);
-            shopFoodMenuTemplate.setItem(20, i_cake);
-            shopFoodMenuTemplate.setItem(21, i_bakedPotatoes);
-            shopFoodMenuTemplate.setItem(22, i_bread);
-            shopFoodMenuTemplate.setItem(23, i_goldenCarrot);
-            shopFoodMenuTemplate.setItem(24, i_goldenApple);
-            //#endregion
+        shopFoodMenuTemplate.setItem(19, i_beefSteak);
+        shopFoodMenuTemplate.setItem(20, i_cake);
+        shopFoodMenuTemplate.setItem(21, i_bakedPotatoes);
+        shopFoodMenuTemplate.setItem(22, i_bread);
+        shopFoodMenuTemplate.setItem(23, i_goldenCarrot);
+        shopFoodMenuTemplate.setItem(24, i_goldenApple);
+        //#endregion
 
-            //#region Tools Shop Menu
-            shopName = "Tool Shop";
-            Inventory shopToolsMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
-            SHOP_MENUS.put(shopName, shopToolsMenuTemplate);
-            firstRowMenu(shopToolsMenuTemplate);
+        //#region Tools Shop Menu
+        shopName = "Tool Shop";
+        Inventory shopToolsMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
+        SHOP_MENUS.put(shopName, shopToolsMenuTemplate);
+        firstRowMenu(shopToolsMenuTemplate);
 
-            ItemStack i_shears = PRICED_ITEMS.get(tn_shears).createItem(1);
-            ItemStack i_woodenPick = PRICED_ITEMS.get(tn_woodPickaxe).createItem(1);
-            ItemStack i_ironAxe = PRICED_ITEMS.get(tn_ironAxe).createItem(1);
-            ItemStack i_diamondPick = PRICED_ITEMS.get(tn_diamondPick).createItem(1);
+        ItemStack i_shears = PRICED_ITEMS.get(tn_shears).createItem(1);
+        ItemStack i_woodenPick = PRICED_ITEMS.get(tn_woodPickaxe).createItem(1);
+        ItemStack i_ironAxe = PRICED_ITEMS.get(tn_ironAxe).createItem(1);
+        ItemStack i_diamondPick = PRICED_ITEMS.get(tn_diamondPick).createItem(1);
 
-            shopToolsMenuTemplate.setItem(19, i_shears);
-            shopToolsMenuTemplate.setItem(20, i_woodenPick);
-            shopToolsMenuTemplate.setItem(21, i_ironAxe);
-            shopToolsMenuTemplate.setItem(22, i_diamondPick);
-            //#endregion
+        shopToolsMenuTemplate.setItem(19, i_shears);
+        shopToolsMenuTemplate.setItem(20, i_woodenPick);
+        shopToolsMenuTemplate.setItem(21, i_ironAxe);
+        shopToolsMenuTemplate.setItem(22, i_diamondPick);
+        //#endregion
 
-            //#region Items Shop Menu
-            shopName = "Item Shop";
-            Inventory shopItemsMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
-            SHOP_MENUS.put(shopName, shopItemsMenuTemplate);
-            firstRowMenu(shopItemsMenuTemplate);
+        //#region Items Shop Menu
+        shopName = "Item Shop";
+        Inventory shopItemsMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
+        SHOP_MENUS.put(shopName, shopItemsMenuTemplate);
+        firstRowMenu(shopItemsMenuTemplate);
 
-            ItemStack i_enderPearl = PRICED_ITEMS.get(in_endPearl).createItem(1);
-            ItemStack i_waterBucket = PRICED_ITEMS.get(in_waterBucket).createItem(1);
-            ItemStack i_notchApple = PRICED_ITEMS.get(in_notchApple).createItem(1);
-            ItemStack i_harmingArrow = PRICED_ITEMS.get(in_harmArrow).createItem(1);
-            ItemStack i_silverfishEgg = PRICED_ITEMS.get(in_silverFish).createItem(1);
-            ItemStack i_tnt = PRICED_ITEMS.get(in_tnt).createItem(1);
+        ItemStack i_enderPearl = PRICED_ITEMS.get(in_endPearl).createItem(1);
+        ItemStack i_waterBucket = PRICED_ITEMS.get(in_waterBucket).createItem(1);
+        ItemStack i_notchApple = PRICED_ITEMS.get(in_notchApple).createItem(1);
+        ItemStack i_harmingArrow = PRICED_ITEMS.get(in_harmArrow).createItem(1);
+        ItemStack i_silverfishEgg = PRICED_ITEMS.get(in_silverFish).createItem(1);
+        ItemStack i_tnt = PRICED_ITEMS.get(in_tnt).createItem(1);
 
-            shopItemsMenuTemplate.setItem(19, i_enderPearl);
-            shopItemsMenuTemplate.setItem(20, i_waterBucket);
-            shopItemsMenuTemplate.setItem(21, i_notchApple);
-            shopItemsMenuTemplate.setItem(22, i_harmingArrow);
-            shopItemsMenuTemplate.setItem(23, i_silverfishEgg);
-            shopItemsMenuTemplate.setItem(24, i_tnt);
-            //#endregion
+        shopItemsMenuTemplate.setItem(19, i_enderPearl);
+        shopItemsMenuTemplate.setItem(20, i_waterBucket);
+        shopItemsMenuTemplate.setItem(21, i_notchApple);
+        shopItemsMenuTemplate.setItem(22, i_harmingArrow);
+        shopItemsMenuTemplate.setItem(23, i_silverfishEgg);
+        shopItemsMenuTemplate.setItem(24, i_tnt);
+        //#endregion
 
-            //#region Main Shop Menu
-            shopName = "Main Shop";
-            Inventory shopMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
-            SHOP_MENUS.put(shopName, shopMenuTemplate);
-            firstRowMenu(shopMenuTemplate);
+        //#region Main Shop Menu
+        shopName = "Main Shop";
+        Inventory shopMenuTemplate = Bukkit.getServer().createInventory(null, 54, shopName);
+        SHOP_MENUS.put(shopName, shopMenuTemplate);
+        firstRowMenu(shopMenuTemplate);
 
-            shopMenuTemplate.setItem(19, i_wool);
-            shopMenuTemplate.setItem(20, i_wood);
-            shopMenuTemplate.setItem(21, i_stoneSword);
-            shopMenuTemplate.setItem(22, i_ironSword);
-            shopMenuTemplate.setItem(23, i_potionOfSwiftness);
-            shopMenuTemplate.setItem(24, i_potionOfLeaping);
-            shopMenuTemplate.setItem(25, i_bakedPotatoes);
-            shopMenuTemplate.setItem(28, i_cake);
-            shopMenuTemplate.setItem(29, i_goldenApple);
-            shopMenuTemplate.setItem(30, i_regularBow);
-            shopMenuTemplate.setItem(31, i_arrow);
-            shopMenuTemplate.setItem(32, i_enderPearl);
-            shopMenuTemplate.setItem(33, i_tnt);
-            //#endregion
-        }
+        shopMenuTemplate.setItem(19, i_wool);
+        shopMenuTemplate.setItem(20, i_wood);
+        shopMenuTemplate.setItem(21, i_stoneSword);
+        shopMenuTemplate.setItem(22, i_ironSword);
+        shopMenuTemplate.setItem(23, i_potionOfSwiftness);
+        shopMenuTemplate.setItem(24, i_potionOfLeaping);
+        shopMenuTemplate.setItem(25, i_bakedPotatoes);
+        shopMenuTemplate.setItem(28, i_cake);
+        shopMenuTemplate.setItem(29, i_goldenApple);
+        shopMenuTemplate.setItem(30, i_regularBow);
+        shopMenuTemplate.setItem(31, i_arrow);
+        shopMenuTemplate.setItem(32, i_enderPearl);
+        shopMenuTemplate.setItem(33, i_tnt);
+        //#endregion
     }
 
-    public static void destroy() {
+    public void destroy() {
         PRICED_ITEMS.clear();
         SHOP_MENUS.clear();
-        initialized = false;
     }
 
-    private static void firstRowMenu(Inventory inv) {
+    private void firstRowMenu(Inventory inv) {
         // Main Menu
         ItemStack mainShopItem = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta mainShopMeta = mainShopItem.getItemMeta();
@@ -424,8 +411,6 @@ public class BedwarsShopMenu {
         ItemStack potionShopItem = new ItemStack(Material.POTION);
         ItemMeta potionShopMeta = potionShopItem.getItemMeta();
         potionShopMeta.setDisplayName(ChatColor.AQUA + "Potion Shop");
-        PotionMeta realPotionMeta = (PotionMeta) potionShopMeta;
-        realPotionMeta.setBasePotionData(new PotionData(PotionType.WATER));
         potionShopItem.setItemMeta(potionShopMeta);
 
         // Blocks Menu
@@ -465,7 +450,7 @@ public class BedwarsShopMenu {
 
     }
 
-    public static boolean openMenu(@Nonnull Player player, String menuName) {
+    public boolean openMenu(@Nonnull Player player, String menuName) {
         Inventory chMenu = SHOP_MENUS.get(ChatColor.stripColor(menuName));
         if (chMenu == null)
             return false;
@@ -473,7 +458,7 @@ public class BedwarsShopMenu {
         return true;
     }
 
-    public static PricesItems selectedSlot(Inventory invMenu, int slot) {
+    public PricesItems selectedSlot(Inventory invMenu, int slot) {
         ItemStack itemBuy = invMenu.getItem(slot);
         if (itemBuy != null) {
             ItemMeta itemBuyMeta = itemBuy.getItemMeta();
@@ -482,8 +467,7 @@ public class BedwarsShopMenu {
         return null;
     }
 
-    public static void buyItem(@Nonnull Player player, @Nonnull PricesItems pricedItemTag,
-                               @Nullable TeamGroupMaker team) {
+    public void buyItem(@Nonnull Player player, @Nonnull PricesItems pricedItemTag, @Nullable TeamGroupMaker team) {
         // Check default buy item
         Material currency = pricedItemTag.getCurrency();
         List<Integer> onCurrencySlots = new ArrayList<>();
@@ -524,11 +508,11 @@ public class BedwarsShopMenu {
      * @param tag Referred price tag
      * @return True if player successfully bought the item, else then false
      */
-    private static boolean receiveItem(@Nonnull Player player, @Nonnull PricesItems tag,
+    private boolean receiveItem(@Nonnull Player player, @Nonnull PricesItems tag,
                                        @Nullable TeamGroupMaker team) {
         PlayerInventory playerInv = player.getInventory();
         if (team != null) {
-            if (tag instanceof PricesItemsArmorWeapon) {
+            if (tag instanceof PricesItemsEnhanceable) {
                 switch (tag.getItemMaterial()) {
                     case STONE_SWORD:
                     case IRON_SWORD:
@@ -558,7 +542,7 @@ public class BedwarsShopMenu {
                         break;
                 }
             } else if (tag.getItemMaterial() == Material.WHITE_WOOL) {
-                ItemStack coloredWool = new ItemStack(PluginStaticColor.woolColor(team.getRawColor()),
+                ItemStack coloredWool = new ItemStack(PluginStaticFunc.woolColor(team.getRawColor()),
                         tag.getDefaultAmount());
                 playerInv.addItem(coloredWool);
                 return true;
@@ -573,7 +557,7 @@ public class BedwarsShopMenu {
      *
      * @param tag Pricetag reference
      */
-    private static ItemStack createNormalItem(@Nonnull PricesItems tag) {
+    private ItemStack createNormalItem(@Nonnull PricesItems tag) {
         // Create a new item without lore
         ItemStack createdItemStack = tag.createItem();
         ItemMeta createdItemMeta = createdItemStack.getItemMeta();
@@ -589,7 +573,7 @@ public class BedwarsShopMenu {
      * @param tag Pricetag reference
      * @param playerInv Target player inventory
      */
-    private static ItemStack createNormalItem(@Nonnull PricesItems tag, @Nonnull PlayerInventory playerInv) {
+    private ItemStack createNormalItem(@Nonnull PricesItems tag, @Nonnull PlayerInventory playerInv) {
         // Create a new item without lore
         ItemStack createdItemStack = tag.createItem();
         ItemMeta createdItemMeta = createdItemStack.getItemMeta();
@@ -599,7 +583,7 @@ public class BedwarsShopMenu {
         return createdItemStack;
     }
 
-    private static boolean createSword(@Nonnull PricesItems tag, @Nonnull PlayerInventory playerInv,
+    private boolean createSword(@Nonnull PricesItems tag, @Nonnull PlayerInventory playerInv,
                                        @Nullable TeamGroupMaker team) {
         ItemStack sword = null;
         for (int i = 0; i < playerInv.getSize(); i++) {
@@ -639,7 +623,7 @@ public class BedwarsShopMenu {
         return true;
     }
 
-    private static boolean createArmor(@Nonnull PricesItems tag, @Nonnull PlayerInventory playerInv,
+    private boolean createArmor(@Nonnull PricesItems tag, @Nonnull PlayerInventory playerInv,
                                        @Nullable TeamGroupMaker team) {
         ItemStack bootSample = playerInv.getBoots();
         ItemStack leggingSample = playerInv.getLeggings();
@@ -713,7 +697,7 @@ public class BedwarsShopMenu {
         return true;
     }
 
-    private static void setUpgrade(@Nonnull TeamGroupMaker team, ItemStack item) {
+    private void setUpgrade(@Nonnull TeamGroupMaker team, ItemStack item) {
         ItemMeta metaItem = item.getItemMeta();
         // Sharper Blade
         if (PluginStaticFunc.isSword(item.getType()) && team.getPermLevels()
@@ -740,7 +724,7 @@ public class BedwarsShopMenu {
         item.setItemMeta(metaItem);
     }
 
-    public static boolean isBedwarsShopMenu(InventoryView inv) {
+    public boolean isBedwarsShopMenu(InventoryView inv) {
         String title = ChatColor.stripColor(inv.getTitle());
         switch (title) {
             case "Main Shop":
@@ -764,8 +748,8 @@ public class BedwarsShopMenu {
      * @param targetSlots List of slot index that has the same item type, must be referenced from other variable
      * @return True if player has the requirement, else then false
      */
-    private static int countItemPlayerInventory(@Nonnull PlayerInventory playerInv, Material required,
-                                                List<Integer> targetSlots) {
+    private int countItemPlayerInventory(@Nonnull PlayerInventory playerInv, Material required,
+                                         List<Integer> targetSlots) {
         int countAmount = 0;
         // Get Player current currency amount
         for (int i = 0; i < playerInv.getSize(); i++) {
@@ -777,5 +761,9 @@ public class BedwarsShopMenu {
                 }
         }
         return countAmount;
+    }
+
+    public List<Inventory> getShopMenus() {
+        return new LinkedList<>(SHOP_MENUS.values());
     }
 }

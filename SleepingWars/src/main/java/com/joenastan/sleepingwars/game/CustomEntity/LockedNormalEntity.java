@@ -3,10 +3,9 @@ package com.joenastan.sleepingwars.game.CustomEntity;
 import java.util.Map;
 
 import com.joenastan.sleepingwars.enumtypes.LockedEntityType;
-import com.joenastan.sleepingwars.enumtypes.ResourcesType;
 import com.joenastan.sleepingwars.utility.Hologram.Hologram;
 import com.joenastan.sleepingwars.utility.PluginStaticFunc;
-import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+import com.joenastan.sleepingwars.utility.CustomEntity.PlayerBedwarsEntity;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
@@ -22,7 +21,7 @@ import javax.annotation.Nonnull;
 public class LockedNormalEntity {
 
     protected LockedEntityType typeLock = LockedEntityType.NORMAL_LOCK;
-    protected Map<ResourcesType, Integer> requirements;
+    protected Map<Material, Integer> requirements;
 
     private final Location locLocked;
     private final Block blockReference;
@@ -35,35 +34,35 @@ public class LockedNormalEntity {
      *
      * @param locLocked Block Location, if there's no entity then it is null
      */
-    public LockedNormalEntity(@Nonnull Location locLocked, Map<ResourcesType, Integer> requirements) {
+    public LockedNormalEntity(@Nonnull Location locLocked, Map<Material, Integer> requirements) {
         this.locLocked = locLocked;
         this.requirements = requirements;
         Block block = locLocked.getBlock();
         blockReference = block;
         Material blockType = block.getType();
-        if (PluginStaticFunc.isStandardDoor(blockType) || PluginStaticFunc.isFenceGate(blockType) ||
-                PluginStaticFunc.isTrapDoor(blockType)) {
+        if (PluginStaticFunc.isGateOrDoor(blockType)) {
             if (block.getBlockData() instanceof Openable) {
                 Openable openableBlock = (Openable) block.getBlockData();
                 if (openableBlock.isOpen())
                     openableBlock.setOpen(false);
             }
         }
+
         // Create hologram sign
         holoSign = new Hologram(new Location(locLocked.getWorld(), locLocked.getBlockX() + 0.5d,
-                locLocked.getBlockY() - 1d, locLocked.getBlockZ() + 0.5d));
+                locLocked.getBlockY() - 1d, locLocked.getBlockZ() + 0.25d));
         if (requirements.isEmpty()) {
             holoSign.addLine(ChatColor.RED + "Permanently locked");
         } else {
             holoSign.addLine(ChatColor.YELLOW + "Required:");
-            for (Map.Entry<ResourcesType, Integer> r_entry : requirements.entrySet()) {
-                if (r_entry.getKey() == ResourcesType.IRON)
-                    holoSign.addLine(ChatColor.GRAY + String.format("%d IRON(s)", r_entry.getValue()));
-                else if (r_entry.getKey() == ResourcesType.GOLD)
-                    holoSign.addLine(ChatColor.GOLD + String.format("%d GOLD(s)", r_entry.getValue()));
-                else if (r_entry.getKey() == ResourcesType.DIAMOND)
+            for (Map.Entry<Material, Integer> r_entry : requirements.entrySet()) {
+                if (r_entry.getKey() == Material.IRON_INGOT)
+                    holoSign.addLine(ChatColor.GRAY + String.format("%d IRON INGOT(s)", r_entry.getValue()));
+                else if (r_entry.getKey() == Material.GOLD_INGOT)
+                    holoSign.addLine(ChatColor.GOLD + String.format("%d GOLD INGOT(s)", r_entry.getValue()));
+                else if (r_entry.getKey() == Material.DIAMOND)
                     holoSign.addLine(ChatColor.AQUA + String.format("%d DIAMOND(s)", r_entry.getValue()));
-                else if (r_entry.getKey() == ResourcesType.EMERALD)
+                else if (r_entry.getKey() == Material.EMERALD)
                     holoSign.addLine(ChatColor.GREEN + String.format("%d EMERALD(s)", r_entry.getValue()));
                 else
                     holoSign.addLine(String.format("%d Undefined(s)", r_entry.getValue()));
@@ -106,48 +105,44 @@ public class LockedNormalEntity {
     public boolean unlockEntity(PlayerBedwarsEntity keyEntity) {
         // is permanent locked
         if (requirements.isEmpty()) {
-            keyEntity.getPlayer().sendMessage(ChatColor.RED + "This gate is permanently locked.");
+            keyEntity.getPlayer().sendMessage(ChatColor.RED + "This entity is permanently locked.");
             return false;
         }
+
         // You don't need to unlock the unlocked entity
         if (unlocked)
             return true;
+
         // Check if the requirement has been fulfilled
-        for (Map.Entry<ResourcesType, Integer> rEntry : requirements.entrySet()) {
-            if (rEntry.getKey() == ResourcesType.IRON) {
-                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.IRON_INGOT, rEntry.getValue())) {
+        for (Map.Entry<Material, Integer> rEntry : requirements.entrySet()) {
+            if (rEntry.getKey() == Material.IRON_INGOT) {
+                if (checkAffordable(keyEntity.getPlayer().getInventory(), Material.IRON_INGOT, rEntry.getValue())) {
                     sendRequirements(keyEntity.getPlayer());
                     return false;
                 }
-            } else if (rEntry.getKey() == ResourcesType.GOLD) {
-                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.GOLD_INGOT, rEntry.getValue())) {
+            } else if (rEntry.getKey() == Material.GOLD_INGOT) {
+                if (checkAffordable(keyEntity.getPlayer().getInventory(), Material.GOLD_INGOT, rEntry.getValue())) {
                     sendRequirements(keyEntity.getPlayer());
                     return false;
                 }
-            } else if (rEntry.getKey() == ResourcesType.DIAMOND) {
-                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.DIAMOND, rEntry.getValue())) {
+            } else if (rEntry.getKey() == Material.DIAMOND) {
+                if (checkAffordable(keyEntity.getPlayer().getInventory(), Material.DIAMOND, rEntry.getValue())) {
                     sendRequirements(keyEntity.getPlayer());
                     return false;
                 }
-            } else if (rEntry.getKey() == ResourcesType.EMERALD) {
-                if (!fulfillByInventoryItems(keyEntity.getPlayer().getInventory(), Material.EMERALD, rEntry.getValue())) {
+            } else if (rEntry.getKey() == Material.EMERALD) {
+                if (checkAffordable(keyEntity.getPlayer().getInventory(), Material.EMERALD, rEntry.getValue())) {
                     sendRequirements(keyEntity.getPlayer());
                     return false;
                 }
             }
         }
+
         // Eat all resources from player's data
-        for (Map.Entry<ResourcesType, Integer> rEntry : requirements.entrySet()) {
-            if (rEntry.getKey() == ResourcesType.IRON) {
-                PluginStaticFunc.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.IRON_INGOT, rEntry.getValue());
-            } else if (rEntry.getKey() == ResourcesType.GOLD) {
-                PluginStaticFunc.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.GOLD_INGOT, rEntry.getValue());
-            } else if (rEntry.getKey() == ResourcesType.DIAMOND) {
-                PluginStaticFunc.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.DIAMOND, rEntry.getValue());
-            } else if (rEntry.getKey() == ResourcesType.EMERALD) {
-                PluginStaticFunc.removeItemInventory(keyEntity.getPlayer().getInventory(), Material.EMERALD, rEntry.getValue());
-            }
-        }
+        for (Map.Entry<Material, Integer> rEntry : requirements.entrySet())
+            PluginStaticFunc.removeItemInventory(keyEntity.getPlayer().getInventory(),
+                    rEntry.getKey(), rEntry.getValue());
+
         // Unlocked
         holoSign.clear();
         holoSign = null;
@@ -161,9 +156,9 @@ public class LockedNormalEntity {
      * @param playerInv Player's referred inventory
      * @param find      Find all items with material type
      * @param require   Required amount
-     * @return True if player has amount of required items, else then false
+     * @return True if player cannot afford the requirement, else then false
      */
-    private boolean fulfillByInventoryItems(PlayerInventory playerInv, Material find, int require) {
+    private boolean checkAffordable(PlayerInventory playerInv, Material find, int require) {
         int currentItemHas = 0;
         for (ItemStack itm : playerInv.getContents()) {
             if (itm == null)
@@ -171,10 +166,10 @@ public class LockedNormalEntity {
             if (itm.getType() == find) {
                 currentItemHas += itm.getAmount();
                 if (currentItemHas >= require)
-                    return true;
+                    return false;
             }
         }
-        return false;
+        return true;
     }
 
     /**
@@ -185,14 +180,14 @@ public class LockedNormalEntity {
     private void sendRequirements(Player player) {
         player.sendMessage(ChatColor.YELLOW + "You need these requirements to unlock:");
         StringBuilder description = new StringBuilder();
-        for (Map.Entry<ResourcesType, Integer> rEntry : requirements.entrySet()) {
-            if (rEntry.getKey() == ResourcesType.IRON) {
-                description.append(String.format("%s%d Iron; ", ChatColor.GRAY + "", rEntry.getValue()));
-            } else if (rEntry.getKey() == ResourcesType.GOLD) {
-                description.append(String.format("%s%d Gold; ", ChatColor.GOLD + "", rEntry.getValue()));
-            } else if (rEntry.getKey() == ResourcesType.DIAMOND) {
+        for (Map.Entry<Material, Integer> rEntry : requirements.entrySet()) {
+            if (rEntry.getKey() == Material.IRON_INGOT) {
+                description.append(String.format("%s%d Iron Ingot; ", ChatColor.GRAY + "", rEntry.getValue()));
+            } else if (rEntry.getKey() == Material.GOLD_INGOT) {
+                description.append(String.format("%s%d Gold Ingot; ", ChatColor.GOLD + "", rEntry.getValue()));
+            } else if (rEntry.getKey() == Material.DIAMOND) {
                 description.append(String.format("%s%d Diamond; ", ChatColor.AQUA + "", rEntry.getValue()));
-            } else if (rEntry.getKey() == ResourcesType.EMERALD) {
+            } else if (rEntry.getKey() == Material.EMERALD) {
                 description.append(String.format("%s%d Emerald; ", ChatColor.GREEN + "", rEntry.getValue()));
             }
         }

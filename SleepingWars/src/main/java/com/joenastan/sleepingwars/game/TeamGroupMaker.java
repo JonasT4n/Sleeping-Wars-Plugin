@@ -6,9 +6,8 @@ import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsUpgradeMenu;
 import com.joenastan.sleepingwars.game.ItemPrice.PricesItems;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 import com.joenastan.sleepingwars.timercoro.AreaEffectTimer;
-import com.joenastan.sleepingwars.utility.PluginStaticColor;
 import com.joenastan.sleepingwars.utility.PluginStaticFunc;
-import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+import com.joenastan.sleepingwars.utility.CustomEntity.PlayerBedwarsEntity;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
@@ -208,7 +207,7 @@ public class TeamGroupMaker {
      */
     public void insertPlayer(PlayerBedwarsEntity playerEnt) {
         playerEnt.getPlayer().sendMessage(String.format("You are in team %s[%s]",
-                PluginStaticColor.getColorString(teamColorPrefix), teamName));
+                PluginStaticFunc.stringToChatColor(teamColorPrefix), teamName));
         playerEnt.getPlayer().teleport(teamSpawnPoint);
         playerEnt.getPlayer().setGameMode(GameMode.SURVIVAL);
         playerEntities.put(playerEnt.getPlayer().getUniqueId(), playerEnt);
@@ -222,8 +221,8 @@ public class TeamGroupMaker {
     public void removePlayer(PlayerBedwarsEntity playerEnt) {
         playerEntities.remove(playerEnt.getPlayer().getUniqueId());
         // Scoreboard sync
-        String recentScore = String.format("%s%d %s", PluginStaticColor
-                .getColorString(teamColorPrefix), playerEntities.size() + 1, teamName);
+        String recentScore = String.format("%s%d %s", PluginStaticFunc
+                .stringToChatColor(teamColorPrefix), playerEntities.size() + 1, teamName);
         inRoom.getScoreboard().resetScores(recentScore);
     }
 
@@ -267,10 +266,10 @@ public class TeamGroupMaker {
         Player player = playerEnt.getPlayer();
         if (isTeamStandStill()) {
             playerEntities.put(player.getUniqueId(), playerEnt);
-            inRoom.roomBroadcast(PluginStaticColor.getColorString(getRawColor()) +
+            inRoom.roomBroadcast(PluginStaticFunc.stringToChatColor(getRawColor()) +
                     player.getName() + ChatColor.WHITE + " reconnected to the game.");
             // Scoreboard sync
-            String recentScore = String.format("%s%d %s", PluginStaticColor.getColorString(teamColorPrefix),
+            String recentScore = String.format("%s%d %s", PluginStaticFunc.stringToChatColor(teamColorPrefix),
                     playerEntities.size() - 1, teamName);
             inRoom.getScoreboard().resetScores(recentScore);
         } else {
@@ -287,15 +286,15 @@ public class TeamGroupMaker {
     public void playerDisconnectedHandler(PlayerBedwarsEntity playerEnt) {
         // Check if player disconnected from the game by command
         if (playerEnt.isLeavingUsingCommand()) {
-            inRoom.roomBroadcast(String.format("%s leave the game.", PluginStaticColor
-                    .getColorString(teamColorPrefix) + playerEnt.getPlayer().getName()));
+            inRoom.roomBroadcast(String.format("%s leave the game.", PluginStaticFunc
+                    .stringToChatColor(teamColorPrefix) + playerEnt.getPlayer().getName()));
         } else {
-            inRoom.roomBroadcast(String.format("%s disconnected from the game.", PluginStaticColor
-                    .getColorString(teamColorPrefix) + playerEnt.getPlayer().getName()));
+            inRoom.roomBroadcast(String.format("%s disconnected from the game.", PluginStaticFunc
+                    .stringToChatColor(teamColorPrefix) + playerEnt.getPlayer().getName()));
         }
         playerEntities.remove(playerEnt.getPlayer().getUniqueId());
         // Scoreboard sync
-        String recentScore = String.format("%s%d %s", PluginStaticColor.getColorString(teamColorPrefix),
+        String recentScore = String.format("%s%d %s", PluginStaticFunc.stringToChatColor(teamColorPrefix),
                 playerEntities.size() + 1, teamName);
         inRoom.getScoreboard().resetScores(recentScore);
     }
@@ -318,7 +317,7 @@ public class TeamGroupMaker {
      *
      * @param active Set active
      */
-    public void setRunningEffectBZ(boolean active) {
+    public void setAreaFXActive(boolean active) {
         if (active) {
             bufferZone.start();
         } else {
@@ -333,7 +332,7 @@ public class TeamGroupMaker {
      */
     public void sendTeamMessage(String msg) {
         for (PlayerBedwarsEntity pbent : playerEntities.values())
-            pbent.getPlayer().sendMessage(PluginStaticColor.getColorString(teamColorPrefix) +
+            pbent.getPlayer().sendMessage(PluginStaticFunc.stringToChatColor(teamColorPrefix) +
                     "[" + teamName + "] " + ChatColor.WHITE + msg);
     }
 
@@ -342,6 +341,13 @@ public class TeamGroupMaker {
      */
     public Map<String, Integer> getPermLevels() {
         return perLevelData;
+    }
+
+    /**
+     * Get team upgrade inventory menu.
+     */
+    public Inventory getUpgradeInventory() {
+        return upgradeMenu.getMenu();
     }
 
     /**

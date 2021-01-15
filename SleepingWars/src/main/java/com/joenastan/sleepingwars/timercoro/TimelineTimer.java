@@ -74,11 +74,11 @@ public class TimelineTimer extends StopwatchTimer {
                 // Reduce about 25% amount of time
                 // TODO: Make it Generic
                 if (eType == TimelineEventType.DIAMOND_UPGRADE &&
-                        rspEntry.getMaterialSpawn() == Material.DIAMOND) {
+                        rspEntry.getCurrency() == Material.DIAMOND) {
                     rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() -
                             (rspEntry.getSecondsPerSpawn() * 25/100));
                 } else if (eType == TimelineEventType.EMERALD_UPGRADE &&
-                        rspEntry.getMaterialSpawn() ==
+                        rspEntry.getCurrency() ==
                         Material.EMERALD) {
                     rspEntry.setSpawnInterval(rspEntry.getSecondsPerSpawn() -
                             (rspEntry.getSecondsPerSpawn() * 25/100));

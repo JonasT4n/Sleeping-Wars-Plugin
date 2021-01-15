@@ -1,11 +1,11 @@
 package com.joenastan.sleepingwars.timercoro;
 
-import com.joenastan.sleepingwars.enumtypes.ResourcesType;
 import com.joenastan.sleepingwars.game.ResourceSpawner;
 import com.joenastan.sleepingwars.SleepingWarsPlugin;
 import com.joenastan.sleepingwars.utility.Hologram.Hologram;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 
 public class ResourceSpawnTimer extends StopwatchTimer {
 
@@ -13,8 +13,8 @@ public class ResourceSpawnTimer extends StopwatchTimer {
     private boolean isLocked = false;
     private Hologram holoSign;
 
-    public ResourceSpawnTimer(float duration, ResourceSpawner spawner) {
-        super(duration);
+    public ResourceSpawnTimer(float interval, ResourceSpawner spawner) {
+        super(interval);
         this.spawner = spawner;
     }
 
@@ -23,13 +23,13 @@ public class ResourceSpawnTimer extends StopwatchTimer {
         if (isLocked)
             return;
         if (holoSign == null) {
-            if (spawner.getTypeSpawner() == ResourcesType.IRON) {
+            if (spawner.getCurrency() == Material.IRON_INGOT) {
                 holoSign = new Hologram(spawner.getSpawnLocation(), ChatColor.GRAY + "Iron Spawner");
-            } else if (spawner.getTypeSpawner() == ResourcesType.GOLD) {
+            } else if (spawner.getCurrency() == Material.GOLD_INGOT) {
                 holoSign = new Hologram(spawner.getSpawnLocation(), ChatColor.GOLD + "Gold Spawner");
-            } else if (spawner.getTypeSpawner() == ResourcesType.DIAMOND) {
+            } else if (spawner.getCurrency() == Material.DIAMOND) {
                 holoSign = new Hologram(spawner.getSpawnLocation(), ChatColor.AQUA + "Diamond Spawner");
-            } else if (spawner.getTypeSpawner() == ResourcesType.EMERALD) {
+            } else if (spawner.getCurrency() == Material.EMERALD) {
                 holoSign = new Hologram(spawner.getSpawnLocation(), ChatColor.GREEN + "Emerald Spawner");
             } else {
                 holoSign = new Hologram(spawner.getSpawnLocation(), "Unknown Resource Spawner");

@@ -3,7 +3,7 @@ package com.joenastan.sleepingwars.utility.DataFiles;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
+import java.io.*;
 
 public abstract class AbstractFile {
 
@@ -11,32 +11,37 @@ public abstract class AbstractFile {
     protected YamlConfiguration fileConfig;
     private final File file;
 
-    public AbstractFile(JavaPlugin main2, String filename) {
-        this.main = main2;
-        file = new File(main2.getDataFolder(), filename);
+    public AbstractFile(JavaPlugin main, String filename) {
+        this.main = main;
+        file = new File(main.getDataFolder(), filename);
         if (!file.exists()) {
             try {
                 if (file.createNewFile())
-                    System.out.println("[SleepingWars] Created configuration file.");
+                    System.out.println("[SleepingWars] Created configuration file: " + filename);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        LoadFileConfig();
+        loadFileConfig();
     }
 
     /**
      * Load config.
      */
-    public void LoadFileConfig() {
+    public void loadFileConfig() {
         fileConfig = YamlConfiguration.loadConfiguration(file);
-        Save();
+        try {
+            fileConfig.load(file);
+        } catch (Exception e) {
+            System.out.println("[SleepingWars] Cannot load configuration file: " + file.getName());
+        }
+        save();
     }
 
     /**
      * Save plugin config file.
      */
-    public void Save() {
+    public void save() {
         try {
             fileConfig.save(file);
         } catch (Exception e) {
@@ -47,5 +52,5 @@ public abstract class AbstractFile {
     /**
      * Load worlds and config
      */
-    public abstract void Load();
+    public abstract void load();
 }

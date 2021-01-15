@@ -1,5 +1,8 @@
 package com.joenastan.sleepingwars.game;
 
+import com.joenastan.sleepingwars.SleepingWarsPlugin;
+import com.joenastan.sleepingwars.utility.DataFiles.GameButtonHolder;
+import com.joenastan.sleepingwars.utility.PluginStaticFunc;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -8,7 +11,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
-import com.joenastan.sleepingwars.utility.CustomDerivedEntity.PlayerBedwarsEntity;
+import com.joenastan.sleepingwars.utility.CustomEntity.PlayerBedwarsEntity;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -20,12 +23,20 @@ import java.io.FileOutputStream;
 
 public class GameManager {
 
+    public static GameManager instance;
+
     private static final int IDRange = 4;
     private static final String alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+
+    public static boolean isGameShuttingDown = false;
+
     private Map<String, SleepingRoom> createdRooms = new HashMap<>();
 
-    public GameManager() {
-        // TODO: Manager performance
+    private GameManager() { }
+
+    public static void init() {
+        if (instance == null)
+            instance = new GameManager();
     }
 
     /**
@@ -44,6 +55,7 @@ public class GameManager {
                 player.sendMessage(ChatColor.BLUE + "You have already created a game.");
                 return;
             }
+
             // Check player in room currently the game is ongoing
             else if (currentRoom.isGameProcessing()) {
                 player.sendMessage(ChatColor.BLUE + "You are currently in game now, can't create new game.");
@@ -51,11 +63,14 @@ public class GameManager {
             }
         }
 
+        // Create room id or set it from parameter
         String createdRoomID;
-        if (roomName == null)
-            createdRoomID = bedwarsWorldID();
-        else
-            createdRoomID = roomName;
+        do {
+            if (roomName == null)
+                createdRoomID = bedwarsWorldID();
+            else
+                createdRoomID = roomName;
+        } while (PluginStaticFunc.isFolderWorldExists(createdRoomID));
 
         // Copy World
         File folderLoc = new File(useMap.getWorldFolder().getAbsolutePath());
@@ -63,13 +78,17 @@ public class GameManager {
         copyWorld(folderLoc, newCopy);
         WorldCreator newCreatedWorld = new WorldCreator(createdRoomID);
         World copiedWorld = Bukkit.createWorld(newCreatedWorld);
-        assert copiedWorld != null;
-        copiedWorld.setAutoSave(false);
+        if (copiedWorld != null) {
+            copiedWorld.setAutoSave(false);
 
-        // Create Room
-        PlayerBedwarsEntity playerEnt = currentRoom == null ? null : currentRoom.playerLeave(player);
-        SleepingRoom newRoom = new SleepingRoom(useMap.getName(), player, copiedWorld, playerEnt);
-        createdRooms.put(createdRoomID, newRoom);
+            // Create Room
+            PlayerBedwarsEntity playerEnt = currentRoom == null ? null : currentRoom.playerLeave(player);
+            SleepingRoom newRoom = new SleepingRoom(useMap.getName(), player, copiedWorld, playerEnt);
+            createdRooms.put(createdRoomID, newRoom);
+
+            // Initialize button command holder
+            GameButtonHolder.copyRoomButton(useMap.getName(), createdRoomID, copiedWorld);
+        }
     }
 
     /**
@@ -110,7 +129,7 @@ public class GameManager {
     /**
      * Check if player is already a host in one game.
      *
-     * @param player Refered player
+     * @param player Referred player
      * @return true if player is a host, else then false
      */
     private boolean playerIsHost(Player player) {
@@ -142,11 +161,12 @@ public class GameManager {
      * Clean garbage and statics, used one time when the plugin will be disabled
      */
     public void cleanManager() {
-        for (SleepingRoom sp : createdRooms.values()) {
+        for (SleepingRoom sp : createdRooms.values())
             sp.destroyRoom();
-        }
+
         createdRooms.clear();
         createdRooms = null;
+        instance = null;
     }
 
     /**
@@ -161,7 +181,8 @@ public class GameManager {
             if (!ignore.contains(source.getName())) {
                 if (source.isDirectory()) {
                     if (!target.exists())
-                        target.mkdirs();
+                        if (target.mkdirs())
+                            System.out.println("Room folder has been created: " + target.getName());
                     String[] files = source.list();
                     for (String file : files) {
                         File srcFile = new File(source, file);

@@ -1,4 +1,4 @@
-package com.joenastan.sleepingwars.utility.CustomDerivedEntity;
+package com.joenastan.sleepingwars.utility.CustomEntity;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;

@@ -8,21 +8,21 @@ import com.joenastan.sleepingwars.commands.WorldMakerCommand;
 import com.joenastan.sleepingwars.events.OnBuilderModeEvents;
 import com.joenastan.sleepingwars.events.OnGameEvent;
 import com.joenastan.sleepingwars.game.GameManager;
-import com.joenastan.sleepingwars.game.InventoryMenus.BedwarsShopMenu;
 import com.joenastan.sleepingwars.utility.DataFiles.GameButtonHolder;
 import com.joenastan.sleepingwars.utility.DataFiles.GameSystemConfig;
 
+import com.joenastan.sleepingwars.utility.PluginStaticFunc;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class SleepingWarsPlugin extends JavaPlugin {
 
     private static JavaPlugin instance;
     private static GameSystemConfig gameSystemConfig;
     private static GameButtonHolder buttonHolderCollection;
-    private static GameManager gameManager;
 
     // Private Variable Getter
     public static JavaPlugin getPlugin() {
@@ -31,10 +31,6 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
     public static GameSystemConfig getGameSystemConfig() {
         return gameSystemConfig;
-    }
-
-    public static GameManager getGameManager() {
-        return gameManager;
     }
 
     public static GameButtonHolder getButtonHolder() {
@@ -46,9 +42,11 @@ public class SleepingWarsPlugin extends JavaPlugin {
         // Initial Loader
         instance = this;
         initSW();
+
         // Load Game Events
         getServer().getPluginManager().registerEvents(new OnGameEvent(), this);
         getServer().getPluginManager().registerEvents(new OnBuilderModeEvents(), this);
+
         // Load Commands
         getCommand("SWorld").setExecutor(new WorldMakerCommand());
         getCommand("SWorld").setTabCompleter(new SWorldCommands());
@@ -60,17 +58,21 @@ public class SleepingWarsPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Save all
+        buttonHolderCollection.saveConfig();
+        gameSystemConfig.insertRoomNames(new ArrayList<>(GameManager.instance.getRoomMap().keySet()));
+        gameSystemConfig.save();
+        GameManager.isGameShuttingDown = true;
+
         // Free up memories
         instance = null;
-        gameSystemConfig.Save();
+        GameManager.instance.cleanManager();
         gameSystemConfig = null;
-        gameManager.cleanManager();
-        gameManager = null;
-        buttonHolderCollection.Save();
+        GameButtonHolder.buttons.clear();
         buttonHolderCollection = null;
+        PluginStaticFunc.MATERIALS.clear();
         OnBuilderModeEvents.clearStatic();
         HandlerList.unregisterAll(this);
-        BedwarsShopMenu.destroy();
         System.out.println("[SleepingWars] Sleeping war is over, see you next time!");
     }
 
@@ -81,15 +83,21 @@ public class SleepingWarsPlugin extends JavaPlugin {
         if (!getDataFolder().exists())
             if (getDataFolder().mkdir())
                 System.out.println("[SleepingWars] Plugin Directory has been created.");
+
         // Create inner directories inside Data Folder if not exists
         File folderPath = new File(getDataFolder(), "/world_backup");
         if (!folderPath.exists())
             if (folderPath.mkdir())
                 System.out.println("[SleepingWars] world_backup Directory has been created.");
+
         // Create Configuration Files
+        GameManager.init();
+        PluginStaticFunc.InitStatics();
         gameSystemConfig = new GameSystemConfig(instance, "worlds.yml");
+        gameSystemConfig.roomDeletionHandle();
         buttonHolderCollection = new GameButtonHolder(instance, "buttons.yml");
-        gameManager = new GameManager();
-        BedwarsShopMenu.init();
     }
 }
+
+~~ Update v1.10b ~~
+
