@@ -98,6 +98,3 @@ public class SleepingWarsPlugin extends JavaPlugin {
         buttonHolderCollection = new GameButtonHolder(instance, "buttons.yml");
     }
 }
-
-~~ Update v1.10b ~~
-
