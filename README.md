@@ -29,29 +29,29 @@
 |`/sworld addteam <team-name> [color]`|Add a new team or restore an unremoved team, for example: `/sworld addteam Blue blue`, it means adding a new team called 'Blue' team with prefix color blue.|
 |`/sworld create <worldname>`|Start creating your own bedwars map, for example `/sworld create MyBedwarsMap`, it means to create a new bedwars map called 'MyBedwarsMap'.|
 |`/sworld edit <worldname>`|Teleport and edit the bedwars world map.|
-|`/sworld help <default=1|page>`|Help sub-commands of `/sworld`|
+|`/sworld help <default=1/page>`|Help sub-commands of `/sworld`|
 |`/sworld inforspawner`|Get almost all settled resource spawners information in current world map.|
 |`/sworld infoworld`|Get bedwars world map general info.|
 |`/sworld infotimeline`|Get event list or timeline information in current world map.|
 |`/sworld leave`|Go back to exactly where you were before entering bedwars world map.|
 |`/sworld rmevent <display-name>`|Remove an event from timeline|
 |`/sworld rmlock <codename>`|Remove locked entity.|
-|`/sworld rmrspawn <default=PUBLIC|select-team> <codename>`|Remove resource spawner.|
+|`/sworld rmrspawn <default=PUBLIC/select-team> <codename>`|Remove resource spawner.|
 |`/sworld rmshop <shop-type> <index-number>`|Remove shop villager spawn location.|
-|`/sworld rmteam <team-name> [default=false|is-permanent-remove]`|Remove an existing team from game.|
+|`/sworld rmteam <team-name> [default=false/is-permanent-remove]`|Remove an existing team from game.|
 |`/sworld setarea <team-name>`|Set zone for team, this area can affect team and enemies with potion effects. Place 2 any solid blocks to set the area after using it.|
 |`/sworld setbed <team-name>`|Set team bed location, after use this command, you must get yourself a bed and put it somewhere around the map.|
-|`/sworld setborder <default=1024|size-radius>`|Set bedwars world map starting border.|
+|`/sworld setborder <default=1024/size-radius>`|Set bedwars world map starting border.|
 |`/sworld seteventorder <event-display-name> <index-order>`|Set procedure order when will it be called after or before other events, for example `/sworld seteventorder WorldStartShrinking 5`, it means `WorldStartShrinking` event will be call after all event orders which less than 5.|
 |`/sworld setflag <key> <true-or-false>`|Set game flag, for example `/sworld setflag armor-restriction true`, it means player will not be able to take off their armor in game.|
 |`/sworld setlock <codename> [resource-spawner-codename]`|Lock path which player cannot enter it. Place any kinds of door/gate/lever/buttons after using this command to set the location.|
-|`/sworld setmaxplayerteam <amount|1-100>`|Set maximum player per team in game, for example `/sworld setmaxplayerteam 5`, it means that each team can have at maximum 5 players.|
+|`/sworld setmaxplayerteam <amount/1-100>`|Set maximum player per team in game, for example `/sworld setmaxplayerteam 5`, it means that each team can have at maximum 5 players.|
 |`/sworld setqspawn`|Set a Queue State spawner, when player join the game then it will teleport exactly to that location|
-|`/sworld setrinterval <default=PUBLIC|select-team> <codename> <interval-seconds>`|Change how fast resource spawner can spawn the item in seconds.|
+|`/sworld setrinterval <default=PUBLIC/select-team> <codename> <interval-seconds>`|Change how fast resource spawner can spawn the item in seconds.|
 |`/sworld setrspawn <resource-type> <team-or-public> <codename>`|Set a natural resource spawner like iron ingot spawner, diamond spawner, etc.|
-|`/sworld setrtype <default=PUBLIC|select-team> <codename> <item-type>`|Change item spawn of existing resource spawner.|
+|`/sworld setrtype <default=PUBLIC/select-team> <codename> <item-type>`|Change item spawn of existing resource spawner.|
 |`/sworld setshop <shop-type>`|Set a spawn for shop villager, the safest way to spawn a shop villager.|
-|`/sworld setshrunkborder <default=|size-radius>`|Set world shrinking border for world shrinking event.|
+|`/sworld setshrunkborder <default=size-radius>`|Set world shrinking border for world shrinking event.|
 |`/sworld setspawn`|Set world default spawn.|
 |`/sworld setteamspawner <team-name>`|Set an existing team spawner in game.|
 |`/sworld testshopspawn`|Spawn villager shops, You must use this command to make the villagers appear in game.|
